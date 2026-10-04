@@ -1,5 +1,7 @@
 # DisDorktion
 
+[Overarching project plan](docs/PROJECT_PLAN.md) · [Proposed GitHub tickets](docs/TICKET_DRAFTS.md)
+
 **Design Ethos**
 Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)
 
@@ -8,6 +10,8 @@ To test each function, a simple GUI either with prerecorded looped input or simp
 **Three-Stage Distortion Plugin Techniques**
 <hr>
 Input Stage: Receiving the signal
+
+- input gain
 - Demodulation: modulate the signal to a higher frequency, then peform demodulation. Allow user to change phase of demodulation oscillator to provide distortion that might be found in radio. 
 - Bit Crushing: Reduces the bit depth and sample rate to create a Crunchy, aliased character at the input source. Adds digital distortion by lowering quality dynamically.
     - Select number of bits
@@ -26,11 +30,8 @@ Output Stage: Outputting the signal
 
 - Low pass
 - High pass
-
-
-
-
-
+- output gain
+- tone
 
 **Suggested Resources for Further Study:**
 - "Digital Audio Signal Processing" and "Digital Audio FX" by Udo Zoelzer: These textbooks provide foundational mathematical and theoretical bases for digital signal processing, covering sampling, quantization, non-linear processing like waveshaping, and delay-based effects including filters.
