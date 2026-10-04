@@ -1,6 +1,6 @@
 # DisDorktion overarching project plan
 
-Status: agreed project direction; development has not started. Ticket drafts await approval before GitHub publication.
+Status: project direction agreed; all 20 approved tickets are published. DSP development has not started.
 
 ## 1. Goal and development methodology
 
@@ -204,30 +204,30 @@ R1 records the resulting evidence and constitutes the first-release gate. Expand
 
 Repository: [LordZordack/disDorktion](https://github.com/LordZordack/disDorktion).
 
-The IDs below are planning identifiers, not GitHub issue numbers. Complete proposed titles, bodies, and labels are in [the ticket drafts](TICKET_DRAFTS.md). Replace publication status with issue links after approved publication.
+The planning IDs below map to published GitHub issues. [Roadmap issue #1](https://github.com/LordZordack/disDorktion/issues/1) tracks the backlog. Approved titles, bodies, labels, and publication links are archived in [the ticket drafts](TICKET_DRAFTS.md).
 
 | ID | Ticket | Dependencies | Publication |
 | --- | --- | --- | --- |
-| P0 | Establish the project roadmap and research conventions | None | Draft |
-| F1 | Establish the JUCE build, module contract, and automated test foundation | P0 | Draft |
-| F2 | Build the reusable audition and measurement harness | F1 | Draft |
-| M1 | Design, implement, and validate the reusable gain module | F1, F2 | Draft |
-| M2 | Design, implement, and validate bit crushing | F1, F2 | Draft |
-| M3 | Design, implement, and validate tanh saturation | F1, F2 | Draft |
-| M4 | Design, implement, and validate wave folding | F1, F2 | Draft |
-| M5 | Design, implement, and validate high-pass and low-pass modules | F1, F2 | Draft |
-| Q1 | Evaluate and approve middle-section anti-aliasing and latency design | M3, M4 | Draft |
-| S1 | Assemble and qualify the input section | M1, M2 | Draft |
-| S2 | Assemble and qualify the middle section | M3, M4, Q1 | Draft |
-| S3 | Assemble and qualify the output section | M5 | Draft |
-| C1 | Integrate the full chain, dry/wet mixing, and output gain | S1, S2, S3, M1 | Draft |
-| U1 | Complete the plugin interface, automation, state, and presets | C1 | Draft |
-| R1 | Qualify and package the first Windows VST3 release | U1 | Draft |
-| X1 | Design, implement, and validate carrier modulation and demodulation | F1, F2 | Draft |
-| X2 | Design, implement, and validate resonant comb filtering | F1, F2 | Draft |
-| X3 | Design, implement, and validate frequency warping | F1, F2 | Draft |
-| X4 | Design, implement, and validate the tone module | F1, F2, S3 | Draft |
-| X5 | Integrate and qualify the experimental modules | X1, X2, X3, X4, R1 | Draft |
+| P0 | Establish the project roadmap and research conventions | None | [#1](https://github.com/LordZordack/disDorktion/issues/1) |
+| F1 | Establish the JUCE build, module contract, and automated test foundation | [P0 / #1](https://github.com/LordZordack/disDorktion/issues/1) | [#2](https://github.com/LordZordack/disDorktion/issues/2) |
+| F2 | Build the reusable audition and measurement harness | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2) | [#3](https://github.com/LordZordack/disDorktion/issues/3) |
+| M1 | Design, implement, and validate the reusable gain module | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#4](https://github.com/LordZordack/disDorktion/issues/4) |
+| M2 | Design, implement, and validate bit crushing | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#5](https://github.com/LordZordack/disDorktion/issues/5) |
+| M3 | Design, implement, and validate tanh saturation | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#6](https://github.com/LordZordack/disDorktion/issues/6) |
+| M4 | Design, implement, and validate wave folding | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#7](https://github.com/LordZordack/disDorktion/issues/7) |
+| M5 | Design, implement, and validate high-pass and low-pass modules | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#8](https://github.com/LordZordack/disDorktion/issues/8) |
+| Q1 | Evaluate and approve middle-section anti-aliasing and latency design | [M3 / #6](https://github.com/LordZordack/disDorktion/issues/6), [M4 / #7](https://github.com/LordZordack/disDorktion/issues/7) | [#9](https://github.com/LordZordack/disDorktion/issues/9) |
+| S1 | Assemble and qualify the input section | [M1 / #4](https://github.com/LordZordack/disDorktion/issues/4), [M2 / #5](https://github.com/LordZordack/disDorktion/issues/5) | [#10](https://github.com/LordZordack/disDorktion/issues/10) |
+| S2 | Assemble and qualify the middle section | [M3 / #6](https://github.com/LordZordack/disDorktion/issues/6), [M4 / #7](https://github.com/LordZordack/disDorktion/issues/7), [Q1 / #9](https://github.com/LordZordack/disDorktion/issues/9) | [#11](https://github.com/LordZordack/disDorktion/issues/11) |
+| S3 | Assemble and qualify the output section | [M5 / #8](https://github.com/LordZordack/disDorktion/issues/8) | [#12](https://github.com/LordZordack/disDorktion/issues/12) |
+| C1 | Integrate the full chain, dry/wet mixing, and output gain | [S1 / #10](https://github.com/LordZordack/disDorktion/issues/10), [S2 / #11](https://github.com/LordZordack/disDorktion/issues/11), [S3 / #12](https://github.com/LordZordack/disDorktion/issues/12), [M1 / #4](https://github.com/LordZordack/disDorktion/issues/4) | [#13](https://github.com/LordZordack/disDorktion/issues/13) |
+| U1 | Complete the plugin interface, automation, state, and presets | [C1 / #13](https://github.com/LordZordack/disDorktion/issues/13) | [#14](https://github.com/LordZordack/disDorktion/issues/14) |
+| R1 | Qualify and package the first Windows VST3 release | [U1 / #14](https://github.com/LordZordack/disDorktion/issues/14) | [#15](https://github.com/LordZordack/disDorktion/issues/15) |
+| X1 | Design, implement, and validate carrier modulation and demodulation | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#16](https://github.com/LordZordack/disDorktion/issues/16) |
+| X2 | Design, implement, and validate resonant comb filtering | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#17](https://github.com/LordZordack/disDorktion/issues/17) |
+| X3 | Design, implement, and validate frequency warping | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#18](https://github.com/LordZordack/disDorktion/issues/18) |
+| X4 | Design, implement, and validate the tone module | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3), [S3 / #12](https://github.com/LordZordack/disDorktion/issues/12) | [#19](https://github.com/LordZordack/disDorktion/issues/19) |
+| X5 | Integrate and qualify the experimental modules | [X1 / #16](https://github.com/LordZordack/disDorktion/issues/16), [X2 / #17](https://github.com/LordZordack/disDorktion/issues/17), [X3 / #18](https://github.com/LordZordack/disDorktion/issues/18), [X4 / #19](https://github.com/LordZordack/disDorktion/issues/19), [R1 / #15](https://github.com/LordZordack/disDorktion/issues/15) | [#20](https://github.com/LordZordack/disDorktion/issues/20) |
 
 Dependencies represent accepted deliverables. Q1 consumes accepted baseline waveshapers and may send them back through validation after quality changes. X5 integrates only accepted experimental modules.
 

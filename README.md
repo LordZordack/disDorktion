@@ -1,6 +1,6 @@
 # DisDorktion
 
-[Overarching project plan](docs/PROJECT_PLAN.md) · [Proposed GitHub tickets](docs/TICKET_DRAFTS.md)
+[Overarching project plan](docs/PROJECT_PLAN.md) · [Published GitHub tickets](docs/TICKET_DRAFTS.md)
 
 **Design Ethos**
 Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)
