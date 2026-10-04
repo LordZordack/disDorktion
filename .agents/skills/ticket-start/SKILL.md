@@ -31,7 +31,8 @@ In token-efficient mode:
 - Google's agentic coding CLI may serve as a subagent when available. Check
   for the `agy` command, then run it from the repository root with a narrow
   prompt and an explicit deliverable. For read-only exploration, use
-  `agy --print --mode plan "<bounded task and expected output>"`. Do not use
+  `agy --mode plan --sandbox --print='<bounded task and expected output>'`.
+  Plan mode may create an artifact in agy's profile. Do not use
   `--dangerously-skip-permissions`; inspect its output before acting on it.
 
 This mode does not waive GitNexus impact requirements, necessary source
