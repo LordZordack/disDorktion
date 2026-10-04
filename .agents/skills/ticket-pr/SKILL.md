@@ -1,6 +1,6 @@
 ---
 name: ticket-pr
-description: Use when completed ticket work on a typed issue branch is ready to commit, verify, push, and open as a GitHub pull request.
+description: Use when completed ticket work on a typed issue branch is ready to commit, verify, push, and open a pull request, or when cleaning up its branch after merge.
 ---
 
 # Finish a DisDorktion Ticket
@@ -173,3 +173,21 @@ Tell the user:
 - Verification commands and results
 - Issue #{number} moved to **in review**, or the exact tracker-update warning
 - `Closes #{number}` will close the issue when the pull request merges
+
+## 10. Clean up the branch after merge
+
+Run this only after the pull request has merged, never immediately after opening it. Verify the exact PR first:
+
+```powershell
+gh pr view {number} --repo LordZordack/DisDorktion --json state,baseRefName,headRefName,headRefOid
+```
+
+Require `state` = `MERGED`, `baseRefName` = `main`, and `headRefName` = the issue branch. If any check fails, leave both branches intact. Then:
+
+1. Run `git status --short --branch`. Stop if there are tracked changes or untracked files other than local `.tickets/` notes. Preserve `.tickets/`; never stage or delete it.
+2. Confirm `git rev-parse {branch}` equals the PR's `headRefOid`. If it differs, preserve the branch because it may contain work that was not merged.
+3. Confirm `git worktree list` shows the issue branch only in the current checkout. Switch to `main` and update it with `git pull --ff-only origin main`.
+4. Delete the local issue branch. Use `git branch -d {branch}` when Git recognizes it as merged. If the PR used squash or rebase merge, `git branch -d` may not recognize the merge; only then use `git branch -D {branch}`, guarded by the verified merged PR and matching `headRefOid` above.
+5. Check whether the remote branch still exists with `git ls-remote --heads origin refs/heads/{branch}`. If absent, it was already removed. If present at the PR's `headRefOid`, delete it with `git push origin --delete {branch}`. If its SHA differs, preserve it and report the warning.
+
+Report which refs were removed. If cleanup stops on a safety check or a command fails, preserve remaining branches and report why.
