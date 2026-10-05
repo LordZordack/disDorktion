@@ -18,3 +18,5 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-05T00:31:40Z: Record verified JUCE foundation and battery diagnostics with AC qualification pending
 
 - 2026-10-05T00:36:06Z: Prepare issue #2 PR: repeat builds and tests, review staged graph changes, preserve pending qualification
+
+- 2026-10-05T00:40:45Z: Correct CI compiler probe: remove unsupported vcvars64 argument after reproducing failure

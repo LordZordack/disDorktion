@@ -40,7 +40,7 @@ jobs:
           $vsVersion = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion
           "Visual Studio: $vsVersion ($vsInstall)"
           $vcvars = Join-Path $vsInstall 'VC\Auxiliary\Build\vcvars64.bat'
-          cmd /c "call `"$vcvars`" -no_logo >nul && cl.exe /? 2>&1"
+          cmd /c "call `"$vcvars`" >nul && cl.exe /? 2>&1"
           if ($LASTEXITCODE -ne 0) { throw "MSVC version probe failed with exit code $LASTEXITCODE" }
           $sdkRoot = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows Kits\Installed Roots').KitsRoot10
           "Windows SDK root: $sdkRoot"
