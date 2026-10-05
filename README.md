@@ -2,6 +2,12 @@
 
 [Overarching project plan](docs/PROJECT_PLAN.md) · [Published GitHub tickets](docs/TICKET_DRAFTS.md)
 
+## Build and DSP references
+
+- [Build commands, toolchains, and dependency pins](docs/BUILDING.md)
+- [DSP processing contract](docs/DSP_CONTRACT.md)
+- [Proposed performance budgets and benchmark procedure](docs/PERFORMANCE.md)
+
 **Design Ethos**
 Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)
 

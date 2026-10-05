@@ -1,2 +1,7 @@
 .tools/
 .gitnexus/
+build/
+cmake-build-*/
+CMakeUserPresets.json
+Testing/
+*.juce

@@ -1,0 +1,7 @@
+{
+  "cmake": {
+    "version": "4.2.8",
+    "url": "https://github.com/Kitware/CMake/releases/download/v4.2.8/cmake-4.2.8-windows-x86_64.zip",
+    "sha256": "d33720a4e03114ae7c964c184e88f68a640be419f973bf4fb685f0900d1864ee"
+  }
+}
