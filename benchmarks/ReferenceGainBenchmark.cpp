@@ -10,6 +10,10 @@
 #endif
 
 #include "dsp/ReferenceGain.h"
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+#include "dsp/BitCrusher.h"
+#include "TimingWindow.h"
+#endif
 #if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
 #include "GainBenchmarkPath.h"
 #endif
@@ -368,7 +372,23 @@ double measureTimerOverhead()
     return percentile(samples, 0.5);
 }
 
-#if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+disdorktion::BitCrusherSettings parametersFor(Scenario scenario, std::uint64_t index)
+{
+    switch (scenario)
+    {
+        case Scenario::automation: return {disdorktion::bitCrusherDepths[index % 11],
+            index % 2 ? 100.0f : 384000.0f, false,
+            index % 2 ? .2f : 1.0f, index % 2 ? .8f : .2f,
+            index % 2 ? -.8f : .8f, index % 2 ? 1.0f : .3f, static_cast<std::uint32_t>(index)};
+        case Scenario::bypass: return {8, 12345.5f, (index / 8) % 2 != 0, .5f, .5f, .8f, 1.0f, 1};
+        case Scenario::oversized: return {64, 384000.0f, false, 1.0f, .5f, .8f, 1.0f, 1};
+        case Scenario::steady: return {64, 384000.0f, false, 1.0f, .5f, .8f, 1.0f, 1};
+        case Scenario::mute: return {};
+    }
+    return {};
+}
+#elif defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
 disdorktion::GainSettings parametersFor(Scenario scenario, std::uint64_t index)
 {
     switch (scenario)
@@ -406,11 +426,18 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
     result.actual = scenario == Scenario::oversized ? 3 * block + 1 : block;
     result.run = run;
     result.scenario = scenario;
-    result.deadline = 1e9 * static_cast<double>(result.actual) / rate * 0.01 * stages;
+    const auto blockDeadline = 1e9 * static_cast<double>(result.actual) / rate;
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+    const auto budgetPercent = 5u;
+    disdorktion::BitCrusher gain;
+#else
+    const auto budgetPercent = stages;
+#endif
+    result.deadline = blockDeadline * 0.01 * budgetPercent;
 
 #if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
     GainBenchmarkPath gain(stages);
-#else
+#elif !defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
     disdorktion::ReferenceGain gain;
 #endif
     if (!gain.prepare({static_cast<double>(rate), block, 2}) || !gain.setParameters(parametersFor(scenario, 0)))
@@ -460,9 +487,21 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
     const auto probeFinished = Clock::now();
     result.calibratedCallbacks = static_cast<double>(iteration - beforeProbe) * targetSeconds
         / std::chrono::duration<double>(probeFinished - probeStart).count();
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+    const auto windowSeconds = quick ? 0.2 : disdorktion::benchmark::timingWindowSeconds(result.calibratedCallbacks);
+    if (!quick)
+    {
+        result.warmupProjectedCallbacks *= windowSeconds / targetSeconds;
+        result.calibratedCallbacks *= windowSeconds / targetSeconds;
+    }
+#endif
     result.stride = static_cast<std::size_t>(selectSamplingStride(static_cast<std::uint64_t>(std::ceil(result.calibratedCallbacks))));
     const auto measureStart = Clock::now();
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+    const auto measureEnd = measureStart + std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(windowSeconds));
+#else
     const auto measureEnd = measureStart + (quick ? std::chrono::milliseconds(200) : measurementDuration);
+#endif
     std::uint64_t callbackNumber = 0;
     while (Clock::now() < measureEnd)
     {
@@ -492,7 +531,7 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
         result.p95 = percentile(timings, 0.95);
         result.p99 = percentile(timings, 0.99);
         result.maximum = static_cast<double>(timings.back());
-        result.fraction = result.p99 / (result.deadline * 100.0 / stages);
+        result.fraction = result.p99 / blockDeadline;
         result.budgetFraction = result.p99 / result.deadline;
     }
     result.timer = timerOverhead;
@@ -507,7 +546,7 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
         if (result.count && result.p99 > result.deadline)
         {
             if (!result.reason.empty()) result.reason += "; ";
-            result.reason += "raw p99 exceeds " + std::to_string(stages) + "% deadline";
+            result.reason += "raw p99 exceeds " + std::to_string(budgetPercent) + "% deadline";
         }
     }
     result.qualified = result.reason.empty();
@@ -516,7 +555,7 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
 
 void writeHeader(std::ostream& out)
 {
-#if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
+#if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK) || defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
     out << "target,stages,latency_samples,input_profile,";
 #endif
     out << "mode,run,rate_hz,prepared_block,actual_block,scenario,timing_count,sampling_stride,warmup_projected_callbacks,calibrated_callbacks,measurement_seconds,median_ns,p95_ns,p99_ns,max_ns,timer_only_median_ns,p99_budget_ns,p99_block_deadline_fraction,p99_budget_fraction,qualified,reason,cpu,architecture,physical_memory,os,sdk,compiler,power_scheme_guid,ac_status,battery_percent,topology,affinity,conditions,thermal_measurement\n";
@@ -524,7 +563,9 @@ void writeHeader(std::ostream& out)
 
 void writeResult(std::ostream& out, const Result& result, const Platform& platform, const Options& options)
 {
-#if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+    out << "bit-crusher,1,0,ordinary,";
+#elif defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
     out << "production-gain," << options.stages << ",0," << (options.tinyInput ? "subnormal" : "ordinary") << ',';
 #endif
     out << (options.quick ? "quick" : options.diagnostic ? "diagnostic" : "baseline") << ','

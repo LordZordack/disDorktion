@@ -1,6 +1,8 @@
 #include "MainComponent.h"
+#include "CaptureRateMapping.h"
 #include <charconv>
 #include <cmath>
+#include <algorithm>
 
 namespace disdorktion::audition
 {
@@ -13,11 +15,17 @@ bool number(const juce::TextEditor& editor, double& result)
     const auto parsed = std::from_chars(text.data(), text.data() + text.size(), result);
     return parsed.ec == std::errc{} && parsed.ptr == text.data() + text.size() && std::isfinite(result);
 }
+juce::NormalisableRange<double> captureRange(double host)
+{
+    return {100.0, 384000.0,
+        [host](double, double, double position) { return captureRateFromPosition(position, host); },
+        [host](double, double, double value) { return captureRateToPosition(value, host); }};
+}
 }
 
 MainComponent::MainComponent()
 {
-    setSize(940, 700);
+    setSize(1080, 890);
     setWantsKeyboardFocus(true);
     title.setText("DisDorktion - module audition", juce::dontSendNotification);
     title.setFont(juce::Font(juce::FontOptions(24.0f)));
@@ -28,6 +36,7 @@ MainComponent::MainComponent()
     observationsLabel.setText("Experiment observations", juce::dontSendNotification);
     target.addItem("Reference gain", 1);
     target.addItem("Gain (dB)", 2);
+    target.addItem("Bit crusher", 3);
     target.setSelectedId(1);
     for (const auto* name : {"Impulse", "Sine", "Two-tone", "Logarithmic sweep", "Seeded white noise", "Audio file loop", "Keyboard / MIDI sine"})
         source.addItem(name, source.getNumItems() + 1);
@@ -35,8 +44,33 @@ MainComponent::MainComponent()
     frequency.setText("440"); frequency2.setText("880"); amplitude.setText("0.25");
     phase.setText("0"); duration.setText("48000"); renderDuration.setText("48000"); seed.setText("1");
     gain.setRange(0, 4, 0); gain.setValue(1);
+    bitDepthLabel.setText("Bit depth", juce::dontSendNotification);
+    captureRateLabel.setText("Capture rate (Hz)", juce::dontSendNotification);
+    for (const auto depth : bitCrusherDepths) bitDepth.addItem(juce::String(depth), static_cast<int>(depth));
+    bitDepth.setSelectedId(64, juce::dontSendNotification);
+    captureRateHz.setNormalisableRange(captureRange(48000.0));
+    mappedCaptureHost = 48000.0;
+    captureRateHz.setNumDecimalPlacesToDisplay(6);
+    captureRateHz.setValue(384000.0, juce::dontSendNotification);
+    fullRateLabel.setText("Full rate 48000 Hz", juce::dontSendNotification);
+    crusherMixLabel.setText("Mix", juce::dontSendNotification);
+    crusherCrushLabel.setText("Crush", juce::dontSendNotification);
+    crusherShapeLabel.setText("Shape", juce::dontSendNotification);
+    crusherJitterLabel.setText("Jitter", juce::dontSendNotification);
+    jitterSeedLabel.setText("Jitter seed", juce::dontSendNotification);
+    jitterSeed.setText("1", false);
+    jitterSeed.setInputRestrictions(10, "0123456789");
+    crusherMix.setRange(0.0, 1.0, 0.0); crusherMix.setValue(1.0, juce::dontSendNotification);
+    crusherCrush.setRange(0.0, 1.0, 0.0); crusherCrush.setValue(0.0, juce::dontSendNotification);
+    crusherShape.setRange(-1.0, 1.0, 0.0); crusherShape.setValue(0.0, juce::dontSendNotification);
+    crusherJitter.setRange(0.0, 1.0, 0.0); crusherJitter.setValue(0.0, juce::dontSendNotification);
+    for (juce::Component* control : std::initializer_list<juce::Component*>{&bitDepth, &captureRateHz,
+        &bitDepthLabel, &captureRateLabel, &effectiveRateLabel, &fullRateLabel,
+        &crusherMix, &crusherCrush, &crusherShape, &crusherJitter, &jitterSeed,
+        &crusherMixLabel, &crusherCrushLabel, &crusherShapeLabel, &crusherJitterLabel, &jitterSeedLabel})
+        control->setEnabled(false);
     monitor.setRange(-60, 0, 0.1); monitor.setValue(-18);
-    for (auto* slider : {&gain, &monitor})
+    for (auto* slider : {&gain, &monitor, &captureRateHz, &crusherMix, &crusherCrush, &crusherShape, &crusherJitter})
     {
         slider->setSliderStyle(juce::Slider::LinearHorizontal);
         slider->setTextBoxStyle(juce::Slider::TextBoxRight, false, 85, 26);
@@ -44,7 +78,10 @@ MainComponent::MainComponent()
     muted.setToggleState(true, juce::dontSendNotification);
     for (juce::Component* component : std::initializer_list<juce::Component*>{
         &title,&gainLabel,&monitorLabel,&sourceLabel,&fieldsLabel,&observationsLabel,
-        &target,&source,&gain,&monitor,&bypass,&moduleMuted,&muted,&apply,&load,&play,&restart,
+        &target,&source,&gain,&monitor,&bitDepth,&captureRateHz,&bitDepthLabel,&captureRateLabel,&effectiveRateLabel,&fullRateLabel,
+        &crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed,
+        &crusherMixLabel,&crusherCrushLabel,&crusherShapeLabel,&crusherJitterLabel,&jitterSeedLabel,
+        &bypass,&moduleMuted,&muted,&apply,&load,&play,&restart,
         &save,&restore,&render,&deviceButton,&frequency,&frequency2,&amplitude,&phase,&duration,&seed,
         &renderDuration,&observations,&meterLabel,&deviceLabel,&statusLabel,&keyboard}) addAndMakeVisible(*component);
     observations.setMultiLine(true);
@@ -58,14 +95,34 @@ MainComponent::MainComponent()
     moduleMuted.setEnabled(false);
     target.onChange = [this] {
         auto next = snapshot();
-        const auto production = target.getSelectedId() == 2;
-        next.version = production ? 2 : 1; next.targetId = production ? "gain" : "reference-gain";
+        const auto selected = target.getSelectedId();
+        next.version = selected == 3 ? 4 : selected;
+        next.targetId = selected == 1 ? "reference-gain" : selected == 2 ? "gain" : "bit-crusher";
         next.gain = 1.0f; next.gainDb = 0.0f; next.mute = false; next.bypass = false;
+        next.bitDepth = 64; next.captureRateHz = 384000.0f;
+        next.mix = 1.0f; next.crush = 0.0f; next.shape = 0.0f;
+        next.jitter = 0.0f; next.jitterSeed = 1;
         configureRecord(next);
     };
     gain.onValueChange = [this] {
         if (target.getSelectedId() == 2) audio.engine().setGainDb(static_cast<float>(gain.getValue()));
-        else audio.engine().setGain(static_cast<float>(gain.getValue()));
+        else if (target.getSelectedId() == 1) audio.engine().setGain(static_cast<float>(gain.getValue()));
+    };
+    bitDepth.onChange = [this] { audio.engine().setBitDepth(static_cast<unsigned>(bitDepth.getSelectedId())); };
+    captureRateHz.onValueChange = [this] {
+        if (!updatingCaptureMapping) audio.engine().setCaptureRateHz(static_cast<float>(captureRateHz.getValue()));
+    };
+    crusherMix.onValueChange = [this] { audio.engine().setCrusherMix(static_cast<float>(crusherMix.getValue())); };
+    crusherCrush.onValueChange = [this] { audio.engine().setCrush(static_cast<float>(crusherCrush.getValue())); };
+    crusherShape.onValueChange = [this] { audio.engine().setQuantizerShape(static_cast<float>(crusherShape.getValue())); };
+    crusherJitter.onValueChange = [this] { audio.engine().setJitter(static_cast<float>(crusherJitter.getValue())); };
+    jitterSeed.onTextChange = [this] {
+        std::uint32_t value = 0;
+        if (readCrusherSeed(value))
+        {
+            record.jitterSeed = value;
+            audio.engine().setJitterSeed(value);
+        }
     };
     moduleMuted.onClick = [this] { audio.engine().setModuleMuted(moduleMuted.getToggleState()); };
     bypass.onClick = [this] { audio.engine().setBypass(bypass.getToggleState()); };
@@ -75,6 +132,9 @@ MainComponent::MainComponent()
     restart.onClick = [this] { audio.restart(); };
     load.onClick = [this] {
         chooseFile(false, "*.wav;*.aif;*.aiff", [this](const auto& file) {
+            std::uint32_t parsedSeed = 0;
+            if (record.version >= 3 && !readCrusherSeed(parsedSeed))
+            { status("Jitter seed must be an unsigned 32-bit integer."); return; }
             auto next = snapshot(); next.source.kind = SourceKind::file; next.filePath = file.getFullPathName();
             next.fileHash.clear(); loadAudio(file, next, false);
         });
@@ -124,6 +184,20 @@ void MainComponent::resized()
     gainLabel.setBounds(bounds.removeFromTop(24));
     row = bounds.removeFromTop(38); bypass.setBounds(row.removeFromRight(120));
     moduleMuted.setBounds(row.removeFromRight(140)); gain.setBounds(row);
+    row = bounds.removeFromTop(46);
+    bitDepthLabel.setBounds(row.removeFromLeft(75)); bitDepth.setBounds(row.removeFromLeft(90).reduced(2));
+    captureRateLabel.setBounds(row.removeFromLeft(130)); captureRateHz.setBounds(row.removeFromLeft(335).reduced(2));
+    fullRateLabel.setBounds(row.removeFromLeft(150)); effectiveRateLabel.setBounds(row);
+    row = bounds.removeFromTop(42);
+    auto half = row.removeFromLeft(row.getWidth() / 2);
+    crusherMixLabel.setBounds(half.removeFromLeft(75)); crusherMix.setBounds(half.reduced(2));
+    crusherCrushLabel.setBounds(row.removeFromLeft(75)); crusherCrush.setBounds(row.reduced(2));
+    row = bounds.removeFromTop(42);
+    half = row.removeFromLeft(row.getWidth() / 2);
+    crusherShapeLabel.setBounds(half.removeFromLeft(75)); crusherShape.setBounds(half.reduced(2));
+    crusherJitterLabel.setBounds(row.removeFromLeft(75)); crusherJitter.setBounds(row.reduced(2));
+    row = bounds.removeFromTop(38);
+    jitterSeedLabel.setBounds(row.removeFromLeft(90)); jitterSeed.setBounds(row.removeFromLeft(190).reduced(2));
     monitorLabel.setBounds(bounds.removeFromTop(24));
     row = bounds.removeFromTop(38); muted.setBounds(row.removeFromRight(180)); monitor.setBounds(row);
     meterLabel.setBounds(bounds.removeFromTop(40));
@@ -149,7 +223,19 @@ ExperimentRecord MainComponent::snapshot() const
 {
     auto result = record;
     if (result.version == 2) { result.gainDb = static_cast<float>(gain.getValue()); result.mute = moduleMuted.getToggleState(); }
-    else result.gain = static_cast<float>(gain.getValue());
+    else if (result.version == 1) result.gain = static_cast<float>(gain.getValue());
+    else
+    {
+        result.version = 4; // Saving a restored v3 record upgrades it to the expressive schema.
+        result.bitDepth = static_cast<unsigned>(bitDepth.getSelectedId());
+        result.captureRateHz = static_cast<float>(captureRateHz.getValue());
+        result.mix = static_cast<float>(crusherMix.getValue());
+        result.crush = static_cast<float>(crusherCrush.getValue());
+        result.shape = static_cast<float>(crusherShape.getValue());
+        result.jitter = static_cast<float>(crusherJitter.getValue());
+        std::uint32_t parsedSeed = 0;
+        if (readCrusherSeed(parsedSeed)) result.jitterSeed = parsedSeed;
+    }
     result.bypass = bypass.getToggleState();
     result.monitorDb = static_cast<float>(monitor.getValue()); result.muted = muted.getToggleState();
     result.observations = observations.getText();
@@ -162,8 +248,32 @@ ExperimentRecord MainComponent::snapshot() const
     return result;
 }
 
+bool MainComponent::readCrusherSeed(std::uint32_t& result) const
+{
+    double value = 0;
+    if (!number(jitterSeed, value) || value < 0 || value > 4294967295.0 || std::floor(value) != value)
+        return false;
+    result = static_cast<std::uint32_t>(value);
+    return true;
+}
+
+void MainComponent::updateCaptureRateMapping()
+{
+    const auto host = captureRateMappingHost(audio.sampleRate());
+    if (host == mappedCaptureHost) return;
+    const auto requested = captureRateHz.getValue();
+    updatingCaptureMapping = true;
+    captureRateHz.setNormalisableRange(captureRange(host));
+    captureRateHz.setValue(requested, juce::dontSendNotification);
+    updatingCaptureMapping = false;
+    mappedCaptureHost = host;
+}
+
 bool MainComponent::readSourceControls(ExperimentRecord& next)
 {
+    std::uint32_t parsedSeed = 0;
+    if (next.version >= 3 && !readCrusherSeed(parsedSeed))
+    { status("Jitter seed must be an unsigned 32-bit integer."); return false; }
     double sourceFrames = 0, renderFrames = 0, seedValue = 0;
     if (!number(frequency, next.source.frequency) || !number(frequency2, next.source.frequency2)
         || !number(amplitude, next.source.amplitude) || !number(phase, next.source.phase)
@@ -188,10 +298,26 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     running = false; play.setButtonText("Play"); keyboardState.reset();
     source.setSelectedId(static_cast<int>(record.source.kind) + 1, juce::dontSendNotification);
     const auto production = record.version == 2;
-    target.setSelectedId(production ? 2 : 1, juce::dontSendNotification);
+    const auto crusher = record.version == 3 || record.version == 4;
+    target.setSelectedId(crusher ? 3 : record.version, juce::dontSendNotification);
     gain.setRange(production ? -60.0 : 0.0, production ? 24.0 : 4.0, 0.0);
     gainLabel.setText(production ? "Module gain (dB)" : "Module gain (linear amplitude)", juce::dontSendNotification);
     gain.setValue(production ? record.gainDb : record.gain, juce::dontSendNotification);
+    gain.setEnabled(!crusher);
+    gainLabel.setEnabled(!crusher);
+    bitDepth.setSelectedId(static_cast<int>(record.bitDepth), juce::dontSendNotification);
+    updateCaptureRateMapping();
+    captureRateHz.setValue(record.captureRateHz, juce::dontSendNotification);
+    crusherMix.setValue(record.mix, juce::dontSendNotification);
+    crusherCrush.setValue(record.crush, juce::dontSendNotification);
+    crusherShape.setValue(record.shape, juce::dontSendNotification);
+    crusherJitter.setValue(record.jitter, juce::dontSendNotification);
+    jitterSeed.setText(juce::String(static_cast<juce::int64>(record.jitterSeed)), false);
+    for (juce::Component* control : std::initializer_list<juce::Component*>{&bitDepth, &captureRateHz,
+        &bitDepthLabel, &captureRateLabel, &effectiveRateLabel, &fullRateLabel,
+        &crusherMix, &crusherCrush, &crusherShape, &crusherJitter, &jitterSeed,
+        &crusherMixLabel, &crusherCrushLabel, &crusherShapeLabel, &crusherJitterLabel, &jitterSeedLabel})
+        control->setEnabled(crusher);
     moduleMuted.setEnabled(production); moduleMuted.setToggleState(record.mute, juce::dontSendNotification);
     bypass.setToggleState(record.bypass, juce::dontSendNotification);
     monitor.setValue(record.monitorDb, juce::dontSendNotification); muted.setToggleState(record.muted, juce::dontSendNotification);
@@ -255,8 +381,16 @@ void MainComponent::setWorkerControlsEnabled(bool enabled)
 {
     for (juce::Component* component : std::initializer_list<juce::Component*>{
         &target,&source,&apply,&load,&save,&restore,&render,&frequency,&frequency2,
-        &amplitude,&phase,&duration,&renderDuration,&seed,&gain,&bypass,&moduleMuted,&observations})
+        &amplitude,&phase,&duration,&renderDuration,&seed,&gain,&bitDepth,&captureRateHz,
+        &crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed,
+        &bypass,&moduleMuted,&observations})
         component->setEnabled(enabled);
+    gain.setEnabled(enabled && record.version < 3);
+    bitDepth.setEnabled(enabled && record.version >= 3);
+    captureRateHz.setEnabled(enabled && record.version >= 3);
+    for (juce::Component* control : std::initializer_list<juce::Component*>{
+        &crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed})
+        control->setEnabled(enabled && record.version >= 3);
     moduleMuted.setEnabled(enabled && record.version == 2);
     // Monitoring remains available during worker activity. Its current settings
     // are retained when a newly loaded source replaces the old one.
@@ -293,6 +427,9 @@ void MainComponent::loadAudio(const juce::File& file, ExperimentRecord next, boo
 
 void MainComponent::saveExperiment()
 {
+    std::uint32_t parsedSeed = 0;
+    if (record.version >= 3 && !readCrusherSeed(parsedSeed))
+    { status("Jitter seed must be an unsigned 32-bit integer."); return; }
     auto next = snapshot();
     juce::String error;
     if (!next.validate(error)) { status(error); return; }
@@ -317,6 +454,9 @@ void MainComponent::loadExperiment()
 
 void MainComponent::renderExperiment()
 {
+    std::uint32_t parsedSeed = 0;
+    if (record.version >= 3 && !readCrusherSeed(parsedSeed))
+    { status("Jitter seed must be an unsigned 32-bit integer."); return; }
     auto next = snapshot();
     juce::String error;
     if (!next.validate(error)) { status(error); return; }
@@ -357,6 +497,7 @@ void MainComponent::showDevices()
 
 void MainComponent::timerCallback()
 {
+    updateCaptureRateMapping();
     if (running && !audio.isPlaying())
     {
         running = false;
@@ -375,6 +516,9 @@ void MainComponent::timerCallback()
         + (now < overloadVisibleUntil ? "   OVERLOAD" : ""), juce::dontSendNotification);
     deviceLabel.setText(juce::String(audio.sampleRate(), 0) + " Hz   " + juce::String(audio.channelCount())
         + " channels   " + juce::String(audio.blockSize()) + " frames   " + (audio.isReady() ? "Ready" : "Stopped / source unavailable"), juce::dontSendNotification);
+    fullRateLabel.setText("Full rate " + juce::String(mappedCaptureHost, 0) + " Hz", juce::dontSendNotification);
+    effectiveRateLabel.setText("Effective " + juce::String(std::min(captureRateHz.getValue(), mappedCaptureHost), 6)
+        + " Hz", juce::dontSendNotification);
     if (audio.consumeMidiOverflow()) status("MIDI queue overflow: notes cleared. Reduce event traffic.");
     if (jobDone.load() && worker.joinable())
     {

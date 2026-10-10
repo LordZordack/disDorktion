@@ -7,6 +7,68 @@
 #include <juce_audio_formats/juce_audio_formats.h>
 #include <catch2/catch_test_macros.hpp>
 #include <limits>
+#include <thread>
+
+TEST_CASE("Crusher scalar automation remains valid during processing", "[harness][realtime][crusher]")
+{
+    using namespace disdorktion;
+    harness::AuditionEngine engine;
+    REQUIRE(engine.selectTarget("bit-crusher"));
+    REQUIRE(engine.prepare({48000.0, 32, 2}));
+    juce::AudioBuffer<float> audio(2, 257);
+    for (int c = 0; c < 2; ++c)
+        for (int n = 0; n < 257; ++n) audio.setSample(c, n, static_cast<float>(n % 17) / 32.0f);
+    std::atomic<bool> settersValid {true};
+    std::thread worker([&] {
+        for (int i = 0; i < 2000; ++i)
+        {
+            bool valid = engine.setBitDepth(i % 2 == 0 ? 4u : 64u);
+            valid &= engine.setCaptureRateHz(i % 2 == 0 ? 100.0f : 384000.0f);
+            valid &= engine.setCrusherMix(i % 2 == 0 ? 0.0f : 1.0f);
+            valid &= engine.setCrush(i % 2 == 0 ? 0.75f : 0.0f);
+            valid &= engine.setQuantizerShape(i % 2 == 0 ? -1.0f : 1.0f);
+            valid &= engine.setJitter(i % 2 == 0 ? 1.0f : 0.0f);
+            engine.setJitterSeed(static_cast<std::uint32_t>(i));
+            engine.setBypass(i % 3 == 0);
+            if (!valid) settersValid.store(false);
+        }
+    });
+    bool processed = true;
+    for (int i = 0; i < 256; ++i)
+        processed &= engine.process(juce::dsp::AudioBlock<float>(audio), false);
+    worker.join();
+    REQUIRE(settersValid.load());
+    REQUIRE(processed);
+    for (int c = 0; c < 2; ++c)
+        for (int n = 0; n < 257; ++n) REQUIRE(std::isfinite(audio.getSample(c, n)));
+}
+
+TEST_CASE("Crusher harness live setters and callback processing allocate nothing", "[harness][realtime][crusher]")
+{
+    using namespace disdorktion;
+    harness::AuditionEngine engine;
+    REQUIRE(engine.selectTarget("bit-crusher"));
+    REQUIRE(engine.setBitCrusherSettings({8, 12000.0f, false}));
+    REQUIRE(engine.prepare({48000.0, 32, 2}));
+    juce::AudioBuffer<float> audio(2, 257);
+    audio.clear();
+    bool success = true;
+    {
+        test::ScopedAllocationTracking tracking;
+        for (int i = 0; i < 32; ++i)
+        {
+            success &= engine.setBitDepth(i % 2 == 0 ? 4u : 16u);
+            success &= engine.setCaptureRateHz(i % 2 == 0 ? 6000.0f : 384000.0f);
+            engine.setBypass(i % 3 == 0);
+            success &= engine.process(juce::dsp::AudioBlock<float>(audio), false);
+        }
+        engine.reset();
+    }
+    const auto counts = test::getAllocationCounts();
+    REQUIRE(success);
+    REQUIRE(counts.allocations == 0);
+    REQUIRE(counts.deallocations == 0);
+}
 
 TEST_CASE("Production harness scalar controls and processing allocate nothing", "[harness][realtime][gain]")
 {

@@ -32,6 +32,8 @@ private:
     void loadExperiment();
     void renderExperiment();
     harness::ExperimentRecord snapshot() const;
+    bool readCrusherSeed(std::uint32_t&) const;
+    void updateCaptureRateMapping();
     void beginJob(std::function<void()>);
     void setWorkerControlsEnabled(bool);
     void status(const juce::String&);
@@ -41,13 +43,15 @@ private:
     harness::ExperimentRecord record;
     juce::MidiKeyboardState keyboardState;
     juce::MidiKeyboardComponent keyboard{keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard};
-    juce::ComboBox target, source;
-    juce::Slider gain, monitor;
+    juce::ComboBox target, source, bitDepth;
+    juce::Slider gain, monitor, captureRateHz, crusherMix, crusherCrush, crusherShape, crusherJitter;
     juce::ToggleButton bypass{"Bypass"}, moduleMuted{"Mute module"}, muted{"Mute monitoring"};
     juce::TextButton apply{"Apply source"}, load{"Load WAV / AIFF"}, play{"Play / stop"}, restart{"Restart"};
     juce::TextButton save{"Save experiment"}, restore{"Load experiment"}, render{"Render offline"}, deviceButton{"Audio / MIDI devices"};
-    juce::TextEditor frequency, frequency2, amplitude, phase, duration, renderDuration, seed, observations;
+    juce::TextEditor frequency, frequency2, amplitude, phase, duration, renderDuration, seed, jitterSeed, observations;
     juce::Label title, gainLabel, monitorLabel, sourceLabel, fieldsLabel, meterLabel, deviceLabel, statusLabel, observationsLabel;
+    juce::Label bitDepthLabel, captureRateLabel, effectiveRateLabel, fullRateLabel;
+    juce::Label crusherMixLabel, crusherCrushLabel, crusherShapeLabel, crusherJitterLabel, jitterSeedLabel;
     std::unique_ptr<juce::FileChooser> chooser;
     juce::Component::SafePointer<juce::DialogWindow> deviceDialog;
     std::thread worker;
@@ -64,5 +68,7 @@ private:
     bool applicationHadFocus = true;
     double lastConversionAttemptRate = 0;
     unsigned lastConversionAttemptChannels = 0;
+    double mappedCaptureHost = 0;
+    bool updatingCaptureMapping = false;
 };
 }

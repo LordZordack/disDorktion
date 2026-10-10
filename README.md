@@ -19,6 +19,18 @@ a legacy trim so existing host automation and saved states keep their meaning.
 See the [gain validation note](docs/okf/notes/gain_validation.md) for recorded test results and remaining listening
 and performance qualification gates.
 
+The shared **Bit Crusher** target adds signed PCM quantization and sample
+holding, with independent channel holds and a shared capture clock. Select it
+in the audition app to adjust bit depth, capture rate, mix, crush, shape, jitter,
+seed, and bypass. The capture-rate slider is logarithmic; its text field stores
+requested Hz independently from the host-capped effective rate. New version-4
+records expose the expressive controls while version 3 retains legacy behavior.
+The design is documented in the [bit crushing method](docs/okf/methods/bit_crushing.md).
+The prior 86-test suites and CPU baseline validate the legacy algorithm only.
+The expressive Debug/Release/headless suites, render checks, and three-run CPU
+baseline pass. New listening, GUI inspection, VS2022 CI, and the graph gate
+remain pending. See the [validation note](docs/okf/notes/bit_crusher_validation.md).
+
 **Design Ethos**
 Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)
 

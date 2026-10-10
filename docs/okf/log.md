@@ -36,3 +36,15 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-10T15:39:36Z: Completed reusable gain validation records: Debug/Release 71 tests each, DSP-only 49, Antigravity core/plugin approval, 28 complete battery distributions plus two preserved capacity failures and one subnormal diagnostic; critical graph change risk recorded; listening and AC gates open.
 
 - 2026-10-10T17:53:51Z: Reviewed issue #4 publication documentation, corrected transition-generator output-dir examples, retained generated listening WAVs locally, and repeated full Debug/Release and independent DSP-only checks; external qualification remains pending.
+
+- 2026-10-10T18:30:42Z: Added approved bit crusher design, parameter semantics, and validation record
+
+- 2026-10-10T19:07:46Z: Recorded bit crusher correctness, spectral, listening feedback, and three-run CPU evidence
+
+- 2026-10-10T19:08:56Z: Recorded bit crusher correctness, spectral, listening feedback, and three-run CPU evidence
+
+- 2026-10-10T19:09:54Z: Recorded bit crusher correctness, spectral, listening feedback, and three-run CPU evidence
+
+- 2026-10-10T20:27:51Z: Recorded expressive crusher controls, reviewed plan, correctness tests, adaptive CPU qualification, and remaining gates
+
+- 2026-10-10T20:39:46Z: Recorded fresh PR verification, full MCP graph report and unresolved refreshed-index coverage; kept generated WAVs local

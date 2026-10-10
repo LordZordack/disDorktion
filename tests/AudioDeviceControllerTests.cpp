@@ -1,9 +1,11 @@
 #include "audition/AudioDeviceController.h"
 #include "AllocationTracking.h"
+#include "audition/CaptureRateMapping.h"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <array>
 #include <cmath>
+#include <limits>
 
 namespace
 {
@@ -54,6 +56,38 @@ ExperimentRecord callbackRecord(SourceKind kind = SourceKind::sine)
     record.monitorDb = 0.0f;
     record.muted = false;
     return record;
+}
+
+TEST_CASE("Capture rate knob is logarithmic and preserves legal requests above device rate", "[audition][crusher]")
+{
+    using namespace disdorktion::audition;
+    for (const auto host : {44100.0, 48000.0, 96000.0, 192000.0})
+    {
+        REQUIRE(captureRateFromPosition(0.0, host) == 100.0);
+        REQUIRE(captureRateFromPosition(1.0, host) == host);
+        REQUIRE(captureRateFromPosition(0.5, host) == Catch::Approx(std::sqrt(100.0 * host)));
+        REQUIRE(captureRateToPosition(384000.0, host) == 1.0);
+        REQUIRE(captureRateToPosition(12345.5, host)
+            == Catch::Approx(std::log(12345.5 / 100.0) / std::log(host / 100.0)));
+    }
+    REQUIRE(captureRateMappingHost(0.0) == 48000.0);
+    REQUIRE(captureRateMappingHost(100.0) == 48000.0);
+    REQUIRE(captureRateMappingHost(-1.0) == 48000.0);
+    REQUIRE(captureRateMappingHost(std::numeric_limits<double>::quiet_NaN()) == 48000.0);
+    REQUIRE(captureRateFromPosition(1.0, 0.0) == 48000.0);
+    juce::Slider slider;
+    const auto mapAt = [&](double host) {
+        slider.setNormalisableRange(juce::NormalisableRange<double> {100.0, 384000.0,
+            [host](double, double, double position) { return captureRateFromPosition(position, host); },
+            [host](double, double, double requested) { return captureRateToPosition(requested, host); }});
+    };
+    mapAt(48000.0);
+    slider.setValue(384000.0, juce::dontSendNotification);
+    mapAt(96000.0);
+    REQUIRE(slider.getValue() == 384000.0);
+    slider.setValue(12345.5, juce::dontSendNotification);
+    mapAt(44100.0);
+    REQUIRE(slider.getValue() == 12345.5);
 }
 
 void callback(AudioDeviceController& controller, float* const* outputs, int count, int frames)
@@ -116,6 +150,56 @@ TEST_CASE("Device callback generated samples and pre-monitor meters match a sine
         REQUIRE(controller.engine().meters().outputPeak == Catch::Approx(2.0f*peak));
         controller.setPlaying(false); callback(controller,audio);
         REQUIRE(audio.getMagnitude(0,0,257) == 0.0f);
+    }
+}
+
+TEST_CASE("Device restoration selects crusher and clamps capture to device rate", "[controller][crusher]")
+{
+    AudioDeviceController fast, capped;
+    CallbackDevice device(48000.0, 64);
+    auto record = callbackRecord(SourceKind::sine);
+    record.version = 3; record.targetId = "bit-crusher";
+    record.bitDepth = 4; record.captureRateHz = 384000.0f;
+    fast.configure(record); fast.audioDeviceAboutToStart(&device); fast.setPlaying(true);
+    record.captureRateHz = 48000.0f;
+    capped.configure(record); capped.audioDeviceAboutToStart(&device); capped.setPlaying(true);
+    juce::AudioBuffer<float> a(2, 257), b(2, 257);
+    callback(fast, a); callback(capped, b);
+    REQUIRE(fast.engine().selectedTargetId() == "bit-crusher");
+    for (int c = 0; c < 2; ++c)
+        for (int n = 0; n < 257; ++n) REQUIRE(a.getSample(c, n) == b.getSample(c, n));
+    auto gainRecord = callbackRecord(SourceKind::sine);
+    gainRecord.version = 2; gainRecord.targetId = "gain";
+    fast.configure(gainRecord); fast.audioDeviceAboutToStart(&device);
+    REQUIRE(fast.engine().selectedTargetId() == "gain");
+    fast.configure(record); fast.audioDeviceAboutToStart(&device);
+    REQUIRE(fast.engine().selectedTargetId() == "bit-crusher");
+}
+
+TEST_CASE("Device restores expressive crusher settings across rate reprepare", "[controller][crusher]")
+{
+    AudioDeviceController controller;
+    CallbackDevice first(48000.0, 32), second(96000.0, 64);
+    auto record = callbackRecord(SourceKind::sine);
+    record.version = 4; record.targetId = "bit-crusher";
+    record.bitDepth = 1; record.captureRateHz = 384000.0f;
+    record.mix = 0.0f; record.crush = 0.75f; record.shape = -0.4f;
+    record.jitter = 0.8f; record.jitterSeed = 7u;
+    for (auto* device : {static_cast<CallbackDevice*>(&first), &second})
+    {
+        controller.configure(record);
+        controller.audioDeviceAboutToStart(device);
+        REQUIRE(controller.isReady());
+        REQUIRE(controller.engine().selectedTargetId() == "bit-crusher");
+        controller.setPlaying(true);
+        juce::AudioBuffer<float> audio(2, 257);
+        callback(controller, audio);
+        for (int n = 0; n < 257; ++n)
+        {
+            const auto expected = static_cast<float>(0.25 * std::sin(
+                juce::MathConstants<double>::twoPi * 440.0 * n / device->getCurrentSampleRate()));
+            REQUIRE(audio.getSample(0, n) == Catch::Approx(expected).margin(1.0e-6f));
+        }
     }
 }
 

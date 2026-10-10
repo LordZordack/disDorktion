@@ -83,6 +83,45 @@ precision limits, including underflow for the smallest subnormal legacy gains.
 State operations and bulk harness restoration require lifecycle synchronization;
 independent live parameter atomics do not promise an atomic whole-state snapshot.
 
+## Production bit crusher
+
+`BitCrusher` follows the module interface above with float32 audio and int64
+quantization codes. Depth accepts 1–8, 16, 32, or 64 bits (default 64); signed
+rounding is nearest with ties away from zero, saturated to
+`[-1, 1 - 2^(1-B)]` for depth B. Capture rate accepts 100–384000 Hz and is
+capped at host rate (default 384000 Hz). Capture-rate, mix, crush, shape,
+jitter, and bypass transitions use 10 ms smoothers; depth changes requantize
+the held raw sample on the next frame without resetting phase. Mix defaults to
+1, crush/shape/jitter to 0, jitter seed to uint32 1, and bypass to off.
+
+The original PCM result is preserved exactly when crush and shape are zero.
+Otherwise, let d0=2^(1-B), d=d0+(1-d0)crush^3, and p=2^(2shape). The enhanced
+path shapes x as sign(x)|x|^p, rounds to the nearest d grid with ties away from
+zero, clamps to [-1,1], then applies the inverse power. Blend that result with
+the legacy PCM result using w=max(crush,|shape|). This keeps neutral controls
+on the legacy path and makes the transition continuous at neutrality. The
+enhanced grid is symmetric and may have saturation endpoints off-grid; it does
+not promise exactly 2^B codes. Mix linearly blends dry input and wet output
+with exact endpoints; bypass independently overrides mix with exact dry output.
+
+Jitter uses a deterministic xorshift32 generator (seed default 1; seed 0 maps
+to a fixed nonzero state), one shared random value per capture interval, and a
+compensated clock. Map each PRNG value r to u=(r+0.5)/2^31-1 in [-1,1).
+At each frame, its threshold is hostRate + u*0.9*smoothedJitter*
+(hostRate-smoothedEffectiveRate),
+where u is uniform in [-1,1). It is bounded below by the effective rate,
+fades to zero at full rate, and permits at most one capture per host frame.
+Near full rate jitter therefore has less effect; with jitter zero the original
+fixed clock is unchanged. Mix/crush/shape/jitter use double linear smoothers,
+advance once per frame, and snap to retained targets on reset. Channels retain
+independent holds on a shared capture clock. The first frame captures
+immediately and phase persists across blocks. Reset clears histories and clock,
+snaps smoothers to retained targets, and reseeds the PRNG. A seed change
+reseeds on the next frame without resetting capture phase. Latency is zero.
+
+See the [bit crushing method](okf/methods/bit_crushing.md) and its
+[validation note](okf/notes/bit_crusher_validation.md).
+
 ## Plugin adapter policy (both gain implementations)
 
 The adapter marks host configuration ready only after successful preparation. Invalid host preparation disables processing even if the module retained an earlier valid configuration. On unprepared or rejected audio processing, clear every output sample with `buffer.clear()` and return without logging, allocation, or host/UI notifications. Clear output-only channels before processing valid input. Rejected parameter updates retain valid controls and do not cause silence.

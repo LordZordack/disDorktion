@@ -8,6 +8,17 @@ second renders silence. Monitoring fields are provenance and do not change
 offline samples. Sources are mathematically generated; no third-party audio
 license is needed. These records describe settled controls, not automation.
 
+The original bit-crusher examples use version 3 and target `bit-crusher`:
+`bit-crusher-sine.json`, `bit-crusher-alias.json`, and
+`bit-crusher-low-bits.json`. They remain legacy algorithm fixtures. New saves
+use version 4 with required `mix`, `crush`, `shape`, `jitter`, and
+`jitterSeed` fields. [bit-crusher-expressive.json](bit-crusher-expressive.json)
+shows the extension controls together; its settings are illustrative and make
+no listening or measurement claim. Prior test and CPU results apply to the
+version-3 algorithm only. Expressive tests and render checks passed; new-WAV
+listening and CPU qualification remain pending. See the
+[validation note](../../docs/okf/notes/bit_crusher_validation.md).
+
 Render from the repository root after building Release:
 
 ```powershell

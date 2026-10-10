@@ -16,7 +16,7 @@ struct MeterSnapshot
 class AuditionEngine
 {
 public:
-    // prepare/reset/selectTarget/setParameters/setGainSettings require a detached
+    // prepare/reset/selectTarget/setParameters/setGainSettings/setBitCrusherSettings require a detached
     // callback. Scalar live setters and meter polling may run concurrently with
     // process(); independent scalar loads do not promise a whole-state snapshot.
     bool prepare(const juce::dsp::ProcessSpec& spec);
@@ -25,6 +25,14 @@ public:
     std::string_view selectedTargetId() const noexcept { return selected->descriptor().id; }
     bool setParameters(const GainParameters& parameters) noexcept;
     bool setGain(float gain) noexcept;
+    bool setBitCrusherSettings(const BitCrusherSettings&) noexcept;
+    bool setBitDepth(unsigned) noexcept;
+    bool setCaptureRateHz(float) noexcept;
+    bool setCrusherMix(float) noexcept;
+    bool setCrush(float) noexcept;
+    bool setQuantizerShape(float) noexcept;
+    bool setJitter(float) noexcept;
+    void setJitterSeed(std::uint32_t) noexcept;
     bool setGainSettings(const GainSettings&) noexcept;
     bool setGainDb(float db) noexcept;
     void setModuleMuted(bool value) noexcept;
@@ -40,15 +48,23 @@ public:
     unsigned int getLatencySamples() const noexcept { return selected->getLatencySamples(); }
 private:
     static_assert(std::atomic<float>::is_always_lock_free);
+    static_assert(std::atomic<unsigned>::is_always_lock_free);
+    static_assert(std::atomic<std::uint32_t>::is_always_lock_free);
     static_assert(std::atomic<bool>::is_always_lock_free);
     void clearMeters() noexcept;
     bool applyParameters() noexcept;
     ReferenceGainTarget target;
     GainTarget productionTarget;
+    BitCrusherTarget crusherTarget;
     AuditionTarget* selected = &target;
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> monitor {0.0f};
     std::atomic<float> gain {1.0f}, monitorDb {-18.0f};
     std::atomic<float> gainDb {0.0f};
+    std::atomic<unsigned> bitDepth {64};
+    std::atomic<float> captureRateHz {384000.0f};
+    std::atomic<float> crusherMix {1.0f}, crush {0.0f}, quantizerShape {0.0f}, jitter {0.0f};
+    std::atomic<std::uint32_t> jitterSeed {1};
+    std::atomic<bool> crusherBypass {false};
     std::atomic<bool> moduleMuted {false}, productionBypass {false};
     std::atomic<bool> bypass {false}, muted {true};
     std::atomic<float> inputPeak {0.0f}, inputRms {0.0f}, outputPeak {0.0f}, outputRms {0.0f};
