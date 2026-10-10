@@ -1,0 +1,30 @@
+{
+    "version":  3,
+    "targetId":  "bit-crusher",
+    "bypass":  false,
+    "sampleRate":  48000,
+    "channels":  2,
+    "blockSize":  256,
+    "renderDurationSamples":  48000,
+    "filePath":  "",
+    "fileHash":  "",
+    "sourceConversion":  "linear;mono-duplicate;stereo-average",
+    "originalSampleRate":  0,
+    "originalChannels":  0,
+    "monitorDb":  -18,
+    "muted":  true,
+    "midiDevice":  "",
+    "buildIdentity":  "example",
+    "observations":  "Generated measurement fixture; no listening claim. Monitoring does not alter rendered samples.",
+    "source":  {
+                   "kind":  "sine",
+                   "frequency":  6000,
+                   "frequency2":  880,
+                   "amplitude":  0.25,
+                   "phase":  0,
+                   "durationSamples":  48000,
+                   "seed":  1
+               },
+    "bitDepth":  64,
+    "captureRateHz":  8000
+}

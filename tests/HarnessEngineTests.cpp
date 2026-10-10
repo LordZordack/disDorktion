@@ -6,6 +6,59 @@
 
 using namespace disdorktion;
 using namespace disdorktion::harness;
+
+TEST_CASE("Harness bit crusher target matches direct processing", "[harness][crusher]")
+{
+    AuditionEngine engine;
+    BitCrusher direct;
+    const juce::dsp::ProcessSpec spec {48000.0, 64, 2};
+    REQUIRE(engine.selectTarget("bit-crusher"));
+    REQUIRE(engine.setBitCrusherSettings({4, 12000.0f, false}));
+    REQUIRE(engine.prepare(spec));
+    REQUIRE(direct.prepare(spec));
+    REQUIRE(direct.setParameters({4, 12000.0f, false}));
+    direct.reset();
+    juce::AudioBuffer<float> actual(2, 256), expected(2, 256);
+    for (int c = 0; c < 2; ++c)
+        for (int n = 0; n < 256; ++n)
+            actual.setSample(c, n, static_cast<float>((n * 17 + c * 7) % 91 - 45) / 64.0f);
+    expected.makeCopyOf(actual);
+    REQUIRE(engine.process(juce::dsp::AudioBlock<float>(actual), false));
+    REQUIRE(direct.process(juce::dsp::AudioBlock<float>(expected)));
+    for (int c = 0; c < 2; ++c)
+        for (int n = 0; n < 256; ++n) REQUIRE(actual.getSample(c, n) == expected.getSample(c, n));
+    REQUIRE_FALSE(engine.setBitDepth(9));
+    REQUIRE_FALSE(engine.setCaptureRateHz(99.0f));
+    BitCrusherTarget target;
+    for (const auto depth : {std::numeric_limits<float>::max(), 4294967296.0f,
+                             std::numeric_limits<float>::quiet_NaN(), 9.0f, 2.5f})
+        REQUIRE_FALSE(target.setControl("bitDepth", depth));
+}
+
+TEST_CASE("Harness expressive crusher settings match direct DSP and reject invalid scalars", "[harness][crusher]")
+{
+    AuditionEngine engine;
+    BitCrusher direct;
+    const BitCrusherSettings settings {3, 9000.0f, false, 0.65f, 0.4f, -0.5f, 0.35f, 123u};
+    REQUIRE(engine.selectTarget("bit-crusher"));
+    REQUIRE(engine.setBitCrusherSettings(settings));
+    REQUIRE(engine.prepare({48000.0, 32, 2}));
+    REQUIRE(direct.prepare({48000.0, 32, 2}));
+    REQUIRE(direct.setParameters(settings)); direct.reset();
+    juce::AudioBuffer<float> actual(2, 257), expected(2, 257);
+    for (int c = 0; c < 2; ++c)
+        for (int n = 0; n < 257; ++n)
+            actual.setSample(c, n, static_cast<float>((n * 23 + c * 7) % 97 - 48) / 64.0f);
+    expected.makeCopyOf(actual);
+    REQUIRE(engine.process(juce::dsp::AudioBlock<float>(actual), false));
+    REQUIRE(direct.process(juce::dsp::AudioBlock<float>(expected)));
+    for (int c = 0; c < 2; ++c)
+        for (int n = 0; n < 257; ++n) REQUIRE(actual.getSample(c, n) == expected.getSample(c, n));
+    REQUIRE_FALSE(engine.setCrusherMix(-0.1f));
+    REQUIRE_FALSE(engine.setCrush(1.1f));
+    REQUIRE_FALSE(engine.setQuantizerShape(std::numeric_limits<float>::infinity()));
+    REQUIRE_FALSE(engine.setJitter(std::numeric_limits<float>::quiet_NaN()));
+}
 namespace
 {
 void fillHarness(juce::AudioBuffer<float>& audio, float value)
@@ -110,7 +163,7 @@ TEST_CASE("Harness rejects malformed controls and preparation and silences failu
     REQUIRE_FALSE(engine.setMonitoring(-61.0f,false)); REQUIRE_FALSE(engine.setMonitoring(1.0f,false));
     REQUIRE_FALSE(engine.setMonitoring(std::numeric_limits<float>::quiet_NaN(),false));
     REQUIRE_FALSE(engine.selectTarget("missing")); REQUIRE(engine.selectTarget("reference-gain"));
-    REQUIRE(auditionTargets().size() == 2);
+    REQUIRE(auditionTargets().size() == 3);
     REQUIRE(engine.prepare({8000.0,1,1}));
     juce::AudioBuffer<float> mono(1,8), stereo(2,8);
     fillHarness(mono,0.25f); REQUIRE(engine.process(juce::dsp::AudioBlock<float>(mono),false));

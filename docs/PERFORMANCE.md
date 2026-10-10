@@ -32,6 +32,52 @@ commands and proposed limits do not constitute qualification.
 
 These are proposed engineering limits for the gain foundation, not measured results or acceptance evidence for the future complete wet chain. Document the budgets before implementing the reference module. Allocate performance shares for additional modules and integration before implementing them.
 
+## Bit crusher measurements
+
+`disdorktion_bit_crusher_measurements.exe` writes deterministic source/wet WAVs
+and `result.json` into a fresh output directory. It exercises 48 and 96 kHz
+spectral checks. The destination must not already exist or contain files.
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_bit_crusher_measurements.exe bit-crusher-measurements
+```
+
+`disdorktion_bit_crusher_benchmark.exe` uses the same timing criteria and
+5% deadline budget, with a crusher-specific adaptive window to keep
+low-throughput cases inside the sampling-count bounds.
+Its steady-64/full, automation cycling all 11 depths at 100 Hz/full,
+bypass-8-at-12345.5-Hz, and oversized-64/full cases use a 5% deadline budget.
+For qualification, run three
+AC-powered, CPU-pinned runs with recorded conditions:
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_bit_crusher_benchmark.exe --runs 3 --conditions "AC power; recorded power/thermal conditions; no competing builds" --output bit_crusher_baseline.csv
+```
+
+For each case, retain the 2-second warmup and 2-second probe. Project the
+10-second timing count, then choose a window of
+`max(10, min(120, 1,500,000 / projectedCountAt10Seconds))` seconds. Scale the
+projected count for that window, then select a fixed stride targeting 150,000
+observations. The stored count must remain within 100,000–200,000; the 120
+second cap still applies. Keep all raw values and do not discard timing
+outliers. This adaptive window applies only to the bit crusher; the gain
+collector retains its existing 10-second window.
+
+Use `--diagnostic` for an unqualified unpinned diagnostic, `--quick` only for
+a smoke check, and `--case-id 48000/32/steady` to filter a retry. The qualified
+[baseline](measurements/bit_crusher_baseline.csv) passed all 120 rows (40 cases
+per run, three runs) for the legacy crusher algorithm; it does not qualify the
+expressive controls. The [unpinned diagnostic](measurements/bit_crusher_unpinned_diagnostic.csv)
+is intentionally unqualified. Preserve both CSVs as legacy evidence. New
+mix/crush/shape/jitter correctness tests and renders pass. The first
+expressive baseline attempt is preserved but unqualified because its 48 kHz /
+1024-frame oversized case collected only 47,099 timings, below the 100,000
+minimum. Its p99 was 278,800 ns versus a 3,201,041.667 ns budget, so this was a
+sampling-coverage shortfall, not a timing-budget failure. The reviewed adaptive
+collector qualified all 120 rows across three runs. Worst p99 was 1.390866% of
+the block deadline, below the 5% limit. See the [expressive baseline](measurements/bit_crusher_expressive_adaptive_baseline.csv)
+and the separate, intentionally unqualified [unpinned diagnostic](measurements/bit_crusher_expressive_unpinned_diagnostic.csv). See the [bit crusher validation note](okf/notes/bit_crusher_validation.md).
+
 ## Reference machine
 
 Record this observed reference machine with each result: Intel Core Ultra 7 155H, 16 cores / 22 logical processors, approximately 32 GiB RAM, Windows 11 Home 10.0.26200. Also record compiler, SDK, power mode, AC power status, and benchmark conditions.

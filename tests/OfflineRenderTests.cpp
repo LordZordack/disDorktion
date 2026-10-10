@@ -75,6 +75,51 @@ TEST_CASE("Offline generated render is exact float audio independent of monitori
     }
 }
 
+TEST_CASE("Bit crusher offline render is deterministic across block sizes", "[render][crusher]")
+{
+    RenderFixture fixture;
+    ExperimentRecord record; record.version = 3; record.targetId = "bit-crusher";
+    record.bitDepth = 4; record.captureRateHz = 12000.0f;
+    record.source.kind = SourceKind::sine; record.source.durationSamples = 257;
+    record.renderDurationSamples = 257; record.blockSize = 17;
+    const auto first = fixture.root.getChildFile("crusher-a");
+    const auto second = fixture.root.getChildFile("crusher-b");
+    const auto result = renderExperiment(record, first);
+    INFO(result.message); REQUIRE(result.status == RenderStatus::success);
+    record.blockSize = 64;
+    REQUIRE(renderExperiment(record, second).status == RenderStatus::success);
+    const auto a = readFloat(first.getChildFile("rendered.wav"), 257, 2);
+    const auto b = readFloat(second.getChildFile("rendered.wav"), 257, 2);
+    const auto source = readFloat(first.getChildFile("source.wav"), 257, 2);
+    REQUIRE(source.getSample(0, 1) != 0.0f);
+    REQUIRE(a.getSample(0, 1) == 0.0f);
+    for (int c = 0; c < 2; ++c)
+        for (int n = 0; n < 257; ++n) REQUIRE(a.getSample(c, n) == b.getSample(c, n));
+}
+
+TEST_CASE("Expressive crusher offline dry mix retains source samples", "[render][crusher]")
+{
+    RenderFixture fixture;
+    ExperimentRecord record; record.version = 4; record.targetId = "bit-crusher";
+    record.bitDepth = 1; record.captureRateHz = 4000.0f;
+    record.mix = 0.0f; record.crush = 0.8f; record.shape = 0.5f;
+    record.jitter = 0.5f; record.jitterSeed = 7u;
+    record.source.kind = SourceKind::sine; record.source.durationSamples = 257;
+    record.renderDurationSamples = 257;
+    const auto dry = fixture.root.getChildFile("dry-mix");
+    const auto dryResult = renderExperiment(record, dry);
+    INFO(dryResult.message); REQUIRE(dryResult.status == RenderStatus::success);
+    const auto source = readFloat(dry.getChildFile("source.wav"), 257, 2);
+    const auto renderedDry = readFloat(dry.getChildFile("rendered.wav"), 257, 2);
+    for (int c = 0; c < 2; ++c)
+        for (int n = 0; n < 257; ++n) REQUIRE(renderedDry.getSample(c, n) == source.getSample(c, n));
+    record.mix = 1.0f;
+    const auto wet = fixture.root.getChildFile("wet-mix");
+    REQUIRE(renderExperiment(record, wet).status == RenderStatus::success);
+    const auto renderedWet = readFloat(wet.getChildFile("rendered.wav"), 257, 2);
+    REQUIRE(renderedWet.getSample(0, 1) != source.getSample(0, 1));
+}
+
 TEST_CASE("Offline loop wraps for exact requested length and hash failures publish nothing", "[render]")
 {
     RenderFixture fixture;

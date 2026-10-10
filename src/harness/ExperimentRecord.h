@@ -12,6 +12,10 @@ struct ExperimentRecord
     juce::String targetId = "reference-gain";
     float gain = 1.0f;
     float gainDb = 0.0f;
+    unsigned bitDepth = 64;
+    float captureRateHz = 384000.0f;
+    float mix = 1.0f, crush = 0.0f, shape = 0.0f, jitter = 0.0f;
+    std::uint32_t jitterSeed = 1;
     bool mute = false;
     bool bypass = false;
     SourceSettings source;

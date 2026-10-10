@@ -19,9 +19,9 @@ The reference gain accepts finite linear amplitude in `[0, 4]`, defaults to unit
 
 ## Evaluation status
 
-The production [gain module](gain.md) adds -60 to +24 dB, explicit mute, independent input/output state and double smoothing envelopes under the same processing contract. Its [validation note](../notes/gain_validation.md) records automated correctness and remaining listening/CPU gates. The adapter retains the reference stage as a compatible legacy trim before the production pair.
+The production [gain module](gain.md) adds -60 to +24 dB, explicit mute, independent input/output state and double smoothing envelopes under the same processing contract. Its [validation note](../notes/gain_validation.md) records automated correctness and remaining listening/CPU gates. The [bit crusher method](bit_crushing.md) also follows this contract, with signed PCM quantization and a shared capture clock. The adapter retains the reference stage as a compatible legacy trim before the production pair.
 
-The reference gain contract is implemented and its unit correctness is verified; see the [foundation validation note](../notes/foundation_validation.md). Production distortion modules remain unqualified. CPU performance is not qualified; the recorded benchmark work was performed on battery power. The proposed budgets and benchmark procedure are in [PERFORMANCE.md](https://github.com/LordZordack/DisDorktion/blob/main/docs/PERFORMANCE.md).
+The reference gain contract is implemented and its unit correctness is verified; see the [foundation validation note](../notes/foundation_validation.md). The legacy bit crusher passed Debug, Release, DSP-only tests, verified renders, and its three-run CPU baseline. The expressive mix/crush/shape/jitter extension passed Debug, Release, headless tests, render checks, and the three-run CPU baseline; listening, GUI, VS2022 CI, and graph gates remain open. The proposed budgets and benchmark procedure are in [PERFORMANCE.md](https://github.com/LordZordack/DisDorktion/blob/main/docs/PERFORMANCE.md).
 
 ## Design choices
 

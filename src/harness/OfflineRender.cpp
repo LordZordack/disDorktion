@@ -106,7 +106,9 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     AuditionEngine engine;
     if (!engine.selectTarget(record.targetId.toStdString())
         || !(record.version == 1 ? engine.setParameters({record.gain, record.bypass})
-                                 : engine.setGainSettings({record.gainDb, record.mute, record.bypass}))
+            : record.version == 2 ? engine.setGainSettings({record.gainDb, record.mute, record.bypass})
+                                  : engine.setBitCrusherSettings({record.bitDepth, record.captureRateHz, record.bypass,
+                                      record.mix, record.crush, record.shape, record.jitter, record.jitterSeed}))
         || !engine.prepare({record.sampleRate, record.blockSize, record.channels}))
     { result.message = "Cannot prepare target"; return result; }
     engine.reset();

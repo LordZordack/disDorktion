@@ -34,7 +34,31 @@ settings/provenance. The checked-in [settings](measurements/gain_transition_fixt
 and [gain validation](okf/notes/gain_validation.md) record numerical checks;
 generated WAVs stay local and listening observations must be recorded separately.
 
-The dedicated **DisDorktion Audition** app auditions the same `ReferenceGain` DSP used by the plugin. Its initial target is `reference-gain`, with linear gain 0–4 (default 1) and smoothed bypass. Accepted modules, sections, and chains can be added later. The generated plugin Standalone wrapper, `DisDorktion.exe`, has a separate purpose and does not supply this experiment workflow.
+The dedicated **DisDorktion Audition** app auditions the same DSP targets used
+by the plugin. It supports `reference-gain`, production `gain`, and
+`bit-crusher`; the generated plugin Standalone wrapper, `DisDorktion.exe`,
+has a separate purpose and does not supply this experiment workflow.
+
+## Bit Crusher target
+
+Select **Bit Crusher** to audition the shared `BitCrusher` module. Controls
+include depth (1–8, 16, 32, or 64 bits), requested capture rate, mix, crush,
+shape, jitter, jitter seed, and bypass. Mix/crush/shape/jitter default to
+1/0/0/0; the uint32 seed defaults to 1. New version-4 records require
+`bitDepth`, `captureRateHz`, `bypass`, `mix`, `crush`, `shape`, `jitter`,
+and `jitterSeed`. Version 3 remains readable with neutral extension settings;
+version-3 extension keys are rejected. New saves upgrade to v4. Version 1/2
+schemas remain unchanged and also reject extension keys.
+
+The rate slider maps logarithmically from 100 Hz to the host rate. Its text
+field retains requested Hz from 100 to 384000, even when that request exceeds
+the current host rate; effective rate is capped without rewriting the stored
+request. Device-rate changes remap the control without changing its value. A
+pre-device rate mapping uses 48000 Hz. The renderer uses the same target and
+settings as the app. See the [bit crusher examples](../examples/experiments/README.md)
+and [validation note](okf/notes/bit_crusher_validation.md). Expressive
+Debug/Release/headless suites and render checks pass; extension CPU qualification,
+new-WAV listening, and manual GUI restore/save inspection remain pending.
 
 ## Start an audition
 
@@ -48,11 +72,11 @@ Use `Release` for the Release artifact. Open **Audio / MIDI devices** to choose 
 
 1. Select a generated source, **Audio file loop**, or **Keyboard / MIDI sine**. Load WAV/AIFF with the file button when using a loop.
 2. Set frequencies in Hz, peak amplitude, phase in radians, **Source frames**, **Render frames**, and noise seed. Click **Apply source** to commit the editors. Selecting another source also attempts to apply its settings. Source application stops playback; press **Play** afterward.
-3. Monitoring starts muted at −18 dB. Set monitoring volume (−60–0 dB) and unmute to listen. Module gain and bypass update live.
+3. Monitoring starts muted at −18 dB. Set monitoring volume (−60–0 dB) and unmute to listen. Supported controls for the selected target update live.
 4. **Stop** stops playback and releases notes. **Restart** resets source and target history. Generated sources stop automatically at their source length and the button returns to **Play**; press Play to repeat them from the beginning. File loops continue until stopped.
 5. Enter observations and save an experiment JSON. Reloading restores a validated record stopped. The device sample rate, channel count, and block size must match the record; otherwise restore reports the mismatch and refuses it. Match the device settings before retrying.
 
-Save and Render use the **last applied source and frame counts**, together with current gain, bypass, monitoring, and observations. Typing into a source editor does not commit it. Click Apply source before saving or rendering changed source settings. Worker activity disables source/settings, gain/bypass, observations, and save/restore/render controls until completion; monitoring remains available.
+Save and Render use the **last applied source and frame counts**, together with current target settings, monitoring, and observations. Typing into a source editor does not commit it. Click Apply source before saving or rendering changed source settings. Worker activity disables source/settings, selected target controls, observations, and save/restore/render controls until completion; monitoring remains available.
 
 ## Signal and measurement semantics
 
@@ -142,10 +166,14 @@ A successful render publishes three files together:
 
 Rendering prepares/resets a fresh target, uses recorded block size, and processes an exact final partial block. It checks the WAV RIFF size budget before writing. An existing output destination is rejected, including an empty directory; the parent must already exist. A staging directory is published by a no-replace rename only after all files succeed. Failure or cancellation cleans incomplete staging; cancellation is an I/O failure. Exit codes are **0** for success/help, **2** for invalid arguments/requests, and **1** for processing/I/O failure. Monitoring fields remain provenance in the experiment and do not change rendered audio.
 
+The target registry supports reference gain, production gain, and bit crusher.
+The bit crusher's expressive extension uses version-4 records; its new controls
+and persistence behavior are described above.
+
 ## Extend a target
 
 `src/harness/AuditionTarget.h` defines a descriptor and adapter interface. `ReferenceGainTarget.h` translates the `gain` control and bypass into the module's typed parameters, delegating prepare, reset, process, and latency reporting to `ReferenceGain`.
 
-To add an accepted module, supply its descriptor and adapter, extend the target registry and engine selection/storage, and add its controls to the interface and validated versioned record format. The current engine and schema explicitly support only reference gain; the descriptor registry alone does not make another module selectable. Extend offline restoration with the same adapter and validation. Target creation, replacement, prepare/reset, multi-field restoration, and destruction require processing to be detached. Only supported live scalar setters and meter reads may run concurrently with processing. Keep source/monitoring ownership in the harness and reuse production DSP.
+To add an accepted module, supply its descriptor and adapter, extend the target registry and engine selection/storage, and add its controls to the interface and validated versioned record format. The registry alone does not make another module selectable. Extend offline restoration with the same adapter and validation. Target creation, replacement, prepare/reset, multi-field restoration, and destruction require processing to be detached. Only supported live scalar setters and meter reads may run concurrently with processing. Keep source/monitoring ownership in the harness and reuse production DSP.
 
 Add mathematical, block-partition, monitor-independence, record round-trip, exact-length, and callback allocation checks for the new target, and document listening/measurement evidence in the [OKF bundle](okf/index.md). See [harness validation](okf/notes/harness_validation.md) for current evidence and unperformed checks. Source inspection and C++ allocation instrumentation have narrower scope than complete realtime or audible qualification.

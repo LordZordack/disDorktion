@@ -17,6 +17,7 @@ Carrier modulation and demodulation, resonant comb filtering, frequency warping,
 ## Research records
 
 - **Processing foundation** (`../methods/processing_contract.md`): implemented real-time module interface, callback rules, and reference gain behavior. See the [DSP contract](https://github.com/LordZordack/DisDorktion/blob/main/docs/DSP_CONTRACT.md), [performance procedure](https://github.com/LordZordack/DisDorktion/blob/main/docs/PERFORMANCE.md), and [foundation validation note](../notes/foundation_validation.md).
+- **Bit crusher** (`../methods/bit_crushing.md`): the legacy depth/capture-rate processor passed Debug, Release, DSP-only Release, render checks, and its three-run CPU baseline. The expressive mix/crush/shape/jitter extension passed VS2026 Debug, Release, headless Release, render checks, and its three-run CPU baseline; new-WAV listening, GUI inspection, VS2022 CI, and graph gate remain open. See the [validation note](../notes/bit_crusher_validation.md).
 - **Methods** (`../methods/`): record each DSP design, its equations or algorithm, parameter ranges and endpoints, expected sound, aliasing and latency concerns, and alternatives. Link supporting papers and experiments.
 - **Papers** (`../papers/`): preserve verified bibliographic details and source links, summarize the relevant finding, and identify the methods it informs. Do not fill gaps in source metadata by guessing.
 - **Notes** (`../notes/`): record experiments and listening evaluations with test signal, sample rate, settings, observations or measurements, and the decision they support. Link the method and paper records where relevant.
@@ -24,9 +25,9 @@ Carrier modulation and demodulation, resonant comb filtering, frequency warping,
 
 ## Evidence status
 
-The [reusable gain design](../methods/gain.md) is implemented in the shared harness and independent plugin input/output stages. Debug and Release checks verify correctness; [gain validation](../notes/gain_validation.md) records fixtures and battery diagnostics. Human listening, manual host checks and AC CPU qualification remain pending.
+The [reusable gain design](../methods/gain.md) is implemented in the shared harness and independent plugin input/output stages. Debug and Release checks verify correctness; [gain validation](../notes/gain_validation.md) records fixtures and battery diagnostics. Human listening and manual host checks remain pending. The bit crusher's verified legacy sine and transient renders were user-auditioned as “Sounds as intended”; musical-category listening remains pending. Its three-run AC CPU baseline passed for the legacy version. Expressive CPU qualification passed; expressive WAV listening remains open.
 
-Describe unimplemented designs as **proposed behavior**. The reference gain foundation's unit correctness is verified in the [foundation validation note](../notes/foundation_validation.md). Production distortion modules remain unqualified. CPU performance has not been qualified because the recorded benchmark work was performed on battery power. Use **measured behavior** only for results supported by a documented test or listening evaluation; include the test conditions and link its note. Record whether evidence accepts, rejects, or revises the proposal.
+Describe unimplemented designs as **proposed behavior**. The reference gain foundation's unit correctness is verified in the [foundation validation note](../notes/foundation_validation.md). Other production distortion modules remain unqualified. CPU performance is qualified for the bit crusher's legacy algorithm only; see its [validation note](../notes/bit_crusher_validation.md). Use **measured behavior** only for results supported by a documented test or listening evaluation; include the test conditions and link its note. Record whether evidence accepts, rejects, or revises the proposal.
 
 ## Open research questions
 

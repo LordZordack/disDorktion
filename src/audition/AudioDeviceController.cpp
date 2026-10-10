@@ -14,7 +14,10 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
     settings = record;
     processor.selectTarget(settings.targetId.toStdString());
     if (settings.version == 1) processor.setParameters({settings.gain, settings.bypass});
-    else processor.setGainSettings({settings.gainDb, settings.mute, settings.bypass});
+    else if (settings.version == 2) processor.setGainSettings({settings.gainDb, settings.mute, settings.bypass});
+    else if (settings.version == 3 || settings.version == 4)
+        processor.setBitCrusherSettings({settings.bitDepth, settings.captureRateHz, settings.bypass,
+            settings.mix, settings.crush, settings.shape, settings.jitter, settings.jitterSeed});
     processor.setMonitorDb(settings.monitorDb);
     processor.setMuted(settings.muted);
     playing.store(false);

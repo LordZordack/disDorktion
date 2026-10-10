@@ -1,5 +1,6 @@
 #include "ExperimentRecord.h"
 #include "dsp/ModuleContract.h"
+#include "dsp/BitCrusher.h"
 #include <cmath>
 #include <limits>
 
@@ -27,11 +28,24 @@ ExperimentRecord::ExperimentRecord() : buildIdentity(DISDORKTION_BUILD_ID) {}
 bool ExperimentRecord::validate(juce::String& error) const
 {
     error.clear();
-    if (!((version == 1 && targetId == "reference-gain") || (version == 2 && targetId == "gain")))
+    if (!((version == 1 && targetId == "reference-gain") || (version == 2 && targetId == "gain")
+        || ((version == 3 || version == 4) && targetId == "bit-crusher")))
         return fail(error, "Unsupported experiment version or target");
     if (!isValidProcessSpec({ sampleRate, blockSize, channels })) return fail(error, "Invalid process specification");
     if (version == 1 && (!std::isfinite(gain) || gain < 0 || gain > 4)) return fail(error, "Gain must be in [0, 4]");
     if (version == 2 && (!std::isfinite(gainDb) || gainDb < -60 || gainDb > 24)) return fail(error, "Gain dB must be in [-60, 24]");
+    if ((version == 3 || version == 4) && (!isValidBitDepth(bitDepth) || !std::isfinite(captureRateHz)
+        || captureRateHz < 100.0f || captureRateHz > 384000.0f)) return fail(error, "Invalid bit crusher settings");
+    if (version == 4 && (!std::isfinite(mix) || mix < 0.0f || mix > 1.0f
+        || !std::isfinite(crush) || crush < 0.0f || crush > 1.0f
+        || !std::isfinite(shape) || shape < -1.0f || shape > 1.0f
+        || !std::isfinite(jitter) || jitter < 0.0f || jitter > 1.0f))
+        return fail(error, "Invalid expressive crusher settings");
+    if (version != 4 && (mix != 1.0f || crush != 0.0f || shape != 0.0f
+        || jitter != 0.0f || jitterSeed != 1))
+        return fail(error, "Legacy experiment cannot contain expressive crusher settings");
+    if (version < 3 && (bitDepth != 64 || captureRateHz != 384000.0f))
+        return fail(error, "Gain experiment cannot contain crusher settings");
     if (!std::isfinite(monitorDb) || monitorDb < -60 || monitorDb > 0) return fail(error, "Monitor dB must be in [-60, 0]");
     if (renderDurationSamples == 0 || renderDurationSamples > maximumSamples
         || source.durationSamples == 0 || source.durationSamples > maximumSamples)
@@ -64,8 +78,14 @@ juce::var ExperimentRecord::toJson() const
     juce::var result(object);
     auto put = [object](const char* key, const juce::var& value) { object->setProperty(key, value); };
     put("version", version); put("targetId", targetId);
-    if (version == 2) { put("gainDb", gainDb); put("mute", mute); }
-    else put("gain", gain);
+    if (version == 1) put("gain", gain);
+    else if (version == 2) { put("gainDb", gainDb); put("mute", mute); }
+    else { put("bitDepth", static_cast<int>(bitDepth)); put("captureRateHz", captureRateHz); }
+    if (version == 4)
+    {
+        put("mix", mix); put("crush", crush); put("shape", shape); put("jitter", jitter);
+        put("jitterSeed", static_cast<juce::int64>(jitterSeed));
+    }
     put("bypass", bypass);
     put("sampleRate", sampleRate); put("channels", static_cast<int>(channels)); put("blockSize", static_cast<int>(blockSize));
     put("renderDurationSamples", static_cast<juce::int64>(renderDurationSamples));
@@ -92,18 +112,46 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto get = [o](const char* key) { return o->getProperty(key); };
     for (auto key : {"targetId", "filePath", "fileHash", "sourceConversion", "midiDevice", "buildIdentity", "observations"})
         if (!get(key).isString()) return fail(error, juce::String("Missing or invalid string: ") + key);
-    if (!integer(get("version"), 1, 2)) return fail(error, "Unsupported or missing version");
+    if (!integer(get("version"), 1, 4)) return fail(error, "Unsupported or missing version");
     const auto version = static_cast<int>(get("version"));
     if ((version == 1 && get("targetId").toString() != "reference-gain")
-        || (version == 2 && get("targetId").toString() != "gain")) return fail(error, "Unsupported target for version");
-    const auto* gainKey = version == 1 ? "gain" : "gainDb";
-    if ((version == 1 && (o->hasProperty("gainDb") || o->hasProperty("mute")))
-        || (version == 2 && o->hasProperty("gain"))) return fail(error, "Mixed gain schemas");
-    if (!number(get(gainKey)) || !std::isfinite(static_cast<double>(get(gainKey))))
-        return fail(error, "Missing or invalid gain number");
-    const auto gainValue = static_cast<double>(get(gainKey));
-    if ((version == 1 && (gainValue < 0 || gainValue > 4))
-        || (version == 2 && (gainValue < -60 || gainValue > 24))) return fail(error, "Gain out of range");
+        || (version == 2 && get("targetId").toString() != "gain")
+        || ((version == 3 || version == 4) && get("targetId").toString() != "bit-crusher"))
+        return fail(error, "Unsupported target for version");
+    if ((version != 1 && o->hasProperty("gain"))
+        || (version != 2 && (o->hasProperty("gainDb") || o->hasProperty("mute")))
+        || (version < 3 && (o->hasProperty("bitDepth") || o->hasProperty("captureRateHz")))
+        || (version != 4 && (o->hasProperty("mix") || o->hasProperty("crush")
+            || o->hasProperty("shape") || o->hasProperty("jitter") || o->hasProperty("jitterSeed"))))
+        return fail(error, "Mixed target schemas");
+    double gainValue = 0.0;
+    if (version < 3)
+    {
+        const auto* gainKey = version == 1 ? "gain" : "gainDb";
+        if (!number(get(gainKey)) || !std::isfinite(static_cast<double>(get(gainKey))))
+            return fail(error, "Missing or invalid gain number");
+        gainValue = static_cast<double>(get(gainKey));
+        if ((version == 1 && (gainValue < 0 || gainValue > 4))
+            || (version == 2 && (gainValue < -60 || gainValue > 24))) return fail(error, "Gain out of range");
+    }
+    else if (!integer(get("bitDepth"), 1, 64)
+        || !isValidBitDepth(static_cast<unsigned>(static_cast<int>(get("bitDepth"))))
+        || !number(get("captureRateHz")) || !std::isfinite(static_cast<double>(get("captureRateHz")))
+        || static_cast<double>(get("captureRateHz")) < 100.0
+        || static_cast<double>(get("captureRateHz")) > 384000.0)
+        return fail(error, "Missing or invalid bit crusher settings");
+    if (version == 4)
+    {
+        for (auto key : {"mix", "crush", "shape", "jitter"})
+            if (!number(get(key)) || !std::isfinite(static_cast<double>(get(key))))
+                return fail(error, juce::String("Missing or invalid crusher number: ") + key);
+        if (static_cast<double>(get("mix")) < 0 || static_cast<double>(get("mix")) > 1
+            || static_cast<double>(get("crush")) < 0 || static_cast<double>(get("crush")) > 1
+            || static_cast<double>(get("shape")) < -1 || static_cast<double>(get("shape")) > 1
+            || static_cast<double>(get("jitter")) < 0 || static_cast<double>(get("jitter")) > 1
+            || !integer(get("jitterSeed"), 0, std::numeric_limits<std::uint32_t>::max()))
+            return fail(error, "Expressive crusher setting out of range");
+    }
     if (version == 2 && !get("mute").isBool()) return fail(error, "Missing or invalid module mute");
     for (auto key : {"sampleRate", "monitorDb", "originalSampleRate"})
         if (!number(get(key)) || !std::isfinite(static_cast<double>(get(key))))
@@ -128,7 +176,18 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     ExperimentRecord candidate;
     candidate.version = version; candidate.targetId = get("targetId").toString();
     if (version == 1) candidate.gain = static_cast<float>(gainValue);
-    else { candidate.gainDb = static_cast<float>(gainValue); candidate.mute = static_cast<bool>(get("mute")); }
+    else if (version == 2) { candidate.gainDb = static_cast<float>(gainValue); candidate.mute = static_cast<bool>(get("mute")); }
+    else { candidate.bitDepth = static_cast<unsigned>(static_cast<int>(get("bitDepth")));
+           candidate.captureRateHz = static_cast<float>(get("captureRateHz"));
+           if (version == 4)
+           {
+               candidate.mix = static_cast<float>(get("mix"));
+               candidate.crush = static_cast<float>(get("crush"));
+               candidate.shape = static_cast<float>(get("shape"));
+               candidate.jitter = static_cast<float>(get("jitter"));
+               candidate.jitterSeed = static_cast<std::uint32_t>(static_cast<juce::int64>(get("jitterSeed")));
+           }
+    }
     candidate.bypass = static_cast<bool>(get("bypass"));
     candidate.sampleRate = static_cast<double>(get("sampleRate"));
     candidate.channels = static_cast<unsigned>(static_cast<int>(get("channels")));

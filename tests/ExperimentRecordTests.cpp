@@ -4,6 +4,89 @@
 
 using namespace disdorktion::harness;
 
+TEST_CASE("Extended crusher records require all expressive fields and upgrade legacy version", "[experiment][crusher]")
+{
+    ExperimentRecord extended;
+    extended.version = 4; extended.targetId = "bit-crusher";
+    extended.mix = 0.37f; extended.crush = 0.62f; extended.shape = -0.5f;
+    extended.jitter = 0.3f; extended.jitterSeed = 0xffffffffu;
+    juce::String error; ExperimentRecord restored;
+    auto json = extended.toJson();
+    REQUIRE(ExperimentRecord::fromJson(juce::JSON::parse(juce::JSON::toString(json)), restored, error));
+    REQUIRE(restored.version == 4);
+    REQUIRE(restored.mix == extended.mix); REQUIRE(restored.crush == extended.crush);
+    REQUIRE(restored.shape == extended.shape); REQUIRE(restored.jitter == extended.jitter);
+    REQUIRE(restored.jitterSeed == extended.jitterSeed);
+    for (auto* key : {"mix", "crush", "shape", "jitter", "jitterSeed"})
+    {
+        auto missing = extended.toJson(); missing.getDynamicObject()->removeProperty(key);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(missing, restored, error));
+    }
+    for (const auto bad : {juce::var(-0.01), juce::var(1.01), juce::var("0.5")})
+    {
+        auto invalid = extended.toJson(); invalid.getDynamicObject()->setProperty("mix", bad);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(invalid, restored, error));
+    }
+    auto invalidShape = extended.toJson(); invalidShape.getDynamicObject()->setProperty("shape", 1.01);
+    REQUIRE_FALSE(ExperimentRecord::fromJson(invalidShape, restored, error));
+    auto invalidSeed = extended.toJson(); invalidSeed.getDynamicObject()->setProperty("jitterSeed", 4294967296.0);
+    REQUIRE_FALSE(ExperimentRecord::fromJson(invalidSeed, restored, error));
+    ExperimentRecord legacy; legacy.version = 3; legacy.targetId = "bit-crusher";
+    auto legacyJson = legacy.toJson();
+    REQUIRE_FALSE(legacyJson.getDynamicObject()->hasProperty("mix"));
+    REQUIRE(ExperimentRecord::fromJson(legacyJson, restored, error));
+    REQUIRE(restored.mix == 1.0f); REQUIRE(restored.crush == 0.0f);
+    REQUIRE(restored.shape == 0.0f); REQUIRE(restored.jitter == 0.0f); REQUIRE(restored.jitterSeed == 1u);
+    legacyJson.getDynamicObject()->setProperty("mix", 1.0);
+    REQUIRE_FALSE(ExperimentRecord::fromJson(legacyJson, restored, error));
+    legacy.crush = 0.1f;
+    REQUIRE_FALSE(legacy.validate(error));
+    for (auto oldVersion : {1, 2})
+    {
+        ExperimentRecord old; old.version = oldVersion;
+        old.targetId = oldVersion == 1 ? "reference-gain" : "gain";
+        auto mixed = old.toJson(); mixed.getDynamicObject()->setProperty("jitter", 0.0);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(mixed, restored, error));
+    }
+}
+
+TEST_CASE("Bit crusher records round trip and reject mixed schemas", "[experiment][crusher]")
+{
+    ExperimentRecord record; record.version = 3; record.targetId = "bit-crusher";
+    record.bitDepth = 8; record.captureRateHz = 12345.5f; record.bypass = true;
+    juce::String error; ExperimentRecord restored;
+    auto json = record.toJson();
+    REQUIRE_FALSE(json.getDynamicObject()->hasProperty("gain"));
+    REQUIRE_FALSE(json.getDynamicObject()->hasProperty("gainDb"));
+    REQUIRE(ExperimentRecord::fromJson(json, restored, error));
+    REQUIRE(restored.bitDepth == 8);
+    REQUIRE(restored.captureRateHz == 12345.5f);
+    const auto file = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getNonexistentChildFile("crusher-record", ".json");
+    REQUIRE(record.save(file, error));
+    REQUIRE(ExperimentRecord::load(file, restored, error));
+    REQUIRE(file.deleteFile());
+    for (const auto* field : {"bitDepth", "captureRateHz", "bypass"})
+    {
+        auto missing = record.toJson(); missing.getDynamicObject()->removeProperty(field);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(missing, restored, error));
+    }
+    for (const auto value : {juce::var(0), juce::var(9), juce::var(65), juce::var(2.5), juce::var("8")})
+    {
+        auto invalid = record.toJson(); invalid.getDynamicObject()->setProperty("bitDepth", value);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(invalid, restored, error));
+    }
+    for (const auto value : {juce::var(99), juce::var(384001), juce::var("12000")})
+    {
+        auto invalid = record.toJson(); invalid.getDynamicObject()->setProperty("captureRateHz", value);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(invalid, restored, error));
+    }
+    auto mixed = record.toJson(); mixed.getDynamicObject()->setProperty("gain", 1.0);
+    REQUIRE_FALSE(ExperimentRecord::fromJson(mixed, restored, error));
+    mixed = record.toJson(); mixed.getDynamicObject()->setProperty("mute", false);
+    REQUIRE_FALSE(ExperimentRecord::fromJson(mixed, restored, error));
+}
+
 TEST_CASE("Production experiments use explicit dB and module mute fields", "[experiment][gain]")
 {
     ExperimentRecord record; record.version = 2; record.targetId = "gain";

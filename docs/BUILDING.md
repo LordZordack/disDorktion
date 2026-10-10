@@ -64,6 +64,8 @@ build/<configure-preset>/{Debug,Release}/disdorktion_reference_gain_benchmark.ex
 build/<configure-preset>/{Debug,Release}/disdorktion_gain_benchmark.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_render.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_gain_transitions.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_bit_crusher_measurements.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_bit_crusher_benchmark.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_harness_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_harness_realtime_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_audition_tests.exe
@@ -85,3 +87,13 @@ The counts above describe the merged F1 foundation. Issue #3 publication verific
 Issue #4 local verification passed 71/71 tests in full Debug and Release, and
 49/49 in independent DSP-only Release. See [gain validation](okf/notes/gain_validation.md)
 for coverage and the pending listening, host and AC performance checks.
+
+Issue #5 local VS2026 verification passed 86/86 tests in full Debug (4.11 s),
+86/86 in full Release (2.33 s), and 63/63 in independent DSP-only Release
+(1.64 s); all requested builds succeeded. VS2022 CI was not run. Render and
+listening evidence, plus outstanding GUI/CPU checks, are recorded in the
+[bit crusher validation note](okf/notes/bit_crusher_validation.md).
+These counts predate the expressive-control extension. Extension VS2026 builds,
+full Debug/Release tests, and headless Release tests also passed; see the
+[validation note](okf/notes/bit_crusher_validation.md). VS2022 CI remains
+unrun.

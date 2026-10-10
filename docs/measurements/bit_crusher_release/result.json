@@ -1,0 +1,32 @@
+{
+  "spectra": [
+    {
+      "hostRateHz": 48000,
+      "captureRateHz": 8000,
+      "inputHz": 6000,
+      "bitDepth": 64,
+      "fftFrames": 32768,
+      "window": "Hann",
+      "foldedPeakHz": 1999.51171875,
+      "maxTimeDomainError": 0.0,
+      "maxReferenceSpectralErrorDbAboveMinus100": 0.0,
+      "passed": true
+    },
+    {
+      "hostRateHz": 96000,
+      "captureRateHz": 8000,
+      "inputHz": 6000,
+      "bitDepth": 64,
+      "fftFrames": 32768,
+      "window": "Hann",
+      "foldedPeakHz": 2000.9765625,
+      "maxTimeDomainError": 0.0,
+      "maxReferenceSpectralErrorDbAboveMinus100": 0.0,
+      "passed": true
+    }
+  ],
+  "latencySamples": 0,
+  "listening": "Pending; generated fixtures are not listening observations",
+  "source": "Generated 440 Hz + 6 kHz tones; transient envelope every quarter second; stereo polarity inverted",
+  "transitionSchedule": "48000 Hz, one event per second at frames 0,48000,...,336000: depth/rate/bypass = 64/384000/off,8/384000/off,4/8000/off,1/8000/off,16/12345.5/off,32/4000/off,64/100/off,64/100/on"
+}

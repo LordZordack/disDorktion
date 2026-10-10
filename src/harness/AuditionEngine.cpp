@@ -34,7 +34,8 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
 {
     prepared = false;
     clearMeters();
-    if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)) return false;
+    if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
+        || !crusherTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -55,6 +56,7 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
 {
     if (id == "reference-gain") selected = &target;
     else if (id == "gain") selected = &productionTarget;
+    else if (id == "bit-crusher") selected = &crusherTarget;
     else return false;
     reset();
     return true;
@@ -74,6 +76,59 @@ bool AuditionEngine::setGain(float value) noexcept
     gain.store(value, std::memory_order_relaxed);
     return true;
 }
+bool AuditionEngine::setBitCrusherSettings(const BitCrusherSettings& value) noexcept
+{
+    if (!isValidBitCrusherSettings(value)) return false;
+    bitDepth.store(value.bitDepth, std::memory_order_relaxed);
+    captureRateHz.store(value.captureRateHz, std::memory_order_relaxed);
+    crusherBypass.store(value.bypass, std::memory_order_relaxed);
+    crusherMix.store(value.mix, std::memory_order_relaxed);
+    crush.store(value.crush, std::memory_order_relaxed);
+    quantizerShape.store(value.shape, std::memory_order_relaxed);
+    jitter.store(value.jitter, std::memory_order_relaxed);
+    jitterSeed.store(value.jitterSeed, std::memory_order_relaxed);
+    return crusherTarget.setParameters(value);
+}
+bool AuditionEngine::setBitDepth(unsigned value) noexcept
+{
+    if (!isValidBitDepth(value)) return false;
+    bitDepth.store(value, std::memory_order_relaxed);
+    return true;
+}
+bool AuditionEngine::setCaptureRateHz(float value) noexcept
+{
+    if (!std::isfinite(value) || value < 100.0f || value > 384000.0f) return false;
+    captureRateHz.store(value, std::memory_order_relaxed);
+    return true;
+}
+bool AuditionEngine::setCrusherMix(float value) noexcept
+{
+    if (!std::isfinite(value) || value < 0.0f || value > 1.0f) return false;
+    crusherMix.store(value, std::memory_order_relaxed);
+    return true;
+}
+bool AuditionEngine::setCrush(float value) noexcept
+{
+    if (!std::isfinite(value) || value < 0.0f || value > 1.0f) return false;
+    crush.store(value, std::memory_order_relaxed);
+    return true;
+}
+bool AuditionEngine::setQuantizerShape(float value) noexcept
+{
+    if (!std::isfinite(value) || value < -1.0f || value > 1.0f) return false;
+    quantizerShape.store(value, std::memory_order_relaxed);
+    return true;
+}
+bool AuditionEngine::setJitter(float value) noexcept
+{
+    if (!std::isfinite(value) || value < 0.0f || value > 1.0f) return false;
+    jitter.store(value, std::memory_order_relaxed);
+    return true;
+}
+void AuditionEngine::setJitterSeed(std::uint32_t value) noexcept
+{
+    jitterSeed.store(value, std::memory_order_relaxed);
+}
 bool AuditionEngine::setGainSettings(const GainSettings& value) noexcept
 {
     if (!validGainDb(value.gainDb)) return false;
@@ -90,12 +145,19 @@ bool AuditionEngine::setGainDb(float value) noexcept
 void AuditionEngine::setModuleMuted(bool value) noexcept { moduleMuted.store(value, std::memory_order_relaxed); }
 void AuditionEngine::setBypass(bool value) noexcept
 {
-    (selected == &target ? bypass : productionBypass).store(value, std::memory_order_relaxed);
+    (selected == &target ? bypass : selected == &productionTarget ? productionBypass : crusherBypass)
+        .store(value, std::memory_order_relaxed);
 }
 bool AuditionEngine::applyParameters() noexcept
 {
     if (selected == &target)
         return target.setParameters({gain.load(std::memory_order_relaxed), bypass.load(std::memory_order_relaxed)});
+    if (selected == &crusherTarget)
+        return crusherTarget.setParameters({bitDepth.load(std::memory_order_relaxed),
+            captureRateHz.load(std::memory_order_relaxed), crusherBypass.load(std::memory_order_relaxed),
+            crusherMix.load(std::memory_order_relaxed), crush.load(std::memory_order_relaxed),
+            quantizerShape.load(std::memory_order_relaxed), jitter.load(std::memory_order_relaxed),
+            jitterSeed.load(std::memory_order_relaxed)});
     return productionTarget.setParameters({gainDb.load(std::memory_order_relaxed),
         moduleMuted.load(std::memory_order_relaxed), productionBypass.load(std::memory_order_relaxed)});
 }
