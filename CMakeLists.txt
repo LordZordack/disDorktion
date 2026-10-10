@@ -6,6 +6,7 @@ include(CTest)
 include(cmake/Dependencies.cmake)
 
 option(DISDORKTION_BUILD_PLUGIN "Build the VST3 and Standalone plugin targets" ON)
+option(DISDORKTION_BUILD_AUDITION_APP "Build the development audition application" ${DISDORKTION_BUILD_PLUGIN})
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -97,4 +98,61 @@ if(WIN32)
     target_link_libraries(disdorktion_reference_gain_benchmark PRIVATE PowrProf)
     target_compile_definitions(disdorktion_reference_gain_benchmark PRIVATE
         DISDORKTION_WINDOWS_SDK_VERSION=\"${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}\")
+endif()
+
+# Harness sources and offline tools are available without GUI/device modules.
+execute_process(COMMAND git rev-parse --short HEAD
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    OUTPUT_VARIABLE DISDORKTION_REVISION OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+if(NOT DISDORKTION_REVISION)
+    set(DISDORKTION_REVISION "unknown")
+endif()
+add_library(disdorktion_harness STATIC
+    src/harness/AuditionEngine.cpp
+    src/harness/SignalSource.cpp
+    src/harness/SineVoice.cpp
+    src/harness/LoopSource.cpp
+    src/harness/ExperimentRecord.cpp
+    src/harness/OfflineRender.cpp
+)
+target_link_libraries(disdorktion_harness PUBLIC disdorktion_dsp
+    PRIVATE juce::juce_audio_formats juce::juce_cryptography)
+target_compile_definitions(disdorktion_harness PUBLIC
+    DISDORKTION_BUILD_ID="${PROJECT_VERSION}-${DISDORKTION_REVISION}-$<CONFIG>"
+    JUCE_MODULE_AVAILABLE_juce_audio_formats=1
+    JUCE_MODULE_AVAILABLE_juce_cryptography=1)
+
+add_executable(disdorktion_render tools/RenderMain.cpp)
+target_link_libraries(disdorktion_render PRIVATE disdorktion_harness)
+
+if(BUILD_TESTING)
+    add_executable(disdorktion_harness_tests
+        tests/HarnessEngineTests.cpp
+        tests/SignalSourceTests.cpp
+        tests/SineVoiceTests.cpp
+        tests/LoopSourceTests.cpp
+        tests/ExperimentRecordTests.cpp
+        tests/OfflineRenderTests.cpp)
+    target_link_libraries(disdorktion_harness_tests PRIVATE disdorktion_harness Catch2::Catch2WithMain)
+    catch_discover_tests(disdorktion_harness_tests TEST_PREFIX "harness::" PROPERTIES TIMEOUT 30)
+    add_executable(disdorktion_harness_realtime_tests
+        tests/HarnessRealtimeTests.cpp tests/AllocationTracking.cpp)
+    target_link_libraries(disdorktion_harness_realtime_tests PRIVATE disdorktion_harness Catch2::Catch2WithMain)
+    catch_discover_tests(disdorktion_harness_realtime_tests TEST_PREFIX "harness-rt::" PROPERTIES TIMEOUT 30)
+    if(DISDORKTION_BUILD_AUDITION_APP)
+        add_executable(disdorktion_audition_tests
+            tests/AudioDeviceControllerTests.cpp tests/AllocationTracking.cpp
+            src/audition/AudioDeviceController.cpp)
+        target_link_libraries(disdorktion_audition_tests PRIVATE disdorktion_harness
+            Catch2::Catch2WithMain juce::juce_audio_utils)
+        catch_discover_tests(disdorktion_audition_tests TEST_PREFIX "audition::" PROPERTIES TIMEOUT 30)
+    endif()
+endif()
+
+if(DISDORKTION_BUILD_AUDITION_APP)
+    juce_add_gui_app(DisDorktionAudition PRODUCT_NAME "DisDorktion Audition")
+    target_sources(DisDorktionAudition PRIVATE
+        src/audition/Main.cpp src/audition/MainComponent.cpp
+        src/audition/AudioDeviceController.cpp)
+    target_link_libraries(DisDorktionAudition PRIVATE disdorktion_harness juce::juce_audio_utils)
 endif()

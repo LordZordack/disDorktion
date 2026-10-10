@@ -6,6 +6,8 @@
 
 - [Build commands, toolchains, and dependency pins](docs/BUILDING.md)
 - [DSP processing contract](docs/DSP_CONTRACT.md)
+- [Audition application, experiment records, and offline rendering](docs/AUDITION_HARNESS.md)
+- [Generated experiment examples](examples/experiments/README.md)
 - [Proposed performance budgets and benchmark procedure](docs/PERFORMANCE.md)
 
 **Design Ethos**

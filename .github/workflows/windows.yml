@@ -56,14 +56,16 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Debug build failed with exit code $LASTEXITCODE" }
           $vst3 = 'build/windows-vs2022/DisDorktion_artefacts/Debug/VST3/DisDorktion.vst3/Contents/x86_64-win/DisDorktion.vst3'
           $standalone = 'build/windows-vs2022/DisDorktion_artefacts/Debug/Standalone/DisDorktion.exe'
-          foreach ($artifact in @($vst3, $standalone)) {
+          $audition = 'build/windows-vs2022/DisDorktionAudition_artefacts/Debug/DisDorktion Audition.exe'
+          $render = 'build/windows-vs2022/Debug/disdorktion_render.exe'
+          foreach ($artifact in @($vst3, $standalone, $audition, $render)) {
             if (-not (Test-Path -LiteralPath $artifact -PathType Leaf)) { throw "Missing Debug build artifact: $artifact" }
           }
           $discovery = ctest --preset windows-vs2022-debug --show-only
           if ($LASTEXITCODE -ne 0) { throw "Debug CTest discovery failed with exit code $LASTEXITCODE" }
           $discovery | Tee-Object -FilePath build/windows-vs2022/ctest-discovery-debug.txt
           if (($discovery -join "`n") -notmatch 'Total Tests: [1-9][0-9]*') { throw 'CTest discovered no tests' }
-          ctest --preset windows-vs2022-debug --output-on-failure --no-tests=error --output-junit build/windows-vs2022/test-results-debug.xml
+          ctest --preset windows-vs2022-debug --output-on-failure --no-tests=error --output-junit (Join-Path $PWD 'build/windows-vs2022/test-results-debug.xml')
           if ($LASTEXITCODE -ne 0) { throw "Debug CTest run failed with exit code $LASTEXITCODE" }
 
       - name: Build and test Release
@@ -73,15 +75,35 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Release build failed with exit code $LASTEXITCODE" }
           $vst3 = 'build/windows-vs2022/DisDorktion_artefacts/Release/VST3/DisDorktion.vst3/Contents/x86_64-win/DisDorktion.vst3'
           $standalone = 'build/windows-vs2022/DisDorktion_artefacts/Release/Standalone/DisDorktion.exe'
-          foreach ($artifact in @($vst3, $standalone)) {
+          $audition = 'build/windows-vs2022/DisDorktionAudition_artefacts/Release/DisDorktion Audition.exe'
+          $render = 'build/windows-vs2022/Release/disdorktion_render.exe'
+          foreach ($artifact in @($vst3, $standalone, $audition, $render)) {
             if (-not (Test-Path -LiteralPath $artifact -PathType Leaf)) { throw "Missing Release build artifact: $artifact" }
           }
           $discovery = ctest --preset windows-vs2022-release --show-only
           if ($LASTEXITCODE -ne 0) { throw "Release CTest discovery failed with exit code $LASTEXITCODE" }
           $discovery | Tee-Object -FilePath build/windows-vs2022/ctest-discovery-release.txt
           if (($discovery -join "`n") -notmatch 'Total Tests: [1-9][0-9]*') { throw 'CTest discovered no tests' }
-          ctest --preset windows-vs2022-release --output-on-failure --no-tests=error --output-junit build/windows-vs2022/test-results-release.xml
+          ctest --preset windows-vs2022-release --output-on-failure --no-tests=error --output-junit (Join-Path $PWD 'build/windows-vs2022/test-results-release.xml')
           if ($LASTEXITCODE -ne 0) { throw "Release CTest run failed with exit code $LASTEXITCODE" }
+
+      - name: Build and test headless harness
+        shell: pwsh
+        run: |
+          cmake --preset windows-vs2022-dsp-only
+          if ($LASTEXITCODE -ne 0) { throw 'Headless configure failed' }
+          cmake --build --preset windows-vs2022-dsp-only-release
+          if ($LASTEXITCODE -ne 0) { throw 'Headless build failed' }
+          ctest --preset windows-vs2022-dsp-only-release --output-on-failure --no-tests=error --output-junit (Join-Path $PWD 'build/windows-vs2022-dsp-only/test-results-release.xml')
+          if ($LASTEXITCODE -ne 0) { throw 'Headless tests failed' }
+          & 'build/windows-vs2022-dsp-only/Release/disdorktion_render.exe' --help
+          if ($LASTEXITCODE -ne 0) { throw 'Headless render CLI help failed' }
+          # juceaide is a configure-time JUCE helper that legitimately uses GUI
+          # modules. Inspect only the shipped headless project's root targets.
+          $headlessProjects = Get-ChildItem build/windows-vs2022-dsp-only -Filter 'disdorktion*.vcxproj'
+          if (-not $headlessProjects) { throw 'Headless target project files are missing' }
+          $deviceDependencies = $headlessProjects | Select-String -Pattern 'juce_gui_basics.cpp|juce_audio_devices.cpp'
+          if ($deviceDependencies) { throw 'Headless build unexpectedly compiles GUI or audio-device modules' }
 
       - name: Upload test reports and build artifacts
         if: always()
@@ -92,5 +114,10 @@ jobs:
             build/windows-vs2022/test-results-*.xml
             build/windows-vs2022/ctest-discovery-*.txt
             build/windows-vs2022/DisDorktion_artefacts/**
+            build/windows-vs2022/DisDorktionAudition_artefacts/**
+            build/windows-vs2022/Debug/disdorktion_render.exe
+            build/windows-vs2022/Release/disdorktion_render.exe
+            build/windows-vs2022-dsp-only/test-results-release.xml
+            build/windows-vs2022-dsp-only/Release/disdorktion_render.exe
             build/windows-vs2022/**/DisDorktion_artefacts/**
           if-no-files-found: warn

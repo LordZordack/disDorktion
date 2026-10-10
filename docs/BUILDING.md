@@ -32,7 +32,9 @@ cmake --build --preset windows-vs2026-dsp-only-release
 ctest --preset windows-vs2026-dsp-only-release --output-on-failure --no-tests=error
 ```
 
-Replace `vs2026` with `vs2022` to use the CI toolchain. DSP-only presets omit the plugin and adapter targets.
+Replace `vs2026` with `vs2022` to use the CI toolchain. DSP-only presets omit the plugin, adapter, and audition GUI targets; they retain the shared harness, offline renderer, and headless harness tests.
+
+`DISDORKTION_BUILD_AUDITION_APP` defaults to `DISDORKTION_BUILD_PLUGIN`. DSP-only presets explicitly set it to `OFF`. For custom configurations, disable both options to build without the audition GUI or plugin. The headless harness links JUCE DSP/audio-format dependencies; audio-device and GUI dependencies belong to audition targets.
 
 ### Offline dependency sources
 
@@ -59,14 +61,21 @@ build/<configure-preset>/{Debug,Release}/disdorktion_dsp_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_realtime_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_adapter_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_reference_gain_benchmark.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_render.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_harness_tests.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_harness_realtime_tests.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_audition_tests.exe
+build/<configure-preset>/DisDorktionAudition_artefacts/{Debug,Release}/DisDorktion Audition.exe
 build/<configure-preset>/DisDorktion_artefacts/{Debug,Release}/VST3/DisDorktion.vst3
 build/<configure-preset>/DisDorktion_artefacts/{Debug,Release}/Standalone/DisDorktion.exe
 ```
 
-The VST3 bundle may contain the plugin binary below its platform-specific `Contents` directory. DSP-only builds omit adapter tests and plugin artifacts.
+The VST3 bundle may contain the plugin binary below its platform-specific `Contents` directory. DSP-only builds omit adapter/audition-device tests and plugin/GUI artifacts. `DisDorktion.exe` is the generated plugin Standalone wrapper; `DisDorktion Audition.exe` supplies sources, monitoring, experiment persistence, and rendering. See the [harness guide](AUDITION_HARNESS.md).
 
 ## Observed configuration status
 
 The local configure completed with Visual Studio Community 18.8.2, MSVC 19.51.36252.0 (tool path 14.51.36231), Windows SDK 10.0.26100.0, and CMake 4.3.1-msvc1. Full Debug and Release builds succeeded, with 16/16 CTest cases passing in each configuration. The independent DSP-only Release build succeeded with 10/10 cases passing. VST3 and Standalone binaries were checked in both configurations. See the [validation record](okf/notes/foundation_validation.md) for scope and limitations.
 
 CI uses Visual Studio 2022 / v143 and pinned CMake 4.2.8. For architecture, processing requirements, and proposed performance budgets, see the [DSP contract](DSP_CONTRACT.md) and [performance procedure](PERFORMANCE.md).
+
+The counts above describe the merged F1 foundation. Issue #3 publication verification passed 47/47 CTest cases in each full Debug and Release configuration and 35/35 in independent DSP-only Release, including generated playback completion/replay. Full audition, renderer, VST3, and plugin Standalone targets built; the headless project sources excluded GUI/audio-device modules. Five generated examples each rendered exactly 48,000 frames through the CLI. See [harness validation](okf/notes/harness_validation.md) for evidence scope, the app startup/close smoke, user-confirmed playback completion, and outstanding manual checks. Local VS2026 results do not establish hosted VS2022 results.

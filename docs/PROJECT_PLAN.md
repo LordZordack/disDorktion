@@ -1,6 +1,6 @@
 # DisDorktion overarching project plan
 
-Status: project direction agreed; all 20 approved tickets are published. DSP development has not started.
+Status: project direction agreed; all 20 approved tickets are published. F1 / #2 is merged: shared DSP, reference gain, the plugin adapter, build presets, and automated tests are available. F2 / #3 adds the audition and measurement harness; its validation and remaining listening checks are recorded in the [harness validation note](okf/notes/harness_validation.md). Production module qualification remains ahead.
 
 ## 1. Goal and development methodology
 
@@ -69,6 +69,8 @@ Provide:
 - A way to record source, settings, sample rate, and observations for each experiment.
 
 Test sources belong to the harness. The VST3 processes host audio. Harness monitoring gain must not affect the underlying module measurements.
+
+The initial implementation selects `reference-gain` and supplies deterministic generated sources, resident WAV/AIFF loops, and monophonic keyboard/MIDI sine input. The dedicated `DisDorktion Audition` application and headless `disdorktion_render` utility share the harness and existing DSP implementation. See the [user and developer guide](AUDITION_HARNESS.md) and [measurement method](okf/methods/audition_measurement.md). Section and complete-chain selection will be added as those targets are accepted.
 
 ### Build and tooling
 
