@@ -9,6 +9,15 @@
 - [Audition application, experiment records, and offline rendering](docs/AUDITION_HARNESS.md)
 - [Generated experiment examples](examples/experiments/README.md)
 - [Proposed performance budgets and benchmark procedure](docs/PERFORMANCE.md)
+- [Production gain design and acceptance limits](docs/okf/methods/gain.md)
+
+The reusable gain module supports -60 to +24 dB, an explicit mute, and 10 ms
+smoothed gain/bypass changes. Select **Gain (dB)** in the audition app; module
+mute and monitoring mute are separate controls. The plugin has independent
+input/output gain instances. Its original linear reference controls remain as
+a legacy trim so existing host automation and saved states keep their meaning.
+See the [gain validation note](docs/okf/notes/gain_validation.md) for recorded test results and remaining listening
+and performance qualification gates.
 
 **Design Ethos**
 Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)

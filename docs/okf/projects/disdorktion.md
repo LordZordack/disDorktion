@@ -24,6 +24,8 @@ Carrier modulation and demodulation, resonant comb filtering, frequency warping,
 
 ## Evidence status
 
+The [reusable gain design](../methods/gain.md) is implemented in the shared harness and independent plugin input/output stages. Debug and Release checks verify correctness; [gain validation](../notes/gain_validation.md) records fixtures and battery diagnostics. Human listening, manual host checks and AC CPU qualification remain pending.
+
 Describe unimplemented designs as **proposed behavior**. The reference gain foundation's unit correctness is verified in the [foundation validation note](../notes/foundation_validation.md). Production distortion modules remain unqualified. CPU performance has not been qualified because the recorded benchmark work was performed on battery power. Use **measured behavior** only for results supported by a documented test or listening evaluation; include the test conditions and link its note. Record whether evidence accepts, rejects, or revises the proposal.
 
 ## Open research questions

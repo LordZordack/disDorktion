@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "samples": 48000,
+  "inputPeak": 0.25,
+  "inputRms": 0.176776694939678,
+  "outputPeak": 0.498815566301346,
+  "outputRms": 0.352715869574818,
+  "overloaded": false,
+  "latencySamples": 0,
+  "experiment": {
+    "version": 2,
+    "targetId": "gain",
+    "gainDb": 6.0,
+    "mute": false,
+    "bypass": false,
+    "sampleRate": 48000.0,
+    "channels": 2,
+    "blockSize": 256,
+    "renderDurationSamples": 48000,
+    "filePath": "",
+    "fileHash": "",
+    "sourceConversion": "linear;mono-duplicate;stereo-average",
+    "originalSampleRate": 0.0,
+    "originalChannels": 0,
+    "monitorDb": -18.0,
+    "muted": true,
+    "midiDevice": "",
+    "buildIdentity": "example",
+    "observations": "Generated 440 Hz sine, production +6 dB, no listening claim. Monitoring fields do not alter rendered audio.",
+    "source": {
+      "kind": "sine",
+      "frequency": 440.0,
+      "frequency2": 880.0,
+      "amplitude": 0.25,
+      "phase": 0.0,
+      "durationSamples": 48000,
+      "seed": 1
+    }
+  },
+  "rendererBuildIdentity": "0.1.0-9be6f99-Debug"
+}

@@ -27,10 +27,11 @@ ExperimentRecord::ExperimentRecord() : buildIdentity(DISDORKTION_BUILD_ID) {}
 bool ExperimentRecord::validate(juce::String& error) const
 {
     error.clear();
-    if (version != 1) return fail(error, "Unsupported experiment version");
-    if (targetId != "reference-gain") return fail(error, "Unsupported target");
+    if (!((version == 1 && targetId == "reference-gain") || (version == 2 && targetId == "gain")))
+        return fail(error, "Unsupported experiment version or target");
     if (!isValidProcessSpec({ sampleRate, blockSize, channels })) return fail(error, "Invalid process specification");
-    if (!std::isfinite(gain) || gain < 0 || gain > 4) return fail(error, "Gain must be in [0, 4]");
+    if (version == 1 && (!std::isfinite(gain) || gain < 0 || gain > 4)) return fail(error, "Gain must be in [0, 4]");
+    if (version == 2 && (!std::isfinite(gainDb) || gainDb < -60 || gainDb > 24)) return fail(error, "Gain dB must be in [-60, 24]");
     if (!std::isfinite(monitorDb) || monitorDb < -60 || monitorDb > 0) return fail(error, "Monitor dB must be in [-60, 0]");
     if (renderDurationSamples == 0 || renderDurationSamples > maximumSamples
         || source.durationSamples == 0 || source.durationSamples > maximumSamples)
@@ -62,7 +63,10 @@ juce::var ExperimentRecord::toJson() const
     auto* object = new juce::DynamicObject;
     juce::var result(object);
     auto put = [object](const char* key, const juce::var& value) { object->setProperty(key, value); };
-    put("version", version); put("targetId", targetId); put("gain", gain); put("bypass", bypass);
+    put("version", version); put("targetId", targetId);
+    if (version == 2) { put("gainDb", gainDb); put("mute", mute); }
+    else put("gain", gain);
+    put("bypass", bypass);
     put("sampleRate", sampleRate); put("channels", static_cast<int>(channels)); put("blockSize", static_cast<int>(blockSize));
     put("renderDurationSamples", static_cast<juce::int64>(renderDurationSamples));
     put("filePath", filePath); put("fileHash", fileHash); put("sourceConversion", sourceConversion);
@@ -88,14 +92,25 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto get = [o](const char* key) { return o->getProperty(key); };
     for (auto key : {"targetId", "filePath", "fileHash", "sourceConversion", "midiDevice", "buildIdentity", "observations"})
         if (!get(key).isString()) return fail(error, juce::String("Missing or invalid string: ") + key);
-    for (auto key : {"gain", "sampleRate", "monitorDb", "originalSampleRate"})
+    if (!integer(get("version"), 1, 2)) return fail(error, "Unsupported or missing version");
+    const auto version = static_cast<int>(get("version"));
+    if ((version == 1 && get("targetId").toString() != "reference-gain")
+        || (version == 2 && get("targetId").toString() != "gain")) return fail(error, "Unsupported target for version");
+    const auto* gainKey = version == 1 ? "gain" : "gainDb";
+    if ((version == 1 && (o->hasProperty("gainDb") || o->hasProperty("mute")))
+        || (version == 2 && o->hasProperty("gain"))) return fail(error, "Mixed gain schemas");
+    if (!number(get(gainKey)) || !std::isfinite(static_cast<double>(get(gainKey))))
+        return fail(error, "Missing or invalid gain number");
+    const auto gainValue = static_cast<double>(get(gainKey));
+    if ((version == 1 && (gainValue < 0 || gainValue > 4))
+        || (version == 2 && (gainValue < -60 || gainValue > 24))) return fail(error, "Gain out of range");
+    if (version == 2 && !get("mute").isBool()) return fail(error, "Missing or invalid module mute");
+    for (auto key : {"sampleRate", "monitorDb", "originalSampleRate"})
         if (!number(get(key)) || !std::isfinite(static_cast<double>(get(key))))
             return fail(error, juce::String("Missing or invalid number: ") + key);
-    if (static_cast<double>(get("gain")) < 0 || static_cast<double>(get("gain")) > 4
-        || static_cast<double>(get("monitorDb")) < -60 || static_cast<double>(get("monitorDb")) > 0)
+    if (static_cast<double>(get("monitorDb")) < -60 || static_cast<double>(get("monitorDb")) > 0)
         return fail(error, "Gain or monitoring value out of range");
     if (!get("bypass").isBool() || !get("muted").isBool()) return fail(error, "Missing or invalid boolean");
-    if (!integer(get("version"), 1, 1)) return fail(error, "Unsupported or missing version");
     if (!integer(get("channels"), 1, 2) || !integer(get("blockSize"), 1, 65536)
         || !integer(get("originalChannels"), 0, 2)
         || !integer(get("renderDurationSamples"), 1, maximumSamples)) return fail(error, "Invalid integer field");
@@ -111,8 +126,10 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     if (!integer(sg("durationSamples"), 1, maximumSamples)
         || !integer(sg("seed"), 0, std::numeric_limits<std::uint32_t>::max())) return fail(error, "Invalid source count or seed");
     ExperimentRecord candidate;
-    candidate.version = 1; candidate.targetId = get("targetId").toString();
-    candidate.gain = static_cast<float>(get("gain")); candidate.bypass = static_cast<bool>(get("bypass"));
+    candidate.version = version; candidate.targetId = get("targetId").toString();
+    if (version == 1) candidate.gain = static_cast<float>(gainValue);
+    else { candidate.gainDb = static_cast<float>(gainValue); candidate.mute = static_cast<bool>(get("mute")); }
+    candidate.bypass = static_cast<bool>(get("bypass"));
     candidate.sampleRate = static_cast<double>(get("sampleRate"));
     candidate.channels = static_cast<unsigned>(static_cast<int>(get("channels")));
     candidate.blockSize = static_cast<unsigned>(static_cast<int>(get("blockSize")));

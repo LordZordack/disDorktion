@@ -19,6 +19,8 @@ The reference gain accepts finite linear amplitude in `[0, 4]`, defaults to unit
 
 ## Evaluation status
 
+The production [gain module](gain.md) adds -60 to +24 dB, explicit mute, independent input/output state and double smoothing envelopes under the same processing contract. Its [validation note](../notes/gain_validation.md) records automated correctness and remaining listening/CPU gates. The adapter retains the reference stage as a compatible legacy trim before the production pair.
+
 The reference gain contract is implemented and its unit correctness is verified; see the [foundation validation note](../notes/foundation_validation.md). Production distortion modules remain unqualified. CPU performance is not qualified; the recorded benchmark work was performed on battery power. The proposed budgets and benchmark procedure are in [PERFORMANCE.md](https://github.com/LordZordack/DisDorktion/blob/main/docs/PERFORMANCE.md).
 
 ## Design choices

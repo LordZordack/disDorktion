@@ -12,7 +12,9 @@ static_assert(std::atomic<bool>::is_always_lock_free);
 void AudioDeviceController::configure(const ExperimentRecord& record)
 {
     settings = record;
-    processor.setParameters({settings.gain, settings.bypass});
+    processor.selectTarget(settings.targetId.toStdString());
+    if (settings.version == 1) processor.setParameters({settings.gain, settings.bypass});
+    else processor.setGainSettings({settings.gainDb, settings.mute, settings.bypass});
     processor.setMonitorDb(settings.monitorDb);
     processor.setMuted(settings.muted);
     playing.store(false);

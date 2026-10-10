@@ -25,6 +25,22 @@ juce::AudioBuffer<float> readFloat(const juce::File& file, int samples, unsigned
     juce::AudioBuffer<float> audio(static_cast<int>(channels), samples);
     REQUIRE(reader->read(&audio, 0, samples, 0, true, true)); return audio;
 }
+
+TEST_CASE("Production offline render retains dB response before monitoring", "[render][gain]")
+{
+    RenderFixture fixture;
+    ExperimentRecord record; record.version = 2; record.targetId = "gain";
+    record.gainDb = -6.0f; record.renderDurationSamples = 31; record.source.durationSamples = 31;
+    record.source.kind = SourceKind::impulse;
+    const auto directory = fixture.root.getChildFile("production");
+    const auto result = renderExperiment(record, directory);
+    INFO(result.message); REQUIRE(result.status == RenderStatus::success);
+    const auto rendered = readFloat(directory.getChildFile("rendered.wav"), 31, 2);
+    REQUIRE(rendered.getSample(0, 0) == Catch::Approx(0.25 * std::pow(10.0, -6.0 / 20.0)).margin(1e-7));
+    record.mute = true;
+    REQUIRE(renderExperiment(record, fixture.root.getChildFile("module-muted")).status == RenderStatus::success);
+    REQUIRE(readFloat(fixture.root.getChildFile("module-muted/rendered.wav"), 31, 2).getMagnitude(0, 31) == 0.0f);
+}
 }
 
 TEST_CASE("Offline generated render is exact float audio independent of monitoring", "[render]")

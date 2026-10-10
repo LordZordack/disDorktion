@@ -30,3 +30,9 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-10T13:43:53Z: Document automatic generated playback completion and replay; record user confirmation for issue #3 PR preparation.
 
 - 2026-10-10T13:46:24Z: Record final issue #3 publication verification: full Debug/Release 47 cases, headless 35 cases, generated completion/replay regression, and explicit CI report paths.
+
+- 2026-10-10T15:33:08Z: Recorded approved reusable gain design, implemented shared/plugin/harness controls, automated validation and reproducible transition fixtures; human listening and AC CPU qualification remain pending.
+
+- 2026-10-10T15:39:36Z: Completed reusable gain validation records: Debug/Release 71 tests each, DSP-only 49, Antigravity core/plugin approval, 28 complete battery distributions plus two preserved capacity failures and one subnormal diagnostic; critical graph change risk recorded; listening and AC gates open.
+
+- 2026-10-10T17:53:51Z: Reviewed issue #4 publication documentation, corrected transition-generator output-dir examples, retained generated listening WAVs locally, and repeated full Debug/Release and independent DSP-only checks; external qualification remains pending.

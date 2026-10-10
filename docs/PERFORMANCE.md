@@ -1,5 +1,35 @@
 # Performance procedure and proposed budgets
 
+## Production gain measurements
+
+`disdorktion_gain_benchmark.exe` compiles the shared timing harness against the
+production module. `--stages 1` measures one instance (1% budget), `--stages 2`
+the input/output pair (2%), and `--stages 3` the legacy trim plus pair (3%).
+These are DSP path measurements; they exclude host parameter loads, meters,
+and the rest of `PluginProcessor`. The complete wet-chain proposed ceiling
+remains 25% of deadline. The original reference benchmark retains its four
+scenarios and CSV format.
+
+Production scenarios add `mute` to steady/automation/bypass/oversized. Steady
+and oversized use +24 dB; automation spans -60 to +24 dB; mute/bypass switch at
+every eighth callback. Both production instances receive the same worst-range
+settings in pair measurements; the compatibility trim stays at 4x. CSV adds
+target, stage count, zero latency, and input profile. `--tiny-input` exercises
+subnormal +/-1e-40 inputs with scoped denormal suppression, always unqualified.
+Debug builds, short windows, filtered cases, and diagnostics cannot qualify.
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_gain_benchmark.exe --stages 1 --runs 3 --conditions "AC power; recorded power/thermal conditions; no competing builds" --output gain_single_baseline.csv
+./build/windows-vs2026/Release/disdorktion_gain_benchmark.exe --stages 2 --runs 3 --conditions "AC power; recorded power/thermal conditions; no competing builds" --output gain_pair_baseline.csv
+./build/windows-vs2026/Release/disdorktion_gain_benchmark.exe --stages 3 --runs 3 --conditions "AC power; recorded power/thermal conditions; no competing builds" --output gain_compatibility_baseline.csv
+./build/windows-vs2026/Release/disdorktion_gain_benchmark.exe --stages 1 --diagnostic --tiny-input --case-id 48000/32/steady --conditions "Recorded power conditions; subnormal input diagnostic" --output gain_subnormal_diagnostic.csv
+```
+
+Use the warmup/calibration/full-window/reference procedure below for production
+measurements. Run no benchmarks during builds/tests. Preserve failures and raw
+distributions. See the [production gain validation note](okf/notes/gain_validation.md) for actual coverage;
+commands and proposed limits do not constitute qualification.
+
 These are proposed engineering limits for the gain foundation, not measured results or acceptance evidence for the future complete wet chain. Document the budgets before implementing the reference module. Allocate performance shares for additional modules and integration before implementing them.
 
 ## Reference machine
@@ -42,5 +72,12 @@ Use the Release executable after correctness builds/tests have completed; no com
 `--diagnostic` runs once without pinning and always reports unqualified. `--quick` shortens the windows for a smoke check and is never qualification evidence. `--case-id 48000/32/automation` selects one case for a recorded retry; filtered or fewer-than-three-run results cannot qualify the full matrix. Exit 0 means all baseline cases qualified; exit 1 means recorded results are unqualified or exceeded limits; exit 2 is invalid input or output failure. Keep each command's CSV even when exit 1 is expected for diagnostics.
 
 ## Observed battery diagnostics
+
+Production gain diagnostics are recorded in [gain validation](okf/notes/gain_validation.md),
+the [ordinary CSV](measurements/gain_battery_diagnostic.csv), and the
+[subnormal CSV](measurements/gain_subnormal_diagnostic.csv). The selected set
+uses 32-frame capacity at 48/96 kHz, all five scenarios and all three stage
+counts: 28 complete ordinary distributions and two preserved capacity failures.
+It is unpinned battery evidence for a subset, with AC qualification pending.
 
 One full battery diagnostic and five targeted sampling retries are recorded in the [validation note](okf/notes/foundation_validation.md), with the [original CSV](measurements/reference_gain_battery_diagnostic.csv) and [retry CSV](measurements/reference_gain_battery_retries.csv). All 40 cases have complete distributions after replacing the five truncated distributions with their documented retries. AC-powered reference qualification remains pending; these diagnostics do not establish a performance pass.

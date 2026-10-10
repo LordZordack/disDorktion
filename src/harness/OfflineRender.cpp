@@ -104,7 +104,9 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     else if (!generated.prepare(record.source, record.sampleRate, record.channels))
     { result.message = "Cannot prepare source"; return result; }
     AuditionEngine engine;
-    if (!engine.setParameters({ record.gain, record.bypass })
+    if (!engine.selectTarget(record.targetId.toStdString())
+        || !(record.version == 1 ? engine.setParameters({record.gain, record.bypass})
+                                 : engine.setGainSettings({record.gainDb, record.mute, record.bypass}))
         || !engine.prepare({record.sampleRate, record.blockSize, record.channels}))
     { result.message = "Cannot prepare target"; return result; }
     engine.reset();

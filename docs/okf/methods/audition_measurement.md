@@ -20,6 +20,8 @@ Generated impulse, sine, two-tone, logarithmic sweep, and seeded noise restart d
 
 ## Scope and limitations
 
+The production `gain` target uses version-2 `gainDb`, `mute` and `bypass` fields; reference version-1 records retain linear gain semantics. Module mute and monitor mute are distinct. See the [gain design](gain.md) and [validation record](../notes/gain_validation.md) for transition fixtures and observed results.
+
 Source loading/hashing/conversion and output writing occur outside realtime playback. Resident PCM and bounded MIDI transport support callback ownership; lifecycle changes detach processing. The initial 256 MiB PCM budget bounds decoded, converted, and old resident data. MIDI uses last-note priority and 5 ms envelope ramps with one-block delayed arrival-time mapping, late-event clamping, and overflow all-notes-off. It is an audition input, not a saved deterministic performance; offline comparisons require generated/file sources.
 
 This implementation supplies measurement tools. It does not establish production sound acceptance, anti-aliasing quality, host qualification, or CPU budgets. Refer to the validation record for observed checks and explicitly outstanding listening/device work.

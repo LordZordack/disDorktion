@@ -1,7 +1,9 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "dsp/ReferenceGain.h"
+#include "dsp/Gain.h"
 #include <atomic>
+#include <array>
 
 namespace disdorktion
 {
@@ -34,7 +36,10 @@ private:
     juce::AudioProcessorValueTreeState parameters;
     std::atomic<float>* gainControl = nullptr;
     std::atomic<float>* bypassControl = nullptr;
+    std::array<std::atomic<float>*, 6> productionControls {};
     ReferenceGain gain;
+    Gain inputGain;
+    Gain outputGain;
     // JUCE calls prepare before playback and release after playback stops.
     // Lifecycle/reset and processing must be serialized, as must the DSP module.
     bool hostReady = false;

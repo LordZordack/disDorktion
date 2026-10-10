@@ -110,7 +110,7 @@ TEST_CASE("Harness rejects malformed controls and preparation and silences failu
     REQUIRE_FALSE(engine.setMonitoring(-61.0f,false)); REQUIRE_FALSE(engine.setMonitoring(1.0f,false));
     REQUIRE_FALSE(engine.setMonitoring(std::numeric_limits<float>::quiet_NaN(),false));
     REQUIRE_FALSE(engine.selectTarget("missing")); REQUIRE(engine.selectTarget("reference-gain"));
-    REQUIRE(auditionTargets().size() == 1);
+    REQUIRE(auditionTargets().size() == 2);
     REQUIRE(engine.prepare({8000.0,1,1}));
     juce::AudioBuffer<float> mono(1,8), stereo(2,8);
     fillHarness(mono,0.25f); REQUIRE(engine.process(juce::dsp::AudioBlock<float>(mono),false));
@@ -127,6 +127,57 @@ TEST_CASE("Harness rejects malformed controls and preparation and silences failu
     mono.setSample(0,0,std::numeric_limits<float>::quiet_NaN());
     REQUIRE_FALSE(engine.process(juce::dsp::AudioBlock<float>(mono)));
     REQUIRE(mono.getMagnitude(0,8) == 0.0f);
+}
+
+TEST_CASE("Production target is selectable and preserves module versus monitor mute", "[harness][engine][gain]")
+{
+    AuditionEngine engine;
+    REQUIRE(engine.selectTarget("gain"));
+    REQUIRE(engine.selectedTargetId() == "gain");
+    REQUIRE(engine.setGainSettings({6.0f, false, false}));
+    REQUIRE(engine.prepare({48000.0, 8, 2}));
+    juce::AudioBuffer<float> audio(2, 32);
+    fillHarness(audio, 0.125f);
+    REQUIRE(engine.process(juce::dsp::AudioBlock<float>(audio), false));
+    REQUIRE(audio.getSample(0, 0) == Catch::Approx(0.125 * std::pow(10.0, 6.0 / 20.0)));
+    engine.setModuleMuted(true); engine.reset(); fillHarness(audio, 0.125f);
+    REQUIRE(engine.process(juce::dsp::AudioBlock<float>(audio), false));
+    REQUIRE(audio.getMagnitude(0, 32) == 0.0f);
+    engine.setBypass(true); engine.reset(); fillHarness(audio, 0.125f);
+    REQUIRE(engine.process(juce::dsp::AudioBlock<float>(audio), false));
+    REQUIRE(audio.getSample(0, 0) == 0.125f);
+    REQUIRE(engine.selectTarget("reference-gain"));
+    fillHarness(audio, 0.125f);
+    REQUIRE(engine.process(juce::dsp::AudioBlock<float>(audio), false));
+    REQUIRE(audio.getSample(0, 0) == 0.125f);
+}
+
+TEST_CASE("Production harness samples equal direct gain through interrupted controls", "[harness][engine][gain]")
+{
+    for (const auto channels : {1u, 2u})
+    {
+        AuditionEngine engine; Gain direct;
+        REQUIRE(engine.selectTarget("gain"));
+        REQUIRE(engine.prepare({48000.0, 32, channels})); REQUIRE(direct.prepare({48000.0, 32, channels}));
+        juce::AudioBuffer<float> actual(static_cast<int>(channels), 257), expected(static_cast<int>(channels), 257);
+        for (const auto parameters : {GainSettings{24.0f, false, false}, GainSettings{-60.0f, true, false},
+                                     GainSettings{6.0f, true, true}, GainSettings{-12.0f, false, false}})
+        {
+            REQUIRE(engine.setGainDb(parameters.gainDb)); engine.setModuleMuted(parameters.mute); engine.setBypass(parameters.bypass);
+            REQUIRE(direct.setParameters(parameters));
+            for (int c = 0; c < static_cast<int>(channels); ++c)
+                for (int n = 0; n < 257; ++n)
+                {
+                    const auto sample = static_cast<float>((n * 17 + c * 13) % 127 - 63) / 128.0f;
+                    actual.setSample(c, n, sample); expected.setSample(c, n, sample);
+                }
+            REQUIRE(engine.process(juce::dsp::AudioBlock<float>(actual).getSubBlock(0, 0), false));
+            REQUIRE(engine.process(juce::dsp::AudioBlock<float>(actual), false));
+            REQUIRE(direct.process(juce::dsp::AudioBlock<float>(expected)));
+            for (int c = 0; c < static_cast<int>(channels); ++c)
+                for (int n = 0; n < 257; ++n) REQUIRE(actual.getSample(c, n) == expected.getSample(c, n));
+        }
+    }
 }
 
 TEST_CASE("Harness reset restores retained endpoints and instances stay independent", "[harness][engine]")
