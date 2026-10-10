@@ -22,6 +22,7 @@ disdorktion_fetch_dependencies()
 
 add_library(disdorktion_dsp STATIC
     src/dsp/ReferenceGain.cpp
+    src/dsp/Gain.cpp
 )
 target_include_directories(disdorktion_dsp PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(disdorktion_dsp PUBLIC cxx_std_20)
@@ -45,12 +46,14 @@ if(BUILD_TESTING)
     add_executable(disdorktion_dsp_tests
         tests/ModuleContractTests.cpp
         tests/ReferenceGainTests.cpp
+        tests/GainTests.cpp
     )
     target_link_libraries(disdorktion_dsp_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
     catch_discover_tests(disdorktion_dsp_tests TEST_PREFIX "dsp::" PROPERTIES TIMEOUT 30)
 
     add_executable(disdorktion_realtime_tests
         tests/RealtimeSafetyTests.cpp
+        tests/GainRealtimeTests.cpp
         tests/AllocationTracking.cpp
     )
     target_link_libraries(disdorktion_realtime_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -59,6 +62,7 @@ if(BUILD_TESTING)
     if(DISDORKTION_BUILD_PLUGIN)
         add_executable(disdorktion_adapter_tests
             tests/PluginAdapterTests.cpp
+            tests/AllocationTracking.cpp
             src/plugin/PluginProcessor.cpp
         )
         target_include_directories(disdorktion_adapter_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -94,7 +98,13 @@ add_executable(disdorktion_reference_gain_benchmark
     benchmarks/ReferenceGainBenchmark.cpp
 )
 target_link_libraries(disdorktion_reference_gain_benchmark PRIVATE disdorktion_dsp)
+add_executable(disdorktion_gain_benchmark benchmarks/ReferenceGainBenchmark.cpp)
+target_link_libraries(disdorktion_gain_benchmark PRIVATE disdorktion_dsp)
+target_compile_definitions(disdorktion_gain_benchmark PRIVATE DISDORKTION_PRODUCTION_GAIN_BENCHMARK=1)
 if(WIN32)
+    target_link_libraries(disdorktion_gain_benchmark PRIVATE PowrProf)
+    target_compile_definitions(disdorktion_gain_benchmark PRIVATE
+        DISDORKTION_WINDOWS_SDK_VERSION=\"${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}\")
     target_link_libraries(disdorktion_reference_gain_benchmark PRIVATE PowrProf)
     target_compile_definitions(disdorktion_reference_gain_benchmark PRIVATE
         DISDORKTION_WINDOWS_SDK_VERSION=\"${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}\")
@@ -124,6 +134,8 @@ target_compile_definitions(disdorktion_harness PUBLIC
 
 add_executable(disdorktion_render tools/RenderMain.cpp)
 target_link_libraries(disdorktion_render PRIVATE disdorktion_harness)
+add_executable(disdorktion_gain_transitions tools/GainTransitionMain.cpp)
+target_link_libraries(disdorktion_gain_transitions PRIVATE disdorktion_harness)
 
 if(BUILD_TESTING)
     add_executable(disdorktion_harness_tests

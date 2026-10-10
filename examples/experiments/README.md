@@ -1,6 +1,12 @@
 # Generated experiment examples
 
-The five JSON files use the complete version 1 [experiment schema](../../docs/AUDITION_HARNESS.md): impulse, sine, two-tone, logarithmic sweep, and seeded white noise. Each uses reference gain at unity, 48 kHz stereo, 256-frame processing, 48,000 source frames, and 48,000 render frames. They are settings examples; `buildIdentity: "example"` makes that provenance explicit and observations make no measured/listening claim.
+The five foundation JSON files use the complete version 1 [experiment schema](../../docs/AUDITION_HARNESS.md): impulse, sine, two-tone, logarithmic sweep, and seeded white noise. Each uses reference gain at unity, 48 kHz stereo, 256-frame processing, 48,000 source frames, and 48,000 render frames. They are settings examples; `buildIdentity: "example"` makes that provenance explicit and observations make no measured/listening claim.
+
+`gain-sine.json` and `gain-mute.json` use version 2, production target `gain`,
+explicit `gainDb: 6` and module `mute`. The first renders a +6 dB sine; the
+second renders silence. Monitoring fields are provenance and do not change
+offline samples. Sources are mathematically generated; no third-party audio
+license is needed. These records describe settled controls, not automation.
 
 Render from the repository root after building Release:
 

@@ -11,6 +11,8 @@ struct ExperimentRecord
     int version = 1;
     juce::String targetId = "reference-gain";
     float gain = 1.0f;
+    float gainDb = 0.0f;
+    bool mute = false;
     bool bypass = false;
     SourceSettings source;
     double sampleRate = 48000.0;

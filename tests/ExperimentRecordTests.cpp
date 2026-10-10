@@ -4,6 +4,54 @@
 
 using namespace disdorktion::harness;
 
+TEST_CASE("Production experiments use explicit dB and module mute fields", "[experiment][gain]")
+{
+    ExperimentRecord record; record.version = 2; record.targetId = "gain";
+    record.gainDb = -60.0f; record.mute = true; record.muted = false;
+    juce::String error; ExperimentRecord restored;
+    auto json = record.toJson();
+    REQUIRE_FALSE(json.getDynamicObject()->hasProperty("gain"));
+    REQUIRE(ExperimentRecord::fromJson(json, restored, error));
+    REQUIRE(restored.gainDb == -60.0f); REQUIRE(restored.mute); REQUIRE_FALSE(restored.muted);
+    for (const auto value : {juce::var(-60.00000001), juce::var(24.00000001), juce::var(true), juce::var("0")})
+    {
+        auto invalid = record.toJson(); invalid.getDynamicObject()->setProperty("gainDb", value);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(invalid, restored, error));
+        REQUIRE(restored.gainDb == -60.0f);
+    }
+    auto mixed = record.toJson(); mixed.getDynamicObject()->setProperty("gain", 1.0);
+    REQUIRE_FALSE(ExperimentRecord::fromJson(mixed, restored, error));
+    for (const auto* key : {"gainDb", "mute", "bypass"})
+    {
+        auto missing = record.toJson(); missing.getDynamicObject()->removeProperty(key);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(missing, restored, error));
+    }
+    auto wrongType = record.toJson(); wrongType.getDynamicObject()->setProperty("mute", 1);
+    REQUIRE_FALSE(ExperimentRecord::fromJson(wrongType, restored, error));
+    auto wrongTarget = record.toJson(); wrongTarget.getDynamicObject()->setProperty("targetId", "reference-gain");
+    REQUIRE_FALSE(ExperimentRecord::fromJson(wrongTarget, restored, error));
+    const auto file = juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("production-gain-record", ".json");
+    REQUIRE(record.save(file, error)); REQUIRE(ExperimentRecord::load(file, restored, error));
+    REQUIRE(restored.gainDb == record.gainDb); REQUIRE(restored.mute); REQUIRE_FALSE(restored.muted);
+    REQUIRE(file.deleteFile());
+}
+
+TEST_CASE("Version one experiments preserve quiet linear gains without production fields", "[experiment][gain]")
+{
+    for (const auto gain : {0.0f, 0.00001f, 0.001f, 1.0f, 4.0f})
+    {
+        ExperimentRecord record; record.gain = gain;
+        const auto json = record.toJson();
+        REQUIRE_FALSE(json.getDynamicObject()->hasProperty("gainDb"));
+        REQUIRE_FALSE(json.getDynamicObject()->hasProperty("mute"));
+        ExperimentRecord restored; juce::String error;
+        REQUIRE(ExperimentRecord::fromJson(juce::JSON::parse(juce::JSON::toString(json)), restored, error));
+        REQUIRE(restored.gain == gain); REQUIRE(restored.version == 1); REQUIRE(restored.targetId == "reference-gain");
+        auto mixed = record.toJson(); mixed.getDynamicObject()->setProperty("gainDb", 0.0);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(mixed, restored, error));
+    }
+}
+
 TEST_CASE("Experiment JSON preserves complete settings and annotations", "[experiment]")
 {
     ExperimentRecord record;

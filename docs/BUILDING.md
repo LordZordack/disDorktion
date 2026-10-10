@@ -61,7 +61,9 @@ build/<configure-preset>/{Debug,Release}/disdorktion_dsp_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_realtime_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_adapter_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_reference_gain_benchmark.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_gain_benchmark.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_render.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_gain_transitions.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_harness_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_harness_realtime_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_audition_tests.exe
@@ -79,3 +81,7 @@ The local configure completed with Visual Studio Community 18.8.2, MSVC 19.51.36
 CI uses Visual Studio 2022 / v143 and pinned CMake 4.2.8. For architecture, processing requirements, and proposed performance budgets, see the [DSP contract](DSP_CONTRACT.md) and [performance procedure](PERFORMANCE.md).
 
 The counts above describe the merged F1 foundation. Issue #3 publication verification passed 47/47 CTest cases in each full Debug and Release configuration and 35/35 in independent DSP-only Release, including generated playback completion/replay. Full audition, renderer, VST3, and plugin Standalone targets built; the headless project sources excluded GUI/audio-device modules. Five generated examples each rendered exactly 48,000 frames through the CLI. See [harness validation](okf/notes/harness_validation.md) for evidence scope, the app startup/close smoke, user-confirmed playback completion, and outstanding manual checks. Local VS2026 results do not establish hosted VS2022 results.
+
+Issue #4 local verification passed 71/71 tests in full Debug and Release, and
+49/49 in independent DSP-only Release. See [gain validation](okf/notes/gain_validation.md)
+for coverage and the pending listening, host and AC performance checks.

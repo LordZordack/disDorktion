@@ -1,5 +1,39 @@
 # Audition and measurement harness
 
+## Production gain target
+
+Select **Gain (dB)** to audition the same production `Gain` implementation used
+by the plugin's independent input/output instances. Gain is -60 to +24 dB,
+default 0 dB. **Mute module** ramps module output to zero; **Mute monitoring**
+only affects live playback after the meters. Bypass returns dry unity, including
+when module mute is selected. Gain/mute/bypass transitions use 10 ms envelopes;
+latency is zero. Both target changes and record restoration detach the callback.
+
+The **Reference gain** target retains the foundation's 0-4 linear controls.
+Restoring records preserves continuous gain values without slider quantization.
+New production records use version 2, `targetId: "gain"`, required finite
+`gainDb` in [-60,+24], boolean `mute` and `bypass`, and the existing source and
+monitor metadata. They omit the linear `gain` field. Version-1 records remain
+`reference-gain` with linear `gain`; mixed units/versions are rejected before
+restoration. Monitor mute retains its field name `muted`. Save/load/render tests
+cover both schemas and bound validation before conversion to float.
+
+Use [gain-sine.json](../examples/experiments/gain-sine.json) or
+[gain-mute.json](../examples/experiments/gain-mute.json) with the renderer commands
+below. The remaining foundation descriptions apply to the legacy target.
+
+Generate deterministic four-second sine/transient gain/mute/bypass fixtures into
+a fresh directory:
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_gain_transitions.exe --output-dir gain-transition-listening
+```
+
+The generator refuses existing destinations and writes float WAVs plus exact
+settings/provenance. The checked-in [settings](measurements/gain_transition_fixtures/settings.json)
+and [gain validation](okf/notes/gain_validation.md) record numerical checks;
+generated WAVs stay local and listening observations must be recorded separately.
+
 The dedicated **DisDorktion Audition** app auditions the same `ReferenceGain` DSP used by the plugin. Its initial target is `reference-gain`, with linear gain 0–4 (default 1) and smoothed bypass. Accepted modules, sections, and chains can be added later. The generated plugin Standalone wrapper, `DisDorktion.exe`, has a separate purpose and does not supply this experiment workflow.
 
 ## Start an audition

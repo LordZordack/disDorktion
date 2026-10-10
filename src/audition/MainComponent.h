@@ -43,7 +43,7 @@ private:
     juce::MidiKeyboardComponent keyboard{keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard};
     juce::ComboBox target, source;
     juce::Slider gain, monitor;
-    juce::ToggleButton bypass{"Bypass"}, muted{"Mute monitoring"};
+    juce::ToggleButton bypass{"Bypass"}, moduleMuted{"Mute module"}, muted{"Mute monitoring"};
     juce::TextButton apply{"Apply source"}, load{"Load WAV / AIFF"}, play{"Play / stop"}, restart{"Restart"};
     juce::TextButton save{"Save experiment"}, restore{"Load experiment"}, render{"Render offline"}, deviceButton{"Audio / MIDI devices"};
     juce::TextEditor frequency, frequency2, amplitude, phase, duration, renderDuration, seed, observations;

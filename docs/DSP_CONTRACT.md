@@ -55,7 +55,35 @@ bypassSmoother.setCurrentAndTargetValue(retainedBypass ? 1.0f : 0.0f);
 
 At every supported sample rate, the initial unity block preserves every sample; there is no startup fade. Define a 10 ms ramp as `floor(sampleRate * 0.010)` frames. When a target changes, advance before applying the first frame, and reach the target on the final ramp frame.
 
-## Plugin adapter policy
+## Production gain (M1)
+
+`Gain` implements the same module interface with `GainSettings { gainDb, mute,
+bypass }`. Finite gain is inclusive [-60,+24] dB, default 0; booleans default
+false. Invalid settings retain the complete previous set. Conversion is
+`10^(gainDb/20)`, cached in double precision. Gain and bypass use double linear
+envelopes over `floor(sampleRate * 0.010)` frames, advancing once per frame.
+Mute ramps gain to exact zero; dB changes while muted are retained for unmute.
+Bypass takes precedence over module mute and returns dry unity. Both envelopes
+keep advancing when bypassed. Reset/preparation snaps to retained controls.
+
+The single-instance finite input envelope is float maximum /16; a production
+pair uses /256; the plugin pair plus legacy reference trim uses /1024. Nominal
+audio is not clipped or normalized. Each instance owns its own state and reports
+zero latency. [Design, sources, alternatives and tolerances](okf/methods/gain.md)
+were recorded before implementation.
+
+The plugin processes legacy reference trim, production input gain, then production
+output gain. First two parameter IDs and linear meanings (`referenceGain`,
+`referenceBypass`) are preserved. New IDs are `inputGainDb`, `inputMute`,
+`inputBypass`, `outputGainDb`, `outputMute`, `outputBypass`. Version-1 XML restores
+the legacy stage and resets production controls to unity/unmuted/unbypassed;
+version-2 XML requires all eight values. All state fields are strictly parsed and
+validated before publication. Host normalized-float transport retains its existing
+precision limits, including underflow for the smallest subnormal legacy gains.
+State operations and bulk harness restoration require lifecycle synchronization;
+independent live parameter atomics do not promise an atomic whole-state snapshot.
+
+## Plugin adapter policy (both gain implementations)
 
 The adapter marks host configuration ready only after successful preparation. Invalid host preparation disables processing even if the module retained an earlier valid configuration. On unprepared or rejected audio processing, clear every output sample with `buffer.clear()` and return without logging, allocation, or host/UI notifications. Clear output-only channels before processing valid input. Rejected parameter updates retain valid controls and do not cause silence.
 

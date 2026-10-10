@@ -119,6 +119,28 @@ TEST_CASE("Device callback generated samples and pre-monitor meters match a sine
     }
 }
 
+TEST_CASE("Device restoration selects production gain and keeps monitor mute distinct", "[controller][gain]")
+{
+    AudioDeviceController controller; CallbackDevice device;
+    auto record = callbackRecord(SourceKind::impulse);
+    record.version = 2; record.targetId = "gain"; record.gainDb = 6.0f;
+    controller.configure(record); controller.audioDeviceAboutToStart(&device); controller.setPlaying(true);
+    juce::AudioBuffer<float> audio(2, 64); callback(controller, audio);
+    REQUIRE(controller.engine().selectedTargetId() == "gain");
+    REQUIRE(audio.getSample(0, 0) == Catch::Approx(0.25 * std::pow(10.0, 6.0 / 20.0)));
+    record.muted = true;
+    controller.configure(record); controller.audioDeviceAboutToStart(&device); controller.setPlaying(true); callback(controller, audio);
+    REQUIRE(audio.getMagnitude(0, 64) == 0.0f);
+    REQUIRE(controller.engine().meters().outputPeak > 0.0f);
+    record.mute = true; record.muted = false;
+    controller.configure(record); controller.audioDeviceAboutToStart(&device); controller.setPlaying(true); callback(controller, audio);
+    REQUIRE(controller.engine().meters().outputPeak == 0.0f);
+    record = callbackRecord(SourceKind::impulse); record.gain = 0.00001f;
+    controller.configure(record); controller.audioDeviceAboutToStart(&device); controller.setPlaying(true); callback(controller, audio);
+    REQUIRE(controller.engine().selectedTargetId() == "reference-gain");
+    REQUIRE(audio.getSample(0, 0) == 0.25f * record.gain);
+}
+
 TEST_CASE("Generated playback stops at completion and Play repeats without Restart", "[controller]")
 {
     for (auto kind : {SourceKind::impulse, SourceKind::sine, SourceKind::twoTone, SourceKind::sweep, SourceKind::noise})

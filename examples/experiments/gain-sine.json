@@ -1,0 +1,30 @@
+{
+    "version":  2,
+    "targetId":  "gain",
+    "bypass":  false,
+    "sampleRate":  48000,
+    "channels":  2,
+    "blockSize":  256,
+    "renderDurationSamples":  48000,
+    "filePath":  "",
+    "fileHash":  "",
+    "sourceConversion":  "linear;mono-duplicate;stereo-average",
+    "originalSampleRate":  0,
+    "originalChannels":  0,
+    "monitorDb":  -18,
+    "muted":  true,
+    "midiDevice":  "",
+    "buildIdentity":  "example",
+    "observations":  "Generated 440 Hz sine, production +6 dB, no listening claim. Monitoring fields do not alter rendered audio.",
+    "source":  {
+                   "kind":  "sine",
+                   "frequency":  440,
+                   "frequency2":  880,
+                   "amplitude":  0.25,
+                   "phase":  0,
+                   "durationSamples":  48000,
+                   "seed":  1
+               },
+    "gainDb":  6,
+    "mute":  false
+}

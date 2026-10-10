@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "target": "gain",
+  "sampleRate": 48000,
+  "channels": 2,
+  "durationSamples": 192000,
+  "durationSeconds": 4.0,
+  "blockCapacity": 127,
+  "blockSchedule": "127-frame blocks, split at exact event frames; final partial block",
+  "sampleFormat": "WAV 32-bit IEEE float",
+  "initialResetOnly": true,
+  "deterministicRerenderVerified": true,
+  "finiteOutputVerified": true,
+  "listeningStatus": "Not listened to; these files are fixtures for a human listening check",
+  "events": [
+    {
+      "frame": 0,
+      "seconds": 0.0,
+      "gainDb": 0.0,
+      "mute": false,
+      "bypass": false
+    },
+    {
+      "frame": 24000,
+      "seconds": 0.5,
+      "gainDb": 24.0,
+      "mute": false,
+      "bypass": false
+    },
+    {
+      "frame": 48000,
+      "seconds": 1.0,
+      "gainDb": -60.0,
+      "mute": false,
+      "bypass": false
+    },
+    {
+      "frame": 72000,
+      "seconds": 1.5,
+      "gainDb": -60.0,
+      "mute": true,
+      "bypass": false
+    },
+    {
+      "frame": 96000,
+      "seconds": 2.0,
+      "gainDb": 24.0,
+      "mute": false,
+      "bypass": false
+    },
+    {
+      "frame": 120000,
+      "seconds": 2.5,
+      "gainDb": 24.0,
+      "mute": false,
+      "bypass": true
+    },
+    {
+      "frame": 144000,
+      "seconds": 3.0,
+      "gainDb": 24.0,
+      "mute": false,
+      "bypass": false
+    },
+    {
+      "frame": 168000,
+      "seconds": 3.5,
+      "gainDb": -12.0,
+      "mute": false,
+      "bypass": false
+    }
+  ],
+  "sources": [
+    {
+      "file": "gain-sine.wav",
+      "provenance": "Original deterministic synthesis in tools/GainTransitionMain.cpp; no external recording",
+      "formula": "0.025 * sin(2*pi*440*n/48000)",
+      "sourceAmplitude": 0.025,
+      "stereo": "Identical source samples in both channels",
+      "inputPeak": 0.025000000372529,
+      "outputPeak": 0.396223306655884,
+      "latencySamples": 0
+    },
+    {
+      "file": "gain-transients.wav",
+      "provenance": "Original deterministic synthesis in tools/GainTransitionMain.cpp; no external recording",
+      "formula": "p=n%6000; 0.025 * exp(-p/360) * cos(2*pi*180*p/48000)",
+      "sourceAmplitude": 0.025,
+      "stereo": "Identical source samples in both channels",
+      "inputPeak": 0.025000000372529,
+      "outputPeak": 0.396223306655884,
+      "latencySamples": 0
+    }
+  ]
+}

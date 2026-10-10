@@ -7,6 +7,7 @@ namespace disdorktion::harness
 namespace
 {
 bool validGain(float gain) noexcept { return std::isfinite(gain) && gain >= 0.0f && gain <= 4.0f; }
+bool validGainDb(float db) noexcept { return std::isfinite(db) && db >= -60.0f && db <= 24.0f; }
 bool validMonitor(float db) noexcept { return std::isfinite(db) && db >= -60.0f && db <= 0.0f; }
 float monitorLevel(float db, bool muted) noexcept { return muted ? 0.0f : std::pow(10.0f, db / 20.0f); }
 struct Reading { float peak = 0.0f; float rms = 0.0f; bool finite = true; };
@@ -33,7 +34,7 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
 {
     prepared = false;
     clearMeters();
-    if (!isValidProcessSpec(spec) || !target.prepare(spec)) return false;
+    if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -43,8 +44,8 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
 
 void AuditionEngine::reset() noexcept
 {
-    (void) target.setParameters({gain.load(std::memory_order_relaxed), bypass.load(std::memory_order_relaxed)});
-    target.reset();
+    (void) applyParameters();
+    selected->reset();
     monitor.setCurrentAndTargetValue(monitorLevel(monitorDb.load(std::memory_order_relaxed),
                                                   muted.load(std::memory_order_relaxed)));
     clearMeters();
@@ -52,7 +53,9 @@ void AuditionEngine::reset() noexcept
 
 bool AuditionEngine::selectTarget(std::string_view id) noexcept
 {
-    if (id != selectedTargetId()) return false;
+    if (id == "reference-gain") selected = &target;
+    else if (id == "gain") selected = &productionTarget;
+    else return false;
     reset();
     return true;
 }
@@ -71,7 +74,31 @@ bool AuditionEngine::setGain(float value) noexcept
     gain.store(value, std::memory_order_relaxed);
     return true;
 }
-void AuditionEngine::setBypass(bool value) noexcept { bypass.store(value, std::memory_order_relaxed); }
+bool AuditionEngine::setGainSettings(const GainSettings& value) noexcept
+{
+    if (!validGainDb(value.gainDb)) return false;
+    gainDb.store(value.gainDb, std::memory_order_relaxed);
+    moduleMuted.store(value.mute, std::memory_order_relaxed);
+    productionBypass.store(value.bypass, std::memory_order_relaxed);
+    return productionTarget.setParameters(value);
+}
+bool AuditionEngine::setGainDb(float value) noexcept
+{
+    if (!validGainDb(value)) return false;
+    gainDb.store(value, std::memory_order_relaxed); return true;
+}
+void AuditionEngine::setModuleMuted(bool value) noexcept { moduleMuted.store(value, std::memory_order_relaxed); }
+void AuditionEngine::setBypass(bool value) noexcept
+{
+    (selected == &target ? bypass : productionBypass).store(value, std::memory_order_relaxed);
+}
+bool AuditionEngine::applyParameters() noexcept
+{
+    if (selected == &target)
+        return target.setParameters({gain.load(std::memory_order_relaxed), bypass.load(std::memory_order_relaxed)});
+    return productionTarget.setParameters({gainDb.load(std::memory_order_relaxed),
+        moduleMuted.load(std::memory_order_relaxed), productionBypass.load(std::memory_order_relaxed)});
+}
 void AuditionEngine::setMonitorDb(float value) noexcept
 {
     if (validMonitor(value)) monitorDb.store(value, std::memory_order_relaxed);
@@ -99,8 +126,8 @@ bool AuditionEngine::process(juce::dsp::AudioBlock<float> block, bool applyMonit
     inputPeak.store(before.peak, std::memory_order_relaxed);
     inputRms.store(before.rms, std::memory_order_relaxed);
     if (!before.finite
-        || !target.setParameters({gain.load(std::memory_order_relaxed), bypass.load(std::memory_order_relaxed)})
-        || !target.process(block))
+        || !applyParameters()
+        || !selected->process(block))
     {
         block.clear();
         outputPeak.store(0.0f, std::memory_order_relaxed); outputRms.store(0.0f, std::memory_order_relaxed);

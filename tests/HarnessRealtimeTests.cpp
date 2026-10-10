@@ -8,6 +8,28 @@
 #include <catch2/catch_test_macros.hpp>
 #include <limits>
 
+TEST_CASE("Production harness scalar controls and processing allocate nothing", "[harness][realtime][gain]")
+{
+    using namespace disdorktion;
+    harness::AuditionEngine engine;
+    REQUIRE(engine.selectTarget("gain")); REQUIRE(engine.prepare({48000.0, 8, 2}));
+    juce::AudioBuffer<float> audio(2, 257); audio.clear();
+    bool success = true;
+    {
+        test::ScopedAllocationTracking tracking;
+        for (int i = 0; i < 32; ++i)
+        {
+            success &= engine.setGainDb(i % 2 == 0 ? -60.0f : 24.0f);
+            engine.setModuleMuted(i % 3 == 0); engine.setBypass(i % 4 == 0);
+            success &= !engine.setGainDb(std::numeric_limits<float>::quiet_NaN());
+            success &= engine.process(juce::dsp::AudioBlock<float>(audio), false);
+        }
+        engine.reset();
+    }
+    const auto counts = test::getAllocationCounts();
+    REQUIRE(success); REQUIRE(counts.allocations == 0); REQUIRE(counts.deallocations == 0);
+}
+
 TEST_CASE("Harness processing controls monitoring and failure paths allocate nothing", "[harness][realtime]")
 {
     using namespace disdorktion;

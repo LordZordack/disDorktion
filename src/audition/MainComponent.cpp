@@ -27,13 +27,14 @@ MainComponent::MainComponent()
     fieldsLabel.setText("Frequency Hz      Second/end Hz     Peak amplitude     Phase radians       Source frames       Render frames       Noise seed", juce::dontSendNotification);
     observationsLabel.setText("Experiment observations", juce::dontSendNotification);
     target.addItem("Reference gain", 1);
+    target.addItem("Gain (dB)", 2);
     target.setSelectedId(1);
     for (const auto* name : {"Impulse", "Sine", "Two-tone", "Logarithmic sweep", "Seeded white noise", "Audio file loop", "Keyboard / MIDI sine"})
         source.addItem(name, source.getNumItems() + 1);
     source.setSelectedId(2);
     frequency.setText("440"); frequency2.setText("880"); amplitude.setText("0.25");
     phase.setText("0"); duration.setText("48000"); renderDuration.setText("48000"); seed.setText("1");
-    gain.setRange(0, 4, 0.001); gain.setValue(1);
+    gain.setRange(0, 4, 0); gain.setValue(1);
     monitor.setRange(-60, 0, 0.1); monitor.setValue(-18);
     for (auto* slider : {&gain, &monitor})
     {
@@ -43,7 +44,7 @@ MainComponent::MainComponent()
     muted.setToggleState(true, juce::dontSendNotification);
     for (juce::Component* component : std::initializer_list<juce::Component*>{
         &title,&gainLabel,&monitorLabel,&sourceLabel,&fieldsLabel,&observationsLabel,
-        &target,&source,&gain,&monitor,&bypass,&muted,&apply,&load,&play,&restart,
+        &target,&source,&gain,&monitor,&bypass,&moduleMuted,&muted,&apply,&load,&play,&restart,
         &save,&restore,&render,&deviceButton,&frequency,&frequency2,&amplitude,&phase,&duration,&seed,
         &renderDuration,&observations,&meterLabel,&deviceLabel,&statusLabel,&keyboard}) addAndMakeVisible(*component);
     observations.setMultiLine(true);
@@ -54,7 +55,19 @@ MainComponent::MainComponent()
     keyboardState.addListener(this);
     apply.onClick = [this] { applySource(); };
     source.onChange = [this] { applySource(); };
-    gain.onValueChange = [this] { audio.engine().setGain(static_cast<float>(gain.getValue())); };
+    moduleMuted.setEnabled(false);
+    target.onChange = [this] {
+        auto next = snapshot();
+        const auto production = target.getSelectedId() == 2;
+        next.version = production ? 2 : 1; next.targetId = production ? "gain" : "reference-gain";
+        next.gain = 1.0f; next.gainDb = 0.0f; next.mute = false; next.bypass = false;
+        configureRecord(next);
+    };
+    gain.onValueChange = [this] {
+        if (target.getSelectedId() == 2) audio.engine().setGainDb(static_cast<float>(gain.getValue()));
+        else audio.engine().setGain(static_cast<float>(gain.getValue()));
+    };
+    moduleMuted.onClick = [this] { audio.engine().setModuleMuted(moduleMuted.getToggleState()); };
     bypass.onClick = [this] { audio.engine().setBypass(bypass.getToggleState()); };
     monitor.onValueChange = [this] { audio.engine().setMonitorDb(static_cast<float>(monitor.getValue())); };
     muted.onClick = [this] { audio.engine().setMuted(muted.getToggleState()); };
@@ -109,7 +122,8 @@ void MainComponent::resized()
     apply.setBounds(row.removeFromLeft(155).reduced(3)); load.setBounds(row.removeFromLeft(180).reduced(3));
     play.setBounds(row.removeFromLeft(130).reduced(3)); restart.setBounds(row.removeFromLeft(130).reduced(3));
     gainLabel.setBounds(bounds.removeFromTop(24));
-    row = bounds.removeFromTop(38); bypass.setBounds(row.removeFromRight(140)); gain.setBounds(row);
+    row = bounds.removeFromTop(38); bypass.setBounds(row.removeFromRight(120));
+    moduleMuted.setBounds(row.removeFromRight(140)); gain.setBounds(row);
     monitorLabel.setBounds(bounds.removeFromTop(24));
     row = bounds.removeFromTop(38); muted.setBounds(row.removeFromRight(180)); monitor.setBounds(row);
     meterLabel.setBounds(bounds.removeFromTop(40));
@@ -134,7 +148,9 @@ void MainComponent::handleNoteOff(juce::MidiKeyboardState*, int, int note, float
 ExperimentRecord MainComponent::snapshot() const
 {
     auto result = record;
-    result.gain = static_cast<float>(gain.getValue()); result.bypass = bypass.getToggleState();
+    if (result.version == 2) { result.gainDb = static_cast<float>(gain.getValue()); result.mute = moduleMuted.getToggleState(); }
+    else result.gain = static_cast<float>(gain.getValue());
+    result.bypass = bypass.getToggleState();
     result.monitorDb = static_cast<float>(monitor.getValue()); result.muted = muted.getToggleState();
     result.observations = observations.getText();
     if (audio.sampleRate() > 0) result.sampleRate = audio.sampleRate();
@@ -169,11 +185,15 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
 {
     devices.removeAudioCallback(&audio);
     record = next;
-    audio.configure(record);
-    devices.addAudioCallback(&audio);
     running = false; play.setButtonText("Play"); keyboardState.reset();
     source.setSelectedId(static_cast<int>(record.source.kind) + 1, juce::dontSendNotification);
-    gain.setValue(record.gain, juce::dontSendNotification); bypass.setToggleState(record.bypass, juce::dontSendNotification);
+    const auto production = record.version == 2;
+    target.setSelectedId(production ? 2 : 1, juce::dontSendNotification);
+    gain.setRange(production ? -60.0 : 0.0, production ? 24.0 : 4.0, 0.0);
+    gainLabel.setText(production ? "Module gain (dB)" : "Module gain (linear amplitude)", juce::dontSendNotification);
+    gain.setValue(production ? record.gainDb : record.gain, juce::dontSendNotification);
+    moduleMuted.setEnabled(production); moduleMuted.setToggleState(record.mute, juce::dontSendNotification);
+    bypass.setToggleState(record.bypass, juce::dontSendNotification);
     monitor.setValue(record.monitorDb, juce::dontSendNotification); muted.setToggleState(record.muted, juce::dontSendNotification);
     frequency.setText(juce::String(record.source.frequency), false);
     frequency2.setText(juce::String(record.source.frequency2), false);
@@ -182,6 +202,10 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     renderDuration.setText(juce::String(static_cast<juce::int64>(record.renderDurationSamples)), false);
     seed.setText(juce::String(static_cast<juce::int64>(record.source.seed)), false);
     observations.setText(record.observations, false);
+    // Range changes may update the slider value. Publish the restored controls
+    // after refreshing the widgets, while processing is still detached.
+    audio.configure(record);
+    devices.addAudioCallback(&audio);
 }
 
 void MainComponent::applySource()
@@ -231,8 +255,9 @@ void MainComponent::setWorkerControlsEnabled(bool enabled)
 {
     for (juce::Component* component : std::initializer_list<juce::Component*>{
         &target,&source,&apply,&load,&save,&restore,&render,&frequency,&frequency2,
-        &amplitude,&phase,&duration,&renderDuration,&seed,&gain,&bypass,&observations})
+        &amplitude,&phase,&duration,&renderDuration,&seed,&gain,&bypass,&moduleMuted,&observations})
         component->setEnabled(enabled);
+    moduleMuted.setEnabled(enabled && record.version == 2);
     // Monitoring remains available during worker activity. Its current settings
     // are retained when a newly loaded source replaces the old one.
 }
