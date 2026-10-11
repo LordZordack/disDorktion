@@ -43,6 +43,34 @@ TEST_CASE("Production offline render retains dB response before monitoring", "[r
 }
 }
 
+TEST_CASE("Tanh offline render dispatches version five independent of monitoring", "[render][tanh]")
+{
+    RenderFixture fixture;
+    ExperimentRecord record; record.version = 5; record.targetId = "tanh-saturation";
+    record.driveDb = 12; record.outputDb = -6;
+    record.renderDurationSamples = 1031; record.source.durationSamples = 1031;
+    record.blockSize = 17;
+    const auto first = fixture.root.getChildFile("tanh-a"), second = fixture.root.getChildFile("tanh-b");
+    const auto result = renderExperiment(record, first);
+    INFO(result.message); REQUIRE(result.status == RenderStatus::success); REQUIRE(result.latencySamples == 0);
+    record.blockSize = 127; record.monitorDb = 0; record.muted = false;
+    REQUIRE(renderExperiment(record, second).status == RenderStatus::success);
+    auto source = readFloat(first.getChildFile("source.wav"), 1031, 2);
+    auto a = readFloat(first.getChildFile("rendered.wav"), 1031, 2);
+    auto b = readFloat(second.getChildFile("rendered.wav"), 1031, 2);
+    for (int c = 0; c < 2; ++c) for (int n = 0; n < 1031; ++n)
+    {
+        REQUIRE(a.getSample(c,n) == Catch::Approx(std::pow(10.0, -6.0/20.0)
+            * std::tanh(std::pow(10.0, 12.0/20.0) * source.getSample(c,n))).margin(2e-7));
+        REQUIRE(a.getSample(c,n) == b.getSample(c,n));
+    }
+    juce::MemoryBlock saved, after;
+    REQUIRE(first.getChildFile("rendered.wav").loadFileAsData(saved));
+    REQUIRE(renderExperiment(record, first).status != RenderStatus::success);
+    REQUIRE(first.getChildFile("rendered.wav").loadFileAsData(after));
+    REQUIRE(after == saved);
+}
+
 TEST_CASE("Offline generated render is exact float audio independent of monitoring", "[render]")
 {
     RenderFixture fixture;

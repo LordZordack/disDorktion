@@ -2,7 +2,7 @@
 type: "Index"
 title: "Methods"
 description: "Index of methods research documents."
-timestamp: "2026-10-10T20:39:46Z"
+timestamp: "2026-10-11T13:06:31Z"
 ---
 
 # Methods
@@ -11,3 +11,4 @@ timestamp: "2026-10-10T20:39:46Z"
 - [Bit crushing](./bit_crushing.md) — Signed PCM amplitude quantization and sample holding for bit-crushing effects.
 - [Reusable input and output gain](./gain.md) — Reviewed production gain design, parameter semantics, transition rules, and acceptance limits for DisDorktion M1.
 - [Real-time DSP processing contract](./processing_contract.md) — Implemented module interface and callback behavior for DisDorktion's JUCE DSP foundation, including the reference gain processor.
+- [Tanh saturation](./tanh_saturation.md) — Approved memoryless tanh saturation design, controls, transition behavior, and pre-implementation acceptance limits for DisDorktion.

@@ -66,6 +66,8 @@ build/<configure-preset>/{Debug,Release}/disdorktion_render.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_gain_transitions.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_bit_crusher_measurements.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_bit_crusher_benchmark.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_tanh_saturation_measurements.exe
+build/<configure-preset>/{Debug,Release}/disdorktion_tanh_saturation_benchmark.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_harness_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_harness_realtime_tests.exe
 build/<configure-preset>/{Debug,Release}/disdorktion_audition_tests.exe

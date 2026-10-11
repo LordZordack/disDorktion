@@ -183,3 +183,56 @@ TEST_CASE("Malformed experiment restore retains prior record", "[experiment]")
     }
     REQUIRE(destination.observations == "retained");
 }
+TEST_CASE("Tanh version five records require explicit strict controls", "[experiment][tanh]")
+{
+    auto json = ExperimentRecord{}.toJson();
+    auto* o = json.getDynamicObject();
+    o->setProperty("version", 5); o->setProperty("targetId", "tanh-saturation");
+    o->removeProperty("gain"); o->setProperty("driveDb", 36.0); o->setProperty("outputDb", -12.0);
+    ExperimentRecord restored; juce::String error;
+    REQUIRE(ExperimentRecord::fromJson(json, restored, error));
+    REQUIRE(restored.version == 5);
+    REQUIRE(restored.toJson().getDynamicObject()->getProperty("driveDb") == juce::var(36.0f));
+    const auto retained = juce::JSON::toString(restored.toJson());
+    for (auto* key : {"driveDb", "outputDb", "bypass"})
+    {
+        auto invalid = juce::JSON::parse(juce::JSON::toString(json)); invalid.getDynamicObject()->removeProperty(key);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(invalid, restored, error));
+        REQUIRE(juce::JSON::toString(restored.toJson()) == retained);
+    }
+    for (auto* key : {"driveDb", "outputDb"})
+        for (auto bad : {juce::var(true), juce::var("0"), juce::var(std::numeric_limits<double>::infinity()), juce::var(36.00000001)})
+        {
+            auto invalid = juce::JSON::parse(juce::JSON::toString(json)); invalid.getDynamicObject()->setProperty(key, bad);
+            REQUIRE_FALSE(ExperimentRecord::fromJson(invalid, restored, error));
+            REQUIRE(juce::JSON::toString(restored.toJson()) == retained);
+        }
+    for (auto* key : {"gain", "gainDb", "bitDepth", "mix", "mute"})
+    {
+        auto invalid = juce::JSON::parse(juce::JSON::toString(json)); invalid.getDynamicObject()->setProperty(key, 1);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(invalid, restored, error));
+    }
+    for (int version = 1; version <= 4; ++version)
+    {
+        ExperimentRecord old; old.version = version;
+        old.targetId = version == 1 ? "reference-gain" : version == 2 ? "gain" : "bit-crusher";
+        REQUIRE(ExperimentRecord::fromJson(old.toJson(), restored, error));
+        REQUIRE(restored.version == version);
+        auto mixed = old.toJson(); mixed.getDynamicObject()->setProperty("driveDb", 0.0);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(mixed, restored, error));
+    }
+    ExperimentRecord tanh; tanh.version = 5; tanh.targetId = "tanh-saturation";
+    REQUIRE(tanh.validate(error));
+    tanh.gain = 2;
+    REQUIRE_FALSE(tanh.validate(error)); tanh.gain = 1;
+    tanh.gainDb = 1;
+    REQUIRE_FALSE(tanh.validate(error)); tanh.gainDb = 0;
+    tanh.mute = true;
+    REQUIRE_FALSE(tanh.validate(error)); tanh.mute = false;
+    tanh.bitDepth = 8;
+    REQUIRE_FALSE(tanh.validate(error)); tanh.bitDepth = 64;
+    tanh.captureRateHz = 12000;
+    REQUIRE_FALSE(tanh.validate(error)); tanh.captureRateHz = 384000;
+    tanh.mix = 0;
+    REQUIRE_FALSE(tanh.validate(error));
+}

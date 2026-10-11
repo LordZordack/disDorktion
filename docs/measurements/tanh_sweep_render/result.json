@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "samples": 96000,
+  "inputPeak": 0.25,
+  "inputRms": 0.176775275820764,
+  "outputPeak": 0.759599626064301,
+  "outputRms": 0.57339889503568,
+  "overloaded": false,
+  "latencySamples": 0,
+  "experiment": {
+    "version": 5,
+    "targetId": "tanh-saturation",
+    "driveDb": 12.0,
+    "outputDb": 0.0,
+    "bypass": false,
+    "sampleRate": 48000.0,
+    "channels": 2,
+    "blockSize": 256,
+    "renderDurationSamples": 96000,
+    "filePath": "",
+    "fileHash": "",
+    "sourceConversion": "linear;mono-duplicate;stereo-average",
+    "originalSampleRate": 0.0,
+    "originalChannels": 0,
+    "monitorDb": -18.0,
+    "muted": true,
+    "midiDevice": "",
+    "buildIdentity": "example",
+    "observations": "Generated native-rate tanh settings example; no listening acceptance claim. Monitoring fields do not alter offline samples.",
+    "source": {
+      "kind": "sweep",
+      "frequency": 20.0,
+      "frequency2": 21600.0,
+      "amplitude": 0.25,
+      "phase": 0.0,
+      "durationSamples": 96000,
+      "seed": 1
+    }
+  },
+  "rendererBuildIdentity": "0.1.0-a84434b-Release"
+}

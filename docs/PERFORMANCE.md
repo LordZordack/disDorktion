@@ -78,9 +78,59 @@ collector qualified all 120 rows across three runs. Worst p99 was 1.390866% of
 the block deadline, below the 5% limit. See the [expressive baseline](measurements/bit_crusher_expressive_adaptive_baseline.csv)
 and the separate, intentionally unqualified [unpinned diagnostic](measurements/bit_crusher_expressive_unpinned_diagnostic.csv). See the [bit crusher validation note](okf/notes/bit_crusher_validation.md).
 
+## Tanh saturation measurements
+
+The proposed module p99 budget is 5% of the incoming block deadline for
+stereo at 48/96 kHz and blocks 32/64/127/256/1024. The native-rate module reports
+zero latency. Steady/oversized use maximum drive and trim; automation traverses
+the drive/trim ranges; bypass switches every eighth callback. For tanh retry
+runs, use the adaptive 10–120 second window and 150,000 equal-wall-time slots.
+Record at most one callback per slot and skip missed slots without catch-up.
+For automation, cover all 101 control residues with at least 100 samples each;
+report the minimum and maximum residue counts in the CSV to expose gaps or
+periodic sampling alias. Keep the 100,000 overall minimum sample count and 5%
+p99 budget. This coverage revision does not change gain or bit-crusher collector
+behavior. Run after builds/tests finish:
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_tanh_saturation_measurements.exe tanh-measurements
+./build/windows-vs2026/Release/disdorktion_tanh_saturation_benchmark.exe --runs 3 --conditions "AC power; balanced profile; thermal sensor unavailable; no competing builds" --output tanh_saturation_cpu_baseline_revision2.csv
+./build/windows-vs2026/Release/disdorktion_tanh_saturation_benchmark.exe --diagnostic --conditions "AC power; balanced profile; thermal sensor unavailable; unpinned diagnostic; no competing builds" --output tanh_saturation_cpu_diagnostic_revision2.csv
+```
+
+The measurement tool requires a fresh destination and writes generated
+source/wet float WAVs, JSON and CSV spectra. Native-rate folded components
+are observations for Q1; they do not establish anti-aliasing quality. Preserve
+failures and raw CSVs. The [validation note](okf/notes/tanh_saturation_validation.md)
+records actual test, spectral, CPU, listening and qualification status.
+
+The first three-run baseline attempt is preserved but incomplete at 62
+rows. In run 2, the 48 kHz/127-frame automation case exhausted its 200,000-sample
+storage cap as callback throughput recovered from probe-time slowdown. The
+warmup/probe projections were 4,215,554/2,732,234 callbacks with stride 18. Its
+3,500 ns p99 is below the 132,292 ns deadline budget, but the truncated
+distribution does not qualify. The revised collector uses one sample per
+equal-wall-time slot and does not catch up after missed slots; the 100,000
+minimum and 5% budget remain unchanged. See the preserved
+[partial baseline CSV](measurements/tanh_saturation_cpu_baseline.csv) and the
+[method revision](okf/methods/tanh_saturation.md#tanh-collector-revision-2-and-qualification).
+Revision 2 qualified all 120 rows across three pinned runs; automation covered
+all 101 control residues in every case with at least 987 samples per residue.
+Worst p99 was 0.377952756% of the block deadline. See the [qualified baseline
+CSV](measurements/tanh_saturation_cpu_baseline_revision2.csv). AC power and
+Balanced profile were reported; thermal sensing and ambient temperature remain
+unavailable or unconfirmed. The separate full unpinned revision-2 diagnostic
+completed all 40 rows and exited 1 as expected because every row was marked
+unpinned/reference qualification unavailable; it had no additional errors or
+budget exceedances. Its worst p99 was 0.48% of deadline, and it remains
+intentionally unqualified. See the [diagnostic CSV](measurements/tanh_saturation_cpu_diagnostic_revision2.csv).
+An earlier diagnostic's out-of-range float endpoint was a separate
+benchmark-fixture calculation error; the corrected conversion and interrupted
+diagnostic are not qualification evidence.
+
 ## Reference machine
 
-Record this observed reference machine with each result: Intel Core Ultra 7 155H, 16 cores / 22 logical processors, approximately 32 GiB RAM, Windows 11 Home 10.0.26200. Also record compiler, SDK, power mode, AC power status, and benchmark conditions.
+The revision-2 tanh baseline recorded an Intel Core Ultra 7 155H, 16 cores / 22 logical processors, 33,752,997,888 bytes RAM, Windows 10.0.26300, Windows SDK 10.0.26100, MSVC 19.51 Release x64. It reported AC power (battery 100%), Balanced profile (scheme GUID prefix 381b), and benchmark affinity group 0 / mask 0x1 / efficiency class 1. Thermal sensing was unavailable and ambient temperature unconfirmed. Record compiler, SDK, power mode, AC power status, affinity, and environmental limitations with each result.
 
 ## Budgets
 

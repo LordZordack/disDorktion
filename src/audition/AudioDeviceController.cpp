@@ -18,6 +18,8 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
     else if (settings.version == 3 || settings.version == 4)
         processor.setBitCrusherSettings({settings.bitDepth, settings.captureRateHz, settings.bypass,
             settings.mix, settings.crush, settings.shape, settings.jitter, settings.jitterSeed});
+    else if (settings.version == 5)
+        processor.setTanhSaturationSettings({settings.driveDb, settings.outputDb, settings.bypass});
     processor.setMonitorDb(settings.monitorDb);
     processor.setMuted(settings.muted);
     playing.store(false);

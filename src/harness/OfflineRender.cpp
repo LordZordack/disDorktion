@@ -104,11 +104,18 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     else if (!generated.prepare(record.source, record.sampleRate, record.channels))
     { result.message = "Cannot prepare source"; return result; }
     AuditionEngine engine;
+    bool settingsReady = false;
+    if (record.version == 1 && record.targetId == "reference-gain")
+        settingsReady = engine.setParameters({record.gain, record.bypass});
+    else if (record.version == 2 && record.targetId == "gain")
+        settingsReady = engine.setGainSettings({record.gainDb, record.mute, record.bypass});
+    else if ((record.version == 3 || record.version == 4) && record.targetId == "bit-crusher")
+        settingsReady = engine.setBitCrusherSettings({record.bitDepth, record.captureRateHz, record.bypass,
+            record.mix, record.crush, record.shape, record.jitter, record.jitterSeed});
+    else if (record.version == 5 && record.targetId == "tanh-saturation")
+        settingsReady = engine.setTanhSaturationSettings({record.driveDb, record.outputDb, record.bypass});
     if (!engine.selectTarget(record.targetId.toStdString())
-        || !(record.version == 1 ? engine.setParameters({record.gain, record.bypass})
-            : record.version == 2 ? engine.setGainSettings({record.gainDb, record.mute, record.bypass})
-                                  : engine.setBitCrusherSettings({record.bitDepth, record.captureRateHz, record.bypass,
-                                      record.mix, record.crush, record.shape, record.jitter, record.jitterSeed}))
+        || !settingsReady
         || !engine.prepare({record.sampleRate, record.blockSize, record.channels}))
     { result.message = "Cannot prepare target"; return result; }
     engine.reset();

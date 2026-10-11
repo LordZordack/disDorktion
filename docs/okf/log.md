@@ -48,3 +48,13 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-10T20:27:51Z: Recorded expressive crusher controls, reviewed plan, correctness tests, adaptive CPU qualification, and remaining gates
 
 - 2026-10-10T20:39:46Z: Recorded fresh PR verification, full MCP graph report and unresolved refreshed-index coverage; kept generated WAVs local
+
+- 2026-10-10T21:58:08Z: Added tanh saturation design and validation workflow
+
+- 2026-10-10T22:25:00Z: Recorded tanh saturation tests, fixtures and sampling revision
+
+- 2026-10-10T22:27:44Z: Recorded tanh saturation tests, fixtures and sampling revision
+
+- 2026-10-10T23:17:23Z: Completed tanh saturation automated validation and CPU evidence
+
+- 2026-10-11T13:06:31Z: Reviewed issue 6 for publication; preserve open listening, GUI and external qualification gates

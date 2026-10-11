@@ -7,6 +7,65 @@
 using namespace disdorktion;
 using namespace disdorktion::harness;
 
+TEST_CASE("Harness selects tanh saturation with nonidentity default", "[harness][tanh]")
+{
+    AuditionEngine engine;
+    REQUIRE(engine.selectTarget("tanh-saturation"));
+    REQUIRE(engine.prepare({48000.0, 32, 2}));
+    juce::AudioBuffer<float> audio(2, 257);
+    for (int c = 0; c < 2; ++c) for (int n = 0; n < 257; ++n)
+        audio.setSample(c, n, c == 0 ? 0.5f : -0.5f);
+    REQUIRE(engine.process(juce::dsp::AudioBlock<float>(audio), false));
+    REQUIRE(audio.getSample(0, 0) == Catch::Approx(std::tanh(0.5)).margin(1e-7));
+    REQUIRE(audio.getSample(1, 256) == -audio.getSample(0, 0));
+    REQUIRE(engine.getLatencySamples() == 0);
+}
+
+TEST_CASE("Tanh harness restores settings and retains independent controls", "[harness][tanh]")
+{
+    AuditionEngine engine;
+    REQUIRE(engine.selectTarget("tanh-saturation"));
+    REQUIRE(engine.setTanhSaturationSettings({12.0f, -6.0f, false}));
+    REQUIRE(engine.prepare({48000.0, 32, 2}));
+    TanhSaturation direct;
+    REQUIRE(direct.setParameters({12.0f, -6.0f, false}));
+    REQUIRE(direct.prepare({48000.0, 32, 2}));
+    juce::AudioBuffer<float> actual(2, 257), expected(2, 257);
+    auto refill = [&] {
+        for (int c = 0; c < 2; ++c) for (int n = 0; n < 257; ++n)
+            actual.setSample(c,n, static_cast<float>((n*17+c*13)%91-45)/64);
+        expected.makeCopyOf(actual);
+    };
+    for (const auto settings : {TanhSaturationSettings {-24,-60,false}, TanhSaturationSettings {36,12,true},
+                                TanhSaturationSettings {0,0,false}})
+    {
+        REQUIRE(engine.setTanhDriveDb(settings.driveDb)); REQUIRE(engine.setTanhOutputDb(settings.outputDb));
+        engine.setBypass(settings.bypass); REQUIRE(direct.setParameters(settings));
+        refill();
+        REQUIRE(engine.process(juce::dsp::AudioBlock<float>(actual), false));
+        REQUIRE(direct.process(juce::dsp::AudioBlock<float>(expected)));
+        for (int c = 0; c < 2; ++c) for (int n = 0; n < 257; ++n)
+            REQUIRE(actual.getSample(c,n) == expected.getSample(c,n));
+    }
+    for (float invalid : {-100.0f, 100.0f, std::numeric_limits<float>::quiet_NaN()})
+    {
+        REQUIRE_FALSE(engine.setTanhDriveDb(invalid)); REQUIRE_FALSE(engine.setTanhOutputDb(invalid));
+        REQUIRE_FALSE(engine.setTanhSaturationSettings({invalid, -6, true}));
+        REQUIRE_FALSE(engine.setTanhSaturationSettings({12, invalid, true}));
+    }
+    REQUIRE(engine.selectTarget("gain")); engine.setBypass(true);
+    REQUIRE(engine.selectTarget("tanh-saturation")); direct.reset();
+    refill(); REQUIRE(engine.process(juce::dsp::AudioBlock<float>(actual), false));
+    REQUIRE(direct.process(juce::dsp::AudioBlock<float>(expected)));
+    for (int c = 0; c < 2; ++c) for (int n = 0; n < 257; ++n)
+        REQUIRE(actual.getSample(c,n) == expected.getSample(c,n));
+    TanhSaturationTarget target;
+    REQUIRE(target.descriptor().id == "tanh-saturation");
+    REQUIRE(target.setControl("driveDb", -24)); REQUIRE(target.setControl("outputDb", 12));
+    REQUIRE_FALSE(target.setControl("driveDb", 36.01f));
+    REQUIRE_FALSE(target.setControl("outputDb", -60.01f)); REQUIRE_FALSE(target.setControl("foreign", 0));
+}
+
 TEST_CASE("Harness bit crusher target matches direct processing", "[harness][crusher]")
 {
     AuditionEngine engine;

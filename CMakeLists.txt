@@ -24,6 +24,7 @@ add_library(disdorktion_dsp STATIC
     src/dsp/ReferenceGain.cpp
     src/dsp/Gain.cpp
     src/dsp/BitCrusher.cpp
+    src/dsp/TanhSaturation.cpp
 )
 target_include_directories(disdorktion_dsp PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(disdorktion_dsp PUBLIC cxx_std_20)
@@ -49,6 +50,8 @@ if(BUILD_TESTING)
         tests/ReferenceGainTests.cpp
         tests/GainTests.cpp
         tests/BitCrusherTests.cpp
+        tests/TanhSaturationTests.cpp
+        tests/BenchmarkSamplingTests.cpp
     )
     target_link_libraries(disdorktion_dsp_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
     catch_discover_tests(disdorktion_dsp_tests TEST_PREFIX "dsp::" PROPERTIES TIMEOUT 30)
@@ -57,6 +60,7 @@ if(BUILD_TESTING)
         tests/RealtimeSafetyTests.cpp
         tests/GainRealtimeTests.cpp
         tests/BitCrusherRealtimeTests.cpp
+        tests/TanhSaturationRealtimeTests.cpp
         tests/AllocationTracking.cpp
     )
     target_link_libraries(disdorktion_realtime_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -107,7 +111,13 @@ target_compile_definitions(disdorktion_gain_benchmark PRIVATE DISDORKTION_PRODUC
 add_executable(disdorktion_bit_crusher_benchmark benchmarks/ReferenceGainBenchmark.cpp)
 target_link_libraries(disdorktion_bit_crusher_benchmark PRIVATE disdorktion_dsp)
 target_compile_definitions(disdorktion_bit_crusher_benchmark PRIVATE DISDORKTION_BIT_CRUSHER_BENCHMARK=1)
+add_executable(disdorktion_tanh_saturation_benchmark benchmarks/ReferenceGainBenchmark.cpp)
+target_link_libraries(disdorktion_tanh_saturation_benchmark PRIVATE disdorktion_dsp)
+target_compile_definitions(disdorktion_tanh_saturation_benchmark PRIVATE DISDORKTION_TANH_SATURATION_BENCHMARK=1)
 if(WIN32)
+    target_link_libraries(disdorktion_tanh_saturation_benchmark PRIVATE PowrProf)
+    target_compile_definitions(disdorktion_tanh_saturation_benchmark PRIVATE
+        DISDORKTION_WINDOWS_SDK_VERSION=\"${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}\")
     target_link_libraries(disdorktion_bit_crusher_benchmark PRIVATE PowrProf)
     target_compile_definitions(disdorktion_bit_crusher_benchmark PRIVATE
         DISDORKTION_WINDOWS_SDK_VERSION=\"${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}\")
@@ -147,6 +157,8 @@ add_executable(disdorktion_gain_transitions tools/GainTransitionMain.cpp)
 target_link_libraries(disdorktion_gain_transitions PRIVATE disdorktion_harness)
 add_executable(disdorktion_bit_crusher_measurements tools/BitCrusherMeasureMain.cpp)
 target_link_libraries(disdorktion_bit_crusher_measurements PRIVATE disdorktion_harness)
+add_executable(disdorktion_tanh_saturation_measurements tools/TanhSaturationMeasureMain.cpp)
+target_link_libraries(disdorktion_tanh_saturation_measurements PRIVATE disdorktion_harness)
 
 if(BUILD_TESTING)
     add_executable(disdorktion_harness_tests
