@@ -10,6 +10,12 @@
 #endif
 
 #include "dsp/ReferenceGain.h"
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#include "dsp/TanhSaturation.h"
+#include "WallTimeSampling.h"
+#include "AutomationCoverage.h"
+#include "TimingWindow.h"
+#endif
 #if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
 #include "dsp/BitCrusher.h"
 #include "TimingWindow.h"
@@ -38,7 +44,11 @@ namespace
 {
 using Clock = std::chrono::steady_clock;
 using Nanoseconds = std::chrono::nanoseconds;
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+constexpr std::size_t timingCapacity = disdorktion::benchmark::WallTimeSampler::targetSlots;
+#else
 constexpr std::size_t timingCapacity = 200000;
+#endif
 constexpr std::size_t minimumTimings = 100000;
 constexpr auto warmupDuration = std::chrono::seconds(2);
 constexpr auto measurementDuration = std::chrono::seconds(10);
@@ -325,6 +335,9 @@ struct Result
     unsigned rate = 0, block = 0, actual = 0, run = 0;
     Scenario scenario = Scenario::steady;
     std::size_t count = 0, stride = 0;
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+    std::size_t automationCovered = 0, automationMinimum = 0, automationMaximum = 0;
+#endif
     double warmupProjectedCallbacks = 0, calibratedCallbacks = 0, measurementSeconds = 0;
     double median = 0, p95 = 0, p99 = 0, maximum = 0, timer = 0, deadline = 0, fraction = 0, budgetFraction = 0;
     bool qualified = false;
@@ -372,7 +385,18 @@ double measureTimerOverhead()
     return percentile(samples, 0.5);
 }
 
-#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+disdorktion::TanhSaturationSettings parametersFor(Scenario scenario, std::uint64_t index)
+{
+    switch (scenario)
+    {
+        case Scenario::automation: return {static_cast<float>(-24.0 + static_cast<double>(index % 101) * .6),
+            static_cast<float>(-60.0 + static_cast<double>((index * 7) % 101) * .72), false};
+        case Scenario::bypass: return {36.0f, 12.0f, (index / 8) % 2 != 0};
+        default: return {36.0f, 12.0f, false};
+    }
+}
+#elif defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
 disdorktion::BitCrusherSettings parametersFor(Scenario scenario, std::uint64_t index)
 {
     switch (scenario)
@@ -427,7 +451,10 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
     result.run = run;
     result.scenario = scenario;
     const auto blockDeadline = 1e9 * static_cast<double>(result.actual) / rate;
-#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+    const auto budgetPercent = 5u;
+    disdorktion::TanhSaturation gain;
+#elif defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
     const auto budgetPercent = 5u;
     disdorktion::BitCrusher gain;
 #else
@@ -437,7 +464,7 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
 
 #if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
     GainBenchmarkPath gain(stages);
-#elif !defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+#elif !defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) && !defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
     disdorktion::ReferenceGain gain;
 #endif
     if (!gain.prepare({static_cast<double>(rate), block, 2}) || !gain.setParameters(parametersFor(scenario, 0)))
@@ -487,7 +514,7 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
     const auto probeFinished = Clock::now();
     result.calibratedCallbacks = static_cast<double>(iteration - beforeProbe) * targetSeconds
         / std::chrono::duration<double>(probeFinished - probeStart).count();
-#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) || defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
     const auto windowSeconds = quick ? 0.2 : disdorktion::benchmark::timingWindowSeconds(result.calibratedCallbacks);
     if (!quick)
     {
@@ -495,20 +522,41 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
         result.calibratedCallbacks *= windowSeconds / targetSeconds;
     }
 #endif
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+    result.stride = 0; // Not applicable to revision 2 wall-time sampling.
+#else
     result.stride = static_cast<std::size_t>(selectSamplingStride(static_cast<std::uint64_t>(std::ceil(result.calibratedCallbacks))));
+#endif
     const auto measureStart = Clock::now();
-#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) || defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
     const auto measureEnd = measureStart + std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(windowSeconds));
 #else
     const auto measureEnd = measureStart + (quick ? std::chrono::milliseconds(200) : measurementDuration);
 #endif
     std::uint64_t callbackNumber = 0;
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+    disdorktion::benchmark::AutomationCoverage coverage;
+    disdorktion::benchmark::WallTimeSampler sampler(std::chrono::duration_cast<Nanoseconds>(measureEnd - measureStart).count());
+    while (true)
+    {
+        // Reuse the existing loop clock read; scheduling remains outside callback timing.
+        const auto now = Clock::now();
+        if (now >= measureEnd) break;
+        const bool record = sampler.shouldSample(std::chrono::duration_cast<Nanoseconds>(now - measureStart).count());
+#else
     while (Clock::now() < measureEnd)
     {
         const bool scheduled = callbackNumber % result.stride == 0;
         const bool record = scheduled && result.count < timings.size();
         if (scheduled && !record) result.reason = "200000 timing capacity exhausted; full window retained, sampled distribution truncated";
+#endif
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+        const auto controlIteration = iteration;
+#endif
         callback(record, result.count);
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+        if (record && scenario == Scenario::automation) coverage.record(controlIteration);
+#endif
         if (record) ++result.count;
         ++callbackNumber;
     }
@@ -522,6 +570,16 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
     }
     if (!quick && result.count < minimumTimings)
         result.reason = "fewer than 100000 sampled callbacks; revise measurement method";
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+    result.automationCovered = coverage.coveredCount();
+    result.automationMinimum = coverage.minimum();
+    result.automationMaximum = coverage.maximum();
+    if (!quick && scenario == Scenario::automation && !coverage.qualifies())
+    {
+        if (!result.reason.empty()) result.reason += "; ";
+        result.reason += "automation sampling coverage below 100 observations for each of 101 settings";
+    }
+#endif
     if (!fullWindow && result.reason.empty()) result.reason = "measurement shorter than 10 seconds";
     if (result.count)
     {
@@ -555,18 +613,27 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
 
 void writeHeader(std::ostream& out)
 {
-#if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK) || defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+#if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK) || defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) || defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
     out << "target,stages,latency_samples,input_profile,";
+#endif
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+    out << "collector_revision,sampling_mode,automation_settings_covered,automation_min_samples_per_setting,automation_max_samples_per_setting,";
 #endif
     out << "mode,run,rate_hz,prepared_block,actual_block,scenario,timing_count,sampling_stride,warmup_projected_callbacks,calibrated_callbacks,measurement_seconds,median_ns,p95_ns,p99_ns,max_ns,timer_only_median_ns,p99_budget_ns,p99_block_deadline_fraction,p99_budget_fraction,qualified,reason,cpu,architecture,physical_memory,os,sdk,compiler,power_scheme_guid,ac_status,battery_percent,topology,affinity,conditions,thermal_measurement\n";
 }
 
 void writeResult(std::ostream& out, const Result& result, const Platform& platform, const Options& options)
 {
-#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+    out << "tanh-saturation,1,0," << (options.tinyInput ? "subnormal" : "ordinary") << ',';
+#elif defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
     out << "bit-crusher,1,0,ordinary,";
 #elif defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
     out << "production-gain," << options.stages << ",0," << (options.tinyInput ? "subnormal" : "ordinary") << ',';
+#endif
+#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+    out << "2,equal-wall-time-slots-150000-no-catchup,"
+        << result.automationCovered << ',' << result.automationMinimum << ',' << result.automationMaximum << ',';
 #endif
     out << (options.quick ? "quick" : options.diagnostic ? "diagnostic" : "baseline") << ','
         << result.run << ',' << result.rate << ',' << result.block << ',' << result.actual << ',' << scenarioName(result.scenario) << ','

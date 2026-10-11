@@ -122,6 +122,25 @@ reseeds on the next frame without resetting capture phase. Latency is zero.
 See the [bit crushing method](okf/methods/bit_crushing.md) and its
 [validation note](okf/notes/bit_crusher_validation.md).
 
+## Tanh saturation
+
+`TanhSaturation` uses `TanhSaturationSettings { driveDb, outputDb, bypass }`.
+Drive is finite [-24,+36] dB and wet output trim is finite [-60,+12] dB;
+both default to 0 dB and bypass defaults off. Settled wet output is
+`10^(outputDb/20) * tanh(10^(driveDb/20) * input)`. Default drive therefore
+applies `tanh(input)`. Output is bounded by the wet trim gain, which may exceed
+nominal unity. All finite float inputs are supported using double intermediates.
+Drive/output gain and bypass use double linear-amplitude 10 ms ramps, advanced
+once per frame. Identical targets preserve ramp progress. Reset/preparation
+snaps to retained targets. Bypass excludes drive and trim, and settled bypass
+returns the original sample exactly. Channels have no audio history and share
+frame controls; instances have independent envelopes. Latency is zero.
+
+The harness selects `tanh-saturation`, with version-5 experiment records storing
+drive and trim explicitly. Native-rate aliasing is measured for Q1; the module
+does not own the future shared oversampling boundary. See the
+[design and acceptance limits](okf/methods/tanh_saturation.md).
+
 ## Plugin adapter policy (both gain implementations)
 
 The adapter marks host configuration ready only after successful preparation. Invalid host preparation disables processing even if the module retained an earlier valid configuration. On unprepared or rejected audio processing, clear every output sample with `buffer.clear()` and return without logging, allocation, or host/UI notifications. Clear output-only channels before processing valid input. Rejected parameter updates retain valid controls and do not cause silence.

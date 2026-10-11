@@ -21,6 +21,11 @@ listening and CPU qualification remain pending. See the
 
 Render from the repository root after building Release:
 
+The `tanh-sine.json`, `tanh-sweep.json`, `tanh-two-tone.json`, and
+`tanh-extreme.json` examples use version 5 and target `tanh-saturation`.
+They store drive and output trim explicitly. These native-rate settings
+examples use generated sources and make no listening acceptance claim.
+
 ```powershell
 New-Item -ItemType Directory -Force -Path '.\renders'
 & '.\build\windows-vs2026\Release\disdorktion_render.exe' `

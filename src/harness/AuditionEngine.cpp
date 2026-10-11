@@ -35,7 +35,7 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     prepared = false;
     clearMeters();
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
-        || !crusherTarget.prepare(spec)) return false;
+        || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -57,6 +57,7 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     if (id == "reference-gain") selected = &target;
     else if (id == "gain") selected = &productionTarget;
     else if (id == "bit-crusher") selected = &crusherTarget;
+    else if (id == "tanh-saturation") selected = &saturationTarget;
     else return false;
     reset();
     return true;
@@ -74,6 +75,26 @@ bool AuditionEngine::setGain(float value) noexcept
 {
     if (!validGain(value)) return false;
     gain.store(value, std::memory_order_relaxed);
+    return true;
+}
+bool AuditionEngine::setTanhSaturationSettings(const TanhSaturationSettings& value) noexcept
+{
+    if (!isValidTanhSaturationSettings(value)) return false;
+    tanhDriveDb.store(value.driveDb, std::memory_order_relaxed);
+    tanhOutputDb.store(value.outputDb, std::memory_order_relaxed);
+    tanhBypass.store(value.bypass, std::memory_order_relaxed);
+    return saturationTarget.setParameters(value);
+}
+bool AuditionEngine::setTanhDriveDb(float value) noexcept
+{
+    if (!isValidTanhSaturationSettings({value, 0.0f, false})) return false;
+    tanhDriveDb.store(value, std::memory_order_relaxed);
+    return true;
+}
+bool AuditionEngine::setTanhOutputDb(float value) noexcept
+{
+    if (!isValidTanhSaturationSettings({0.0f, value, false})) return false;
+    tanhOutputDb.store(value, std::memory_order_relaxed);
     return true;
 }
 bool AuditionEngine::setBitCrusherSettings(const BitCrusherSettings& value) noexcept
@@ -145,11 +166,15 @@ bool AuditionEngine::setGainDb(float value) noexcept
 void AuditionEngine::setModuleMuted(bool value) noexcept { moduleMuted.store(value, std::memory_order_relaxed); }
 void AuditionEngine::setBypass(bool value) noexcept
 {
-    (selected == &target ? bypass : selected == &productionTarget ? productionBypass : crusherBypass)
+    (selected == &target ? bypass : selected == &productionTarget ? productionBypass
+        : selected == &saturationTarget ? tanhBypass : crusherBypass)
         .store(value, std::memory_order_relaxed);
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if (selected == &saturationTarget)
+        return saturationTarget.setParameters({tanhDriveDb.load(std::memory_order_relaxed),
+            tanhOutputDb.load(std::memory_order_relaxed), tanhBypass.load(std::memory_order_relaxed)});
     if (selected == &target)
         return target.setParameters({gain.load(std::memory_order_relaxed), bypass.load(std::memory_order_relaxed)});
     if (selected == &crusherTarget)

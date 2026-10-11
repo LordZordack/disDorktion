@@ -326,6 +326,29 @@ TEST_CASE("Device callback queue overflow clears the voice and publishes an indi
     REQUIRE(controller.consumeMidiOverflow()); REQUIRE_FALSE(controller.consumeMidiOverflow());
 }
 
+TEST_CASE("Tanh device restoration applies drive and trim before first callback", "[controller][tanh]")
+{
+    using namespace disdorktion;
+    AudioDeviceController controller;
+    CallbackDevice device;
+    auto record = callbackRecord(); record.version = 5; record.targetId = "tanh-saturation";
+    record.driveDb = 12.0f; record.outputDb = -6.0f;
+    controller.configure(record); controller.audioDeviceAboutToStart(&device); controller.setPlaying(true);
+    juce::AudioBuffer<float> audio(2,64), expected(2,64);
+    harness::SignalSource source; REQUIRE(source.prepare(record.source,48000,2));
+    source.process(juce::dsp::AudioBlock<float>(expected));
+    callback(controller,audio);
+    for (int c=0;c<2;++c) for(int n=0;n<64;++n)
+        REQUIRE(audio.getSample(c,n) == Catch::Approx(std::pow(10.0,-6.0/20.0)
+            * std::tanh(std::pow(10.0,12.0/20.0)*expected.getSample(c,n))).margin(2e-7));
+    {
+        test::ScopedAllocationTracking tracking;
+        controller.engine().setTanhDriveDb(36); controller.engine().setTanhOutputDb(12);
+        controller.engine().setBypass(true); controller.restart(); callback(controller,audio);
+    }
+    const auto counts=test::getAllocationCounts(); REQUIRE(counts.allocations==0); REQUIRE(counts.deallocations==0);
+}
+
 TEST_CASE("Prepared app callbacks including MIDI queues and malformed outputs allocate nothing", "[controller][realtime]")
 {
     using namespace disdorktion;

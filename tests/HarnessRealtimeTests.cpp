@@ -9,6 +9,59 @@
 #include <limits>
 #include <thread>
 
+TEST_CASE("Tanh harness live controls process and reset allocate nothing", "[harness][realtime][tanh]")
+{
+    using namespace disdorktion;
+    harness::AuditionEngine engine;
+    REQUIRE(engine.selectTarget("tanh-saturation"));
+    REQUIRE(engine.prepare({48000.0,32,2}));
+    juce::AudioBuffer<float> audio(2,257); audio.clear();
+    bool success = true;
+    {
+        test::ScopedAllocationTracking tracking;
+        for (int i = 0; i < 32; ++i)
+        {
+            success &= engine.setTanhDriveDb(i%2 == 0 ? -24.0f : 36.0f);
+            success &= engine.setTanhOutputDb(i%2 == 0 ? -60.0f : 12.0f);
+            engine.setBypass(i%3 == 0);
+            success &= engine.process(juce::dsp::AudioBlock<float>(audio).getSubBlock(0,0),false);
+            success &= engine.process(juce::dsp::AudioBlock<float>(audio),false);
+        }
+        engine.reset();
+    }
+    const auto counts = test::getAllocationCounts();
+    REQUIRE(success); REQUIRE(counts.allocations == 0); REQUIRE(counts.deallocations == 0);
+}
+
+TEST_CASE("Tanh scalar automation remains valid during processing", "[harness][realtime][tanh]")
+{
+    using namespace disdorktion;
+    harness::AuditionEngine engine;
+    REQUIRE(engine.selectTarget("tanh-saturation"));
+    REQUIRE(engine.prepare({48000.0,32,2}));
+    juce::AudioBuffer<float> audio(2,257);
+    std::atomic<bool> valid {true};
+    std::thread worker([&] {
+        for (int i = 0; i < 2000; ++i)
+        {
+            if (!engine.setTanhDriveDb(i%2 == 0 ? -24.0f : 36.0f)
+                || !engine.setTanhOutputDb(i%2 == 0 ? -60.0f : 12.0f)) valid.store(false);
+            engine.setBypass(i%3 == 0);
+        }
+    });
+    bool processed = true, finite = true;
+    for (int i = 0; i < 256; ++i)
+    {
+        for (int c = 0; c < 2; ++c) for (int n = 0; n < 257; ++n)
+            audio.setSample(c,n,c == 0 ? 0.5f : -0.5f);
+        processed &= engine.process(juce::dsp::AudioBlock<float>(audio),false);
+        for (int c = 0; c < 2; ++c) for (int n = 0; n < 257; ++n)
+            finite &= std::isfinite(audio.getSample(c,n));
+    }
+    worker.join();
+    REQUIRE(valid.load()); REQUIRE(processed); REQUIRE(finite);
+}
+
 TEST_CASE("Crusher scalar automation remains valid during processing", "[harness][realtime][crusher]")
 {
     using namespace disdorktion;

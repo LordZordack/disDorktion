@@ -36,8 +36,24 @@ generated WAVs stay local and listening observations must be recorded separately
 
 The dedicated **DisDorktion Audition** app auditions the same DSP targets used
 by the plugin. It supports `reference-gain`, production `gain`, and
-`bit-crusher`; the generated plugin Standalone wrapper, `DisDorktion.exe`,
+`bit-crusher`, and `tanh-saturation`; the generated plugin Standalone wrapper, `DisDorktion.exe`,
 has a separate purpose and does not supply this experiment workflow.
+
+## Tanh saturation target
+
+Select **Tanh saturation** for Drive (dB), Output trim (dB), and bypass.
+Drive spans -24 to +36 dB, trim spans -60 to +12 dB, and both default to 0.
+Default drive applies tanh coloration. The module has 10 ms smoothers and zero
+latency; settled bypass returns dry input and excludes trim. Monitoring volume
+and mute remain independent and never alter offline measurements.
+
+Version-5 records require `targetId: "tanh-saturation"`, finite `driveDb` and
+`outputDb`, boolean `bypass`, and the existing source/monitor metadata. Gain
+and crusher controls retain neutral defaults and mixed target settings are
+rejected. Versions 1–4 retain their existing semantics. Use the `tanh-*.json`
+examples or save an experiment from the app. Native-rate aliasing is baseline
+material for Q1. See [the design](okf/methods/tanh_saturation.md) and
+[validation](okf/notes/tanh_saturation_validation.md).
 
 ## Bit Crusher target
 

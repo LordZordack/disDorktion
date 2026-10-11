@@ -31,6 +31,15 @@ The expressive Debug/Release/headless suites, render checks, and three-run CPU
 baseline pass. New listening, GUI inspection, VS2022 CI, and the graph gate
 remain pending. See the [validation note](docs/okf/notes/bit_crusher_validation.md).
 
+The shared **Tanh saturation** target provides -24 to +36 dB drive and an
+independent -60 to +12 dB output trim. Select it in the audition application;
+the transfer is `outputGain * tanh(driveGain * input)`, with 10 ms control and
+bypass ramps and zero module latency. Version-5 experiment records preserve
+these settings. Native-rate measurements provide comparison material for Q1's
+shared middle-section anti-aliasing work. See the
+[design](docs/okf/methods/tanh_saturation.md) and
+[validation evidence](docs/okf/notes/tanh_saturation_validation.md).
+
 **Design Ethos**
 Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)
 
