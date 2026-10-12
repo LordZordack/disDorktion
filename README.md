@@ -11,6 +11,22 @@
 - [Proposed performance budgets and benchmark procedure](docs/PERFORMANCE.md)
 - [Production gain design and acceptance limits](docs/okf/methods/gain.md)
 
+### Launch the Release audition app
+
+From a PowerShell terminal in the project root, build and launch:
+
+```powershell
+cmake --preset windows-vs2026
+cmake --build --preset windows-vs2026-release --target DisDorktionAudition --parallel 4
+& ".\build\windows-vs2026\DisDorktionAudition_artefacts\Release\DisDorktion Audition.exe"
+```
+
+After building, use just the last command to launch again, or double-click
+`DisDorktion Audition.exe` in that `Release` folder. Use the Release executable
+to audition the latest Release build; a previously built Debug executable can
+still contain older module options. In the module menu, select **High-pass** or
+**Low-pass**, then choose Butterworth, Chebyshev I, or Chebyshev II under **Response**.
+
 The reusable gain module supports -60 to +24 dB, an explicit mute, and 10 ms
 smoothed gain/bypass changes. Select **Gain (dB)** in the audition app; module
 mute and monitoring mute are separate controls. The plugin has independent
@@ -47,6 +63,17 @@ the wet output ceiling; default settings preserve inputs within [-1, 1].
 Controls and bypass ramp over 10 ms, with zero module latency. Version-6
 records retain its settings. See the [design](docs/okf/methods/wave_folding.md)
 and [validation evidence](docs/okf/notes/wave_folder_validation.md).
+
+The independent **High-pass** and **Low-pass** audition targets offer Butterworth,
+Chebyshev I (1 dB passband ripple), and Chebyshev II (40 dB stopband attenuation)
+responses. Cutoff is 20–20000 Hz and consistently denotes the half-power point;
+the effective value is capped at 45% of sample rate. Cutoff, response and bypass
+transitions take 10 ms. Version-7 experiment records preserve settings; both
+modules report zero added latency. See the [high-pass design](docs/okf/methods/high_pass_filter.md),
+[low-pass design](docs/okf/methods/low_pass_filter.md), and their
+[high-pass](docs/okf/notes/high_pass_validation.md) /
+[low-pass](docs/okf/notes/low_pass_validation.md) evidence. These targets prepare
+the output filters for later section integration.
 
 **Design Ethos**
 Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)

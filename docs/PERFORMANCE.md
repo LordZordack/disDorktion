@@ -1,5 +1,32 @@
 # Performance procedure and proposed budgets
 
+## Output filter measurements
+
+`disdorktion_cutoff_filter_measurements` generates HP/LP impulse response and
+stepped-sine comparisons, six five-second sweep WAV pairs, and CPU timing data:
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_cutoff_filter_measurements.exe cutoff-filter-measurements
+```
+
+The destination must be new. Each module's diagnostic p99 budget is strictly
+below 5% of the callback deadline. Both filters process three warm response
+banks, even in bypass. Timing covers 44.1/48/96/192 kHz, 32/64/128/256/512/1024
+frames, mono/stereo, settled, endpoint cutoff/mode automation, and full bypass:
+288 cases total, 256 warmup callbacks and 1000 stored timings per case.
+`cpu_raw.csv` retains every timing; `cpu_summary.csv` reports median/p99/max and
+deadline fraction. `result.json` separates spectral success, diagnostic CPU
+budget success and reference-hardware qualification. The command fails if
+either numeric check fails or cases are incomplete. Each module reports zero
+latency samples; frequency-dependent phase delay is not reported as added latency.
+
+These short, unpinned runs establish diagnostics only. Reference-hardware
+qualification still requires the longer warmup/sampling, recorded power and
+thermal conditions, affinity and repeated runs in this document. Run timings
+without concurrent builds/tests. Evidence and limitations are recorded in
+[high-pass validation](okf/notes/high_pass_validation.md) and
+[low-pass validation](okf/notes/low_pass_validation.md).
+
 ## Production gain measurements
 
 `disdorktion_gain_benchmark.exe` compiles the shared timing harness against the

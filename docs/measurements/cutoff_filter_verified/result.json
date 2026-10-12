@@ -1,0 +1,20 @@
+{
+  "build": "0.1.0-c1326a3-Release",
+  "os": "Windows 11",
+  "cpuVendor": "GenuineIntel",
+  "logicalCpus": 22,
+  "cpuQualification": "diagnostic only; 256 warmup + 1000 samples per case; no affinity/power/thermal qualification",
+  "highPassMaxMagnitudeError": 4.628230940422427e-8,
+  "lowPassMaxMagnitudeError": 5.38524447257771e-8,
+  "highPassMaxSteppedSineErrorDb": 3.189935298192719e-7,
+  "lowPassMaxSteppedSineErrorDb": 2.605313873612165e-7,
+  "highPassWorstP99DeadlineFraction": 0.00615,
+  "lowPassWorstP99DeadlineFraction": 0.0057,
+  "cpuCases": 288,
+  "listening": "pending human evaluation",
+  "spectralChecksPass": true,
+  "cpuDiagnosticBudgetPass": true,
+  "checksPass": true,
+  "referenceHardwareQualified": false,
+  "sourceStatus": "uncommitted issue-8 implementation; build identity names base revision"
+}

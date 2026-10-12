@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-10-12T12:58:10Z",
+  "baseRevision": "c1326a3",
+  "workingTree": "uncommitted issue-8",
+  "sha256": {
+    "src/dsp/CutoffFilter.h": "8ef91d8726cf33255f1b23c6cd881ea3fcd42c81ba6c8f05405d89ea0d381f3d",
+    "src/dsp/HighPass.h": "d98dad58b550c6bac7ab08acffd88e8eb0ec75296ccb356797eed02839c5c86a",
+    "src/dsp/LowPass.h": "721bf17d974ef4aa5aec1a9503e10fd94e373e0ca6245ff1271be6c3b744d1c8",
+    "src/harness/CutoffFilterTarget.h": "9c201f17fc950d0c4ecca781876e6867370b2dd10030e14108a9da33637f253b",
+    "src/harness/AuditionEngine.cpp": "2d73c2e56d2201303af1b8574ef084c800b33f06a281307d1683f56995ab4749",
+    "src/harness/AuditionEngine.h": "bb6131480d9ebb2fbb76823eed8738e04ef910f8ce4a6684b47478e61ccb2272",
+    "src/harness/ExperimentRecord.cpp": "6e519bee4ca9cead011b54655d2bdc8956a5f1b77c0a4938323f4b74fb6004f7",
+    "src/harness/ExperimentRecord.h": "140ee516e0cfded381c513affbfe0072351c5b9e37bc001118fdbedaab13bf2a",
+    "src/harness/OfflineRender.cpp": "514ce130e2c03824077c1e7cf29926f193c6e0e46e8e2c110caed4726e2311ae",
+    "src/audition/AudioDeviceController.cpp": "b2f7bd50d5405497f1e6aeab3c61ef618b202fc4c986a523e596b9d9045f7ec5",
+    "src/audition/MainComponent.cpp": "438a2735192941a4fece22be217595f797721731e5b7f0564ab94e2fc5fecb92",
+    "src/audition/MainComponent.h": "7bc6e74c8d904e0adc55d2a3fae6db7367402d5c6e2c8978611afcf0ca401d7c",
+    "tools/CutoffFilterMeasureMain.cpp": "c0c64149d8923ec27f64e7fbcd5cd888ebba239b11d8a2d7a1aaade6484f157a",
+    "tools/CutoffFilterAcceptance.h": "707c171db86e9e9b2d8727f3d77abb5f28392a0c514ed48cfd9dd4d1b41affeb",
+    "tests/CutoffFilterTests.cpp": "091f0613be2fce6c5cd6713737ff7edbd74f3cd8ee5bbea441e48652ed8b890c",
+    "tests/CutoffFilterRealtimeTests.cpp": "bdeda08857b5674a319b44aff94eab3d24327d475627f267f157c74dbdea96ee",
+    "tests/CutoffHarnessTests.cpp": "69c590b281449777f036839a1927323da27c126c5948ac34bf446f644e348639",
+    "tests/CutoffHarnessRealtimeTests.cpp": "3bb891e3a8354f29a05ebc90c52fe75dccace791449e8a6e0f93b29374ec9b25",
+    "CMakeLists.txt": "d19c675788c1f4d994d5faa9f800fb6c8d2441daca837053b46701d7be93d42e"
+  }
+}

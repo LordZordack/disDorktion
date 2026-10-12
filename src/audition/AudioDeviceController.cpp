@@ -22,6 +22,8 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
         processor.setTanhSaturationSettings({settings.driveDb, settings.outputDb, settings.bypass});
     else if (settings.version == 6)
         processor.setWaveFolderSettings({settings.driveDb, settings.threshold, settings.outputDb, settings.bypass});
+    else if (settings.version == 7)
+        processor.setFilterSettings({settings.cutoffHz,settings.bypass,settings.response});
     processor.setMonitorDb(settings.monitorDb);
     processor.setMuted(settings.muted);
     playing.store(false);

@@ -26,6 +26,15 @@ Carrier modulation and demodulation, resonant comb filtering, frequency warping,
 
 ## Evidence status
 
+The independently selectable [high-pass](../methods/high_pass_filter.md) and
+[low-pass](../methods/low_pass_filter.md) modules implement Butterworth,
+Chebyshev I and Chebyshev II responses with smoothed cutoff/mode/bypass and
+version-7 experiment records. Their numerical and diagnostic CPU evidence,
+plus pending listening and reference-hardware qualification, are recorded in
+[high-pass validation](../notes/high_pass_validation.md) and
+[low-pass validation](../notes/low_pass_validation.md). Output-section and
+finished-plugin integration remain later milestones.
+
 The [wave-folder design](../methods/wave_folding.md) is implemented with smoothed
 controls, version-6 experiment records and native-rate measurement tools. Its
 automated correctness, spectral and three-run CPU evidence, and pending human

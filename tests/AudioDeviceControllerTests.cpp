@@ -6,6 +6,7 @@
 #include <array>
 #include <cmath>
 #include <limits>
+#include "harness/SignalSource.h"
 
 namespace
 {
@@ -465,6 +466,34 @@ TEST_CASE("Stopped wave folder restoration and device reprepare retain live sett
     controller.setPlaying(true); callback(controller, audio);
     REQUIRE(controller.engine().selectedTargetId() == "wave-folder");
     REQUIRE(audio.getSample(0, 0) == 0.25f);
+}
+
+TEST_CASE("Filter device restoration retains mode cutoff and live controls across reprepare", "[controller][cutoff-filter]")
+{
+    using namespace disdorktion;
+    for(const char* id:{"high-pass","low-pass"})for(auto mode:{FilterResponse::butterworth,FilterResponse::chebyshev1,FilterResponse::chebyshev2})
+    {
+        auto record=callbackRecord();record.version=7;record.targetId=id;record.cutoffHz=1000;record.response=mode;
+        AudioDeviceController controller;controller.configure(record);CallbackDevice device;
+        controller.audioDeviceAboutToStart(&device);controller.setPlaying(true);
+        juce::AudioBuffer<float> audio(2,64),expected(2,64);
+        disdorktion::harness::SignalSource source;REQUIRE(source.prepare(record.source,48000,2));
+        source.process(juce::dsp::AudioBlock<float>(expected));
+        disdorktion::harness::AuditionEngine engine;REQUIRE(engine.selectTarget(id));REQUIRE(engine.setFilterSettings({1000,false,mode}));REQUIRE(engine.prepare({48000,64,2}));
+        REQUIRE(engine.process(juce::dsp::AudioBlock<float>(expected),false));
+        callback(controller,audio);
+        for(int n=0;n<64;++n)REQUIRE(audio.getSample(0,n)==expected.getSample(0,n));
+        REQUIRE(controller.engine().setFilterCutoffHz(20000));REQUIRE(controller.engine().setFilterResponse(FilterResponse::chebyshev2));controller.engine().setBypass(true);
+        CallbackDevice lowerRate(8000);controller.audioDeviceStopped();controller.audioDeviceAboutToStart(&lowerRate);controller.setPlaying(true);
+        REQUIRE(source.prepare(record.source,8000,2));source.process(juce::dsp::AudioBlock<float>(expected));
+        callback(controller,audio);for(int n=0;n<64;++n)REQUIRE(audio.getSample(0,n)==expected.getSample(0,n));
+        {
+            test::ScopedAllocationTracking tracking;
+            for(unsigned n=0;n<32;++n)
+            {controller.engine().setFilterCutoffHz(n%2?20.f:20000.f);controller.engine().setFilterResponse(static_cast<FilterResponse>(n%3));controller.engine().setBypass(n%4==0);callback(controller,audio);}
+        }
+        const auto count=test::getAllocationCounts();REQUIRE(count.allocations==0);REQUIRE(count.deallocations==0);
+    }
 }
 
 TEST_CASE("Wave folder callbacks and live controls allocate nothing", "[controller][wave-folder][realtime]")

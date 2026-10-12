@@ -44,6 +44,9 @@ private:
     juce::MidiKeyboardState keyboardState;
     juce::MidiKeyboardComponent keyboard{keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard};
     juce::ComboBox target, source, bitDepth;
+    juce::ComboBox filterResponse;
+    juce::Slider filterCutoff;
+    juce::Label filterCutoffLabel, filterResponseLabel, filterInfo;
     juce::Slider gain, monitor, captureRateHz, crusherMix, crusherCrush, crusherShape, crusherJitter;
     juce::Slider tanhDrive, tanhOutput, folderThreshold;
     juce::Label tanhDriveLabel, tanhOutputLabel, folderThresholdLabel;
