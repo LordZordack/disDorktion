@@ -35,7 +35,8 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     prepared = false;
     clearMeters();
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
-        || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)) return false;
+        || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)
+        || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -59,6 +60,8 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     else if (id == "bit-crusher") selected = &crusherTarget;
     else if (id == "tanh-saturation") selected = &saturationTarget;
     else if (id == "wave-folder") selected = &folderTarget;
+    else if (id == "high-pass") selected = &highPassTarget;
+    else if (id == "low-pass") selected = &lowPassTarget;
     else return false;
     reset();
     return true;
@@ -121,6 +124,29 @@ bool AuditionEngine::setWaveOutputDb(float value) noexcept
 {
     if (!isValidWaveFolderSettings({0.0f, 1.0f, value, false})) return false;
     waveOutputDb.store(value, std::memory_order_relaxed); return true;
+}
+bool AuditionEngine::setFilterSettings(const CutoffSettings& value) noexcept
+{
+    if (!isValidCutoffSettings(value) || (selected != &highPassTarget && selected != &lowPassTarget)) return false;
+    const bool high = selected == &highPassTarget;
+    (high ? highCutoff : lowCutoff).store(value.cutoffHz,std::memory_order_relaxed);
+    (high ? highResponse : lowResponse).store(static_cast<unsigned>(value.response),std::memory_order_relaxed);
+    (high ? highBypass : lowBypass).store(value.bypass,std::memory_order_relaxed);
+    return high ? highPassTarget.setParameters(value) : lowPassTarget.setParameters(value);
+}
+bool AuditionEngine::setFilterCutoffHz(float value) noexcept
+{
+    if (!isValidCutoffSettings({value,false,FilterResponse::butterworth})
+        || (selected != &highPassTarget && selected != &lowPassTarget)) return false;
+    (selected == &highPassTarget ? highCutoff : lowCutoff).store(value,std::memory_order_relaxed);
+    return true;
+}
+bool AuditionEngine::setFilterResponse(FilterResponse value) noexcept
+{
+    if (static_cast<unsigned>(value) >= filterResponseIds.size()
+        || (selected != &highPassTarget && selected != &lowPassTarget)) return false;
+    (selected == &highPassTarget ? highResponse : lowResponse).store(static_cast<unsigned>(value),std::memory_order_relaxed);
+    return true;
 }
 bool AuditionEngine::setBitCrusherSettings(const BitCrusherSettings& value) noexcept
 {
@@ -191,12 +217,20 @@ bool AuditionEngine::setGainDb(float value) noexcept
 void AuditionEngine::setModuleMuted(bool value) noexcept { moduleMuted.store(value, std::memory_order_relaxed); }
 void AuditionEngine::setBypass(bool value) noexcept
 {
+    if (selected == &highPassTarget) { highBypass.store(value,std::memory_order_relaxed); return; }
+    if (selected == &lowPassTarget) { lowBypass.store(value,std::memory_order_relaxed); return; }
     (selected == &target ? bypass : selected == &productionTarget ? productionBypass
         : selected == &saturationTarget ? tanhBypass : selected == &folderTarget ? waveBypass : crusherBypass)
         .store(value, std::memory_order_relaxed);
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if (selected == &highPassTarget)
+        return highPassTarget.setParameters({highCutoff.load(std::memory_order_relaxed), highBypass.load(std::memory_order_relaxed),
+            static_cast<FilterResponse>(highResponse.load(std::memory_order_relaxed))});
+    if (selected == &lowPassTarget)
+        return lowPassTarget.setParameters({lowCutoff.load(std::memory_order_relaxed), lowBypass.load(std::memory_order_relaxed),
+            static_cast<FilterResponse>(lowResponse.load(std::memory_order_relaxed))});
     if (selected == &folderTarget)
         return folderTarget.setParameters({waveDriveDb.load(std::memory_order_relaxed),
             waveThreshold.load(std::memory_order_relaxed), waveOutputDb.load(std::memory_order_relaxed),

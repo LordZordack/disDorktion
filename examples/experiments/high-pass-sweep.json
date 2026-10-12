@@ -1,0 +1,30 @@
+{
+  "version": 7,
+  "targetId": "high-pass",
+  "cutoffHz": 1000.0,
+  "response": "butterworth",
+  "bypass": false,
+  "sampleRate": 48000.0,
+  "channels": 2,
+  "blockSize": 256,
+  "renderDurationSamples": 240000,
+  "filePath": "",
+  "fileHash": "",
+  "sourceConversion": "linear;mono-duplicate;stereo-average",
+  "originalSampleRate": 0.0,
+  "originalChannels": 0,
+  "monitorDb": -18.0,
+  "muted": true,
+  "midiDevice": "",
+  "buildIdentity": "0.1.0-c1326a3-Release",
+  "observations": "Listening pending: compare sweep coloration/ringing and bypass at monitor -18 dB; also audition your own transient/music file.",
+  "source": {
+    "kind": "sweep",
+    "frequency": 20.0,
+    "frequency2": 20000.0,
+    "amplitude": 0.25,
+    "phase": 0.0,
+    "durationSamples": 240000,
+    "seed": 1
+  }
+}

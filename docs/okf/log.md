@@ -66,3 +66,7 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-12T01:09:44Z: Recorded wave folder correctness, spectral and CPU qualification results
 
 - 2026-10-12T02:21:18Z: Reviewed issue 7 for publication; include compact evidence and preserve open listening, GUI and VS2022 gates
+
+- 2026-10-12T12:58:50Z: Added high-pass and low-pass response designs and numerical/realtime/diagnostic CPU evidence; listening and reference CPU qualification pending
+
+- 2026-10-12T15:59:47Z: Documented Release audition launch and publication artifacts for issue 8

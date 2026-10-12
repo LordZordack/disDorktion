@@ -1,5 +1,6 @@
 #pragma once
 #include "SignalSource.h"
+#include "dsp/CutoffFilter.h"
 #include <juce_core/juce_core.h>
 
 namespace disdorktion::harness
@@ -14,6 +15,8 @@ struct ExperimentRecord
     float gainDb = 0.0f;
     float driveDb = 0.0f, outputDb = 0.0f;
     float threshold = 1.0f;
+    float cutoffHz = 1000.0f;
+    FilterResponse response = FilterResponse::butterworth;
     unsigned bitDepth = 64;
     float captureRateHz = 384000.0f;
     float mix = 1.0f, crush = 0.0f, shape = 0.0f, jitter = 0.0f;

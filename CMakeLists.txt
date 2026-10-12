@@ -53,6 +53,7 @@ if(BUILD_TESTING)
         tests/BitCrusherTests.cpp
         tests/TanhSaturationTests.cpp
         tests/WaveFolderTests.cpp
+        tests/CutoffFilterTests.cpp
         tests/BenchmarkSamplingTests.cpp
     )
     target_link_libraries(disdorktion_dsp_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -64,6 +65,7 @@ if(BUILD_TESTING)
         tests/BitCrusherRealtimeTests.cpp
         tests/TanhSaturationRealtimeTests.cpp
         tests/WaveFolderRealtimeTests.cpp
+        tests/CutoffFilterRealtimeTests.cpp
         tests/AllocationTracking.cpp
     )
     target_link_libraries(disdorktion_realtime_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -170,11 +172,14 @@ add_executable(disdorktion_tanh_saturation_measurements tools/TanhSaturationMeas
 target_link_libraries(disdorktion_tanh_saturation_measurements PRIVATE disdorktion_harness)
 add_executable(disdorktion_wave_folder_measurements tools/WaveFolderMeasureMain.cpp)
 target_link_libraries(disdorktion_wave_folder_measurements PRIVATE disdorktion_harness)
+add_executable(disdorktion_cutoff_filter_measurements tools/CutoffFilterMeasureMain.cpp)
+target_link_libraries(disdorktion_cutoff_filter_measurements PRIVATE disdorktion_harness)
 target_compile_definitions(disdorktion_wave_folder_measurements PRIVATE DISDORKTION_GIT_REVISION="${DISDORKTION_REVISION}")
 
 if(BUILD_TESTING)
     add_executable(disdorktion_harness_tests
         tests/HarnessEngineTests.cpp
+        tests/CutoffHarnessTests.cpp
         tests/SignalSourceTests.cpp
         tests/SineVoiceTests.cpp
         tests/LoopSourceTests.cpp
@@ -184,6 +189,7 @@ if(BUILD_TESTING)
     target_compile_definitions(disdorktion_harness_tests PRIVATE DISDORKTION_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     catch_discover_tests(disdorktion_harness_tests TEST_PREFIX "harness::" PROPERTIES TIMEOUT 30)
     add_executable(disdorktion_harness_realtime_tests
+        tests/CutoffHarnessRealtimeTests.cpp
         tests/HarnessRealtimeTests.cpp tests/AllocationTracking.cpp)
     target_link_libraries(disdorktion_harness_realtime_tests PRIVATE disdorktion_harness Catch2::Catch2WithMain)
     catch_discover_tests(disdorktion_harness_realtime_tests TEST_PREFIX "harness-rt::" PROPERTIES TIMEOUT 30)

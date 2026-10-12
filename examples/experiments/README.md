@@ -1,5 +1,11 @@
 # Generated experiment examples
 
+`high-pass-sweep.json` and `low-pass-sweep.json` are version-7, 48 kHz stereo,
+five-second sweeps from 20 Hz to 20 kHz at peak amplitude 0.25, cutoff 1 kHz,
+Butterworth, monitor −18 dB and monitoring muted. Restore in the audition app
+and switch response to compare Chebyshev I/II, or pass the record to
+`disdorktion_render`. The filter measurement tool generates all six mode pairs.
+
 The five foundation JSON files use the complete version 1 [experiment schema](../../docs/AUDITION_HARNESS.md): impulse, sine, two-tone, logarithmic sweep, and seeded white noise. Each uses reference gain at unity, 48 kHz stereo, 256-frame processing, 48,000 source frames, and 48,000 render frames. They are settings examples; `buildIdentity: "example"` makes that provenance explicit and observations make no measured/listening claim.
 
 `gain-sine.json` and `gain-mute.json` use version 2, production target `gain`,

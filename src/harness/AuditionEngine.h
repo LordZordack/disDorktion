@@ -2,6 +2,7 @@
 #include "ReferenceGainTarget.h"
 #include "TanhSaturationTarget.h"
 #include "WaveFolderTarget.h"
+#include "CutoffFilterTarget.h"
 #include <atomic>
 
 namespace disdorktion::harness
@@ -34,6 +35,9 @@ public:
     bool setWaveDriveDb(float) noexcept;
     bool setWaveThreshold(float) noexcept;
     bool setWaveOutputDb(float) noexcept;
+    bool setFilterSettings(const CutoffSettings&) noexcept;
+    bool setFilterCutoffHz(float) noexcept;
+    bool setFilterResponse(FilterResponse) noexcept;
     bool setBitCrusherSettings(const BitCrusherSettings&) noexcept;
     bool setBitDepth(unsigned) noexcept;
     bool setCaptureRateHz(float) noexcept;
@@ -67,6 +71,8 @@ private:
     BitCrusherTarget crusherTarget;
     TanhSaturationTarget saturationTarget;
     WaveFolderTarget folderTarget;
+    CutoffFilterTarget<true> highPassTarget;
+    CutoffFilterTarget<false> lowPassTarget;
     AuditionTarget* selected = &target;
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> monitor {0.0f};
     std::atomic<float> gain {1.0f}, monitorDb {-18.0f};
@@ -75,6 +81,9 @@ private:
     std::atomic<bool> tanhBypass {false};
     std::atomic<float> waveDriveDb {0.0f}, waveThreshold {1.0f}, waveOutputDb {0.0f};
     std::atomic<bool> waveBypass {false};
+    std::atomic<float> highCutoff {20.f}, lowCutoff {20000.f};
+    std::atomic<unsigned> highResponse {0}, lowResponse {0};
+    std::atomic<bool> highBypass {false}, lowBypass {false};
     std::atomic<unsigned> bitDepth {64};
     std::atomic<float> captureRateHz {384000.0f};
     std::atomic<float> crusherMix {1.0f}, crush {0.0f}, quantizerShape {0.0f}, jitter {0.0f};

@@ -2,7 +2,7 @@
 type: "RootIndex"
 title: "Research Knowledge Base"
 description: "Index of DisDorktion research documents."
-timestamp: "2026-10-12T02:21:18Z"
+timestamp: "2026-10-12T15:59:47Z"
 okf_version: "0.2"
 ---
 

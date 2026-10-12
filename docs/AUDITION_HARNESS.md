@@ -1,5 +1,41 @@
 # Audition and measurement harness
 
+## High-pass and low-pass targets
+
+Select **High-pass** or **Low-pass**, then set **Cutoff (Hz)** and **Response**.
+Both use second-order filters: Butterworth is flat; Chebyshev I has 1 dB
+passband ripple; Chebyshev II has finite stopband zeros and a 40 dB stopband
+floor. Cutoff always means half power (−3.0103 dB). Defaults are 20 Hz high-pass,
+20000 Hz low-pass, Butterworth, and bypass off. Requested cutoff stays in
+20–20000 Hz; the display reports its effective cap at `0.45 * sampleRate`.
+Changing the audio device preserves the requested cutoff and live mode.
+
+Cutoff, response selection, and bypass have 10 ms transitions. Filter histories
+keep running during bypass; fully bypassed samples are exact dry. Latency is
+zero added samples, with the usual IIR phase response. Monitoring volume is
+applied after measurement and never changes offline renders. The filters have
+independent targets and controls; output-section/plugin integration is a later ticket.
+
+Version 7 requires targetId `high-pass` or `low-pass`, finite `cutoffHz` in
+[20,20000], and string `response` (`butterworth`, `chebyshev-1`, `chebyshev-2`),
+plus existing bypass/source/monitor fields. Invalid or mixed target schemas
+reject without changing the prior record; versions 1–6 retain their meaning.
+
+Load [high-pass sweep](../examples/experiments/high-pass-sweep.json) or
+[low-pass sweep](../examples/experiments/low-pass-sweep.json), switch responses,
+and save settings for comparison. Generate all six source/wet listening pairs
+and their exact metadata in a fresh directory:
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_cutoff_filter_measurements.exe cutoff-filter-measurements
+```
+
+The tool records independent impulse and stepped-sine checks and CPU diagnostics.
+Listen at −18 dB monitoring, compare modes/bypass, and also use transient/music
+material. Human listening results remain pending in the separate
+[high-pass](okf/notes/high_pass_validation.md) and
+[low-pass](okf/notes/low_pass_validation.md) notes.
+
 ## Production gain target
 
 Select **Gain (dB)** to audition the same production `Gain` implementation used
