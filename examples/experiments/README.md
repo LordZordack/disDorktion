@@ -34,3 +34,10 @@ New-Item -ItemType Directory -Force -Path '.\renders'
 ```
 
 Choose a new output directory on every run. The renderer preserves the example record in `result.json` and adds its actual `rendererBuildIdentity`. To restore these in the GUI, match 48 kHz, stereo, and a 256-frame device block first. Source frames and render frames are independent; a longer generated render contains silence after the source ends. For file experiments, save a successfully loaded WAV/AIFF in the app to obtain the absolute path, actual hash, and original format.
+
+`wave-folder-sine.json`, `wave-folder-sweep.json`, `wave-folder-two-tone.json`,
+and `wave-folder-extreme.json` use version 6 and target `wave-folder`, with
+explicit drive, threshold, output trim and bypass. They use generated sources;
+the settings make no human listening acceptance claim. Lower thresholds also
+lower the wet output ceiling. See the
+[wave-folder design](../../docs/okf/methods/wave_folding.md).

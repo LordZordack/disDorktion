@@ -177,3 +177,35 @@ counts: 28 complete ordinary distributions and two preserved capacity failures.
 It is unpinned battery evidence for a subset, with AC qualification pending.
 
 One full battery diagnostic and five targeted sampling retries are recorded in the [validation note](okf/notes/foundation_validation.md), with the [original CSV](measurements/reference_gain_battery_diagnostic.csv) and [retry CSV](measurements/reference_gain_battery_retries.csv). All 40 cases have complete distributions after replacing the five truncated distributions with their documented retries. AC-powered reference qualification remains pending; these diagnostics do not establish a performance pass.
+
+## Wave-folder baseline
+
+`disdorktion_wave_folder_benchmark` uses the revision-2 equal-wall-time
+collector, 150,000 preallocated timing slots and an adaptive 10–120 second
+window to obtain 100,000–200,000 observations. Every one of the 101 automation
+residues needs at least 100 observations. Qualify three pinned AC runs for
+stereo 48/96 kHz, capacities 32/64/127/256/1024, and steady/automation/bypass/
+oversized scenarios. Its p99 limit is 5% of the **incoming** block deadline.
+Keep builds and fixture generation out of the qualification runs.
+
+```powershell
+& '.\build\windows-vs2026\Release\disdorktion_wave_folder_benchmark.exe' `
+  --runs 3 --conditions 'Record actual power and thermal conditions; no competing builds' `
+  --output '.\docs\measurements\wave_folder_cpu_baseline.csv'
+& '.\build\windows-vs2026\Release\disdorktion_wave_folder_benchmark.exe' `
+  --diagnostic --output '.\docs\measurements\wave_folder_cpu_diagnostic.csv'
+```
+
+`--quick`, `--tiny-input`, `--wide-input` and `--extreme-input` are diagnostics;
+the three input options are mutually exclusive. Diagnostic runs intentionally
+return 1 and cannot qualify the reference budget. A fresh output path is
+required. See [wave-folder evidence](okf/notes/wave_folder_validation.md) for
+actual conditions, failures and remaining acceptance gates.
+
+Measured wave-folder baseline: all 120 rows qualified across three pinned AC
+runs; worst p99 was 1.01867% of incoming deadline (5% limit). See
+[the baseline CSV](measurements/wave_folder_cpu_baseline.csv) and
+[recorded conditions](okf/notes/wave_folder_validation.md). Thermal sensing
+and ambient conditions were unavailable/unconfirmed. The isolated result does
+not qualify the complete wet chain. The separate unpinned diagnostic and human
+listening remain distinct gates.

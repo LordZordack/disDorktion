@@ -45,8 +45,8 @@ private:
     juce::MidiKeyboardComponent keyboard{keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard};
     juce::ComboBox target, source, bitDepth;
     juce::Slider gain, monitor, captureRateHz, crusherMix, crusherCrush, crusherShape, crusherJitter;
-    juce::Slider tanhDrive, tanhOutput;
-    juce::Label tanhDriveLabel, tanhOutputLabel;
+    juce::Slider tanhDrive, tanhOutput, folderThreshold;
+    juce::Label tanhDriveLabel, tanhOutputLabel, folderThresholdLabel;
     juce::ToggleButton bypass{"Bypass"}, moduleMuted{"Mute module"}, muted{"Mute monitoring"};
     juce::TextButton apply{"Apply source"}, load{"Load WAV / AIFF"}, play{"Play / stop"}, restart{"Restart"};
     juce::TextButton save{"Save experiment"}, restore{"Load experiment"}, render{"Render offline"}, deviceButton{"Audio / MIDI devices"};

@@ -252,3 +252,41 @@ TEST_CASE("Harness resident loop wrapping allocates nothing", "[harness][realtim
     REQUIRE(audio.getSample(0,0) == audio.getSample(1,0));
     REQUIRE(audio.getMagnitude(0,257) == 0.5f);
 }
+TEST_CASE("Wave folder scalar automation remains valid during concurrent processing", "[harness][realtime][wave-folder]")
+{
+    using namespace disdorktion;
+    harness::AuditionEngine engine; REQUIRE(engine.selectTarget("wave-folder")); REQUIRE(engine.prepare({48000.0,32,2}));
+    juce::AudioBuffer<float> audio(2,257); std::atomic<bool> valid{true};
+    std::thread worker([&] {
+        for(int i=0;i<2000;++i) {
+            if(!engine.setWaveDriveDb(i%2 ? -24.0f : 36.0f) || !engine.setWaveThreshold(i%2 ? .05f : 1.0f)
+               || !engine.setWaveOutputDb(i%2 ? -60.0f : 12.0f)) valid.store(false);
+            engine.setBypass(i%3==0);
+        }
+    });
+    bool processed=true, finite=true;
+    for(int i=0;i<256;++i) {
+        for(int c=0;c<2;++c) for(int n=0;n<257;++n) audio.setSample(c,n,c==0 ? 2.0f : -2.0f);
+        processed &= engine.process(juce::dsp::AudioBlock<float>(audio),false);
+        for(int c=0;c<2;++c) for(int n=0;n<257;++n) finite &= std::isfinite(audio.getSample(c,n));
+    }
+    worker.join(); REQUIRE(valid.load()); REQUIRE(processed); REQUIRE(finite);
+}
+TEST_CASE("Wave folder harness live scalar updates and detached reset allocate nothing", "[harness][realtime][wave-folder]")
+{
+    using namespace disdorktion;
+    harness::AuditionEngine engine; REQUIRE(engine.selectTarget("wave-folder")); REQUIRE(engine.prepare({48000.0,32,2}));
+    juce::AudioBuffer<float> audio(2,257); audio.clear(); bool success=true;
+    {
+        test::ScopedAllocationTracking tracking;
+        for(int i=0;i<32;++i) {
+            success &= engine.setWaveDriveDb(i%2 ? -24.0f : 36.0f);
+            success &= engine.setWaveThreshold(i%2 ? .05f : 1.0f);
+            success &= engine.setWaveOutputDb(i%2 ? -60.0f : 12.0f); engine.setBypass(i%3==0);
+            success &= engine.process(juce::dsp::AudioBlock<float>(audio).getSubBlock(0,0),false);
+            success &= engine.process(juce::dsp::AudioBlock<float>(audio),false);
+        }
+        engine.reset();
+    }
+    const auto counts=test::getAllocationCounts(); REQUIRE(success); REQUIRE(counts.allocations==0); REQUIRE(counts.deallocations==0);
+}

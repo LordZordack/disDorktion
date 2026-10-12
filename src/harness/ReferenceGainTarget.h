@@ -3,13 +3,16 @@
 #include "dsp/ReferenceGain.h"
 #include "GainTarget.h"
 #include "BitCrusherTarget.h"
+#include "TanhSaturationTarget.h"
+#include "WaveFolderTarget.h"
 #include <array>
 
 namespace disdorktion::harness
 {
 inline constexpr std::array referenceGainControls { TargetControl {"gain", "Gain", 0.0f, 4.0f, 1.0f} };
 inline constexpr TargetDescriptor referenceGainDescriptor {"reference-gain", "Reference gain", referenceGainControls};
-inline constexpr std::array targetRegistry { referenceGainDescriptor, gainDescriptor, bitCrusherDescriptor };
+inline constexpr std::array targetRegistry { referenceGainDescriptor, gainDescriptor, bitCrusherDescriptor,
+    tanhSaturationDescriptor, waveFolderDescriptor };
 inline constexpr std::span<const TargetDescriptor> auditionTargets() noexcept { return targetRegistry; }
 
 class ReferenceGainTarget final : public AuditionTarget

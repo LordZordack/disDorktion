@@ -30,7 +30,7 @@ bool ExperimentRecord::validate(juce::String& error) const
     error.clear();
     if (!((version == 1 && targetId == "reference-gain") || (version == 2 && targetId == "gain")
         || ((version == 3 || version == 4) && targetId == "bit-crusher")
-        || (version == 5 && targetId == "tanh-saturation")))
+        || (version == 5 && targetId == "tanh-saturation") || (version == 6 && targetId == "wave-folder")))
         return fail(error, "Unsupported experiment version or target");
     if (!isValidProcessSpec({ sampleRate, blockSize, channels })) return fail(error, "Invalid process specification");
     if (version == 1 && (!std::isfinite(gain) || gain < 0 || gain > 4)) return fail(error, "Gain must be in [0, 4]");
@@ -47,12 +47,15 @@ bool ExperimentRecord::validate(juce::String& error) const
         return fail(error, "Legacy experiment cannot contain expressive crusher settings");
     if (version < 3 && (bitDepth != 64 || captureRateHz != 384000.0f))
         return fail(error, "Gain experiment cannot contain crusher settings");
-    if (version == 5 && (!std::isfinite(driveDb) || driveDb < -24 || driveDb > 36
+    if (version >= 5 && (!std::isfinite(driveDb) || driveDb < -24 || driveDb > 36
         || !std::isfinite(outputDb) || outputDb < -60 || outputDb > 12))
         return fail(error, "Invalid tanh saturation settings");
-    if (version != 5 && (driveDb != 0.0f || outputDb != 0.0f))
+    if (version < 5 && (driveDb != 0.0f || outputDb != 0.0f))
         return fail(error, "Foreign tanh saturation settings");
-    if (version == 5 && (gain != 1.0f || gainDb != 0.0f || mute
+    if (version == 6 && (!std::isfinite(threshold) || threshold < 0.05f || threshold > 1.0f))
+        return fail(error, "Invalid wave folder threshold");
+    if (version != 6 && threshold != 1.0f) return fail(error, "Foreign wave folder threshold");
+    if (version >= 5 && (gain != 1.0f || gainDb != 0.0f || mute
         || bitDepth != 64 || captureRateHz != 384000.0f))
         return fail(error, "Foreign gain or crusher settings");
     if (!std::isfinite(monitorDb) || monitorDb < -60 || monitorDb > 0) return fail(error, "Monitor dB must be in [-60, 0]");
@@ -89,8 +92,9 @@ juce::var ExperimentRecord::toJson() const
     put("version", version); put("targetId", targetId);
     if (version == 1) put("gain", gain);
     else if (version == 2) { put("gainDb", gainDb); put("mute", mute); }
-    else if (version == 5) { put("driveDb", driveDb); put("outputDb", outputDb); }
+    else if (version >= 5) { put("driveDb", driveDb); put("outputDb", outputDb); }
     else { put("bitDepth", static_cast<int>(bitDepth)); put("captureRateHz", captureRateHz); }
+    if (version == 6) put("threshold", threshold);
     if (version == 4)
     {
         put("mix", mix); put("crush", crush); put("shape", shape); put("jitter", jitter);
@@ -122,22 +126,27 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto get = [o](const char* key) { return o->getProperty(key); };
     for (auto key : {"targetId", "filePath", "fileHash", "sourceConversion", "midiDevice", "buildIdentity", "observations"})
         if (!get(key).isString()) return fail(error, juce::String("Missing or invalid string: ") + key);
-    if (!integer(get("version"), 1, 5)) return fail(error, "Unsupported or missing version");
+    if (!integer(get("version"), 1, 6)) return fail(error, "Unsupported or missing version");
     const auto version = static_cast<int>(get("version"));
     if ((version == 1 && get("targetId").toString() != "reference-gain")
         || (version == 2 && get("targetId").toString() != "gain")
         || ((version == 3 || version == 4) && get("targetId").toString() != "bit-crusher")
-        || (version == 5 && get("targetId").toString() != "tanh-saturation"))
+        || (version == 5 && get("targetId").toString() != "tanh-saturation")
+        || (version == 6 && get("targetId").toString() != "wave-folder"))
         return fail(error, "Unsupported target for version");
     if ((version != 1 && o->hasProperty("gain"))
         || (version != 2 && (o->hasProperty("gainDb") || o->hasProperty("mute")))
-        || ((version < 3 || version == 5) && (o->hasProperty("bitDepth") || o->hasProperty("captureRateHz")))
+        || ((version < 3 || version >= 5) && (o->hasProperty("bitDepth") || o->hasProperty("captureRateHz")))
         || (version != 4 && (o->hasProperty("mix") || o->hasProperty("crush")
             || o->hasProperty("shape") || o->hasProperty("jitter") || o->hasProperty("jitterSeed"))))
         return fail(error, "Mixed target schemas");
-    if (version != 5 && (o->hasProperty("driveDb") || o->hasProperty("outputDb")))
+    if (version < 5 && (o->hasProperty("driveDb") || o->hasProperty("outputDb")))
         return fail(error, "Mixed target schemas");
-    if (version == 5)
+    if (version != 6 && o->hasProperty("threshold")) return fail(error, "Mixed target schemas");
+    if (version == 6 && (!number(get("threshold")) || !std::isfinite(static_cast<double>(get("threshold")))
+        || static_cast<double>(get("threshold")) < 0.05 || static_cast<double>(get("threshold")) > 1.0))
+        return fail(error, "Missing or invalid wave folder threshold");
+    if (version >= 5)
     {
         for (auto key : {"driveDb", "outputDb"})
             if (!number(get(key)) || !std::isfinite(static_cast<double>(get(key))))
@@ -156,7 +165,7 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
         if ((version == 1 && (gainValue < 0 || gainValue > 4))
             || (version == 2 && (gainValue < -60 || gainValue > 24))) return fail(error, "Gain out of range");
     }
-    else if (version != 5 && (!integer(get("bitDepth"), 1, 64)
+    else if (version < 5 && (!integer(get("bitDepth"), 1, 64)
         || !isValidBitDepth(static_cast<unsigned>(static_cast<int>(get("bitDepth"))))
         || !number(get("captureRateHz")) || !std::isfinite(static_cast<double>(get("captureRateHz")))
         || static_cast<double>(get("captureRateHz")) < 100.0
@@ -199,7 +208,8 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     candidate.version = version; candidate.targetId = get("targetId").toString();
     if (version == 1) candidate.gain = static_cast<float>(gainValue);
     else if (version == 2) { candidate.gainDb = static_cast<float>(gainValue); candidate.mute = static_cast<bool>(get("mute")); }
-    else if (version == 5) { candidate.driveDb = static_cast<float>(get("driveDb")); candidate.outputDb = static_cast<float>(get("outputDb")); }
+    else if (version >= 5) { candidate.driveDb = static_cast<float>(get("driveDb")); candidate.outputDb = static_cast<float>(get("outputDb"));
+                            if (version == 6) candidate.threshold = static_cast<float>(get("threshold")); }
     else { candidate.bitDepth = static_cast<unsigned>(static_cast<int>(get("bitDepth")));
            candidate.captureRateHz = static_cast<float>(get("captureRateHz"));
            if (version == 4)

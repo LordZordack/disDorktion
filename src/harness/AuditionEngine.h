@@ -1,6 +1,7 @@
 #pragma once
 #include "ReferenceGainTarget.h"
 #include "TanhSaturationTarget.h"
+#include "WaveFolderTarget.h"
 #include <atomic>
 
 namespace disdorktion::harness
@@ -17,7 +18,7 @@ struct MeterSnapshot
 class AuditionEngine
 {
 public:
-    // prepare/reset/selectTarget/setParameters/setGainSettings/setBitCrusherSettings/setTanhSaturationSettings require a detached
+    // prepare/reset/selectTarget and bulk settings setters require a detached
     // callback. Scalar live setters and meter polling may run concurrently with
     // process(); independent scalar loads do not promise a whole-state snapshot.
     bool prepare(const juce::dsp::ProcessSpec& spec);
@@ -29,6 +30,10 @@ public:
     bool setTanhSaturationSettings(const TanhSaturationSettings&) noexcept;
     bool setTanhDriveDb(float) noexcept;
     bool setTanhOutputDb(float) noexcept;
+    bool setWaveFolderSettings(const WaveFolderSettings&) noexcept;
+    bool setWaveDriveDb(float) noexcept;
+    bool setWaveThreshold(float) noexcept;
+    bool setWaveOutputDb(float) noexcept;
     bool setBitCrusherSettings(const BitCrusherSettings&) noexcept;
     bool setBitDepth(unsigned) noexcept;
     bool setCaptureRateHz(float) noexcept;
@@ -61,12 +66,15 @@ private:
     GainTarget productionTarget;
     BitCrusherTarget crusherTarget;
     TanhSaturationTarget saturationTarget;
+    WaveFolderTarget folderTarget;
     AuditionTarget* selected = &target;
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> monitor {0.0f};
     std::atomic<float> gain {1.0f}, monitorDb {-18.0f};
     std::atomic<float> gainDb {0.0f};
     std::atomic<float> tanhDriveDb {0.0f}, tanhOutputDb {0.0f};
     std::atomic<bool> tanhBypass {false};
+    std::atomic<float> waveDriveDb {0.0f}, waveThreshold {1.0f}, waveOutputDb {0.0f};
+    std::atomic<bool> waveBypass {false};
     std::atomic<unsigned> bitDepth {64};
     std::atomic<float> captureRateHz {384000.0f};
     std::atomic<float> crusherMix {1.0f}, crush {0.0f}, quantizerShape {0.0f}, jitter {0.0f};

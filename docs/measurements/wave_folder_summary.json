@@ -1,0 +1,2650 @@
+{
+  "tool": "disdorktion_wave_folder_measurements",
+  "schemaVersion": 1,
+  "createdUtc": "2026-10-11T17:12:28.203-04:00",
+  "juceVersion": "JUCE v8.0.14",
+  "buildId": "0.1.0-ba2c2dc-Release",
+  "gitRevision": "ba2c2dc",
+  "compiler": "MSVC 195136252",
+  "configuration": "Release",
+  "buildDate": "Oct 11 2026 17:11:55",
+  "operatingSystem": "Windows 11",
+  "transitionFixtures": [
+    {
+      "name": "transition-tones",
+      "sampleRateHz": 48000,
+      "channels": 2,
+      "frames": 384000,
+      "preparedBlockFrames": 127,
+      "events": [
+        {
+          "driveDb": -24.0,
+          "threshold": 1.0,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 0
+        },
+        {
+          "driveDb": 6.0,
+          "threshold": 0.5,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 48000
+        },
+        {
+          "driveDb": 18.0,
+          "threshold": 0.25,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 96000
+        },
+        {
+          "driveDb": 36.0,
+          "threshold": 0.050000000745058,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 144000
+        },
+        {
+          "driveDb": 36.0,
+          "threshold": 1.0,
+          "outputDb": -12.0,
+          "bypass": false,
+          "frame": 192000
+        },
+        {
+          "driveDb": 12.0,
+          "threshold": 0.5,
+          "outputDb": 0.0,
+          "bypass": true,
+          "frame": 240000
+        },
+        {
+          "driveDb": -24.0,
+          "threshold": 0.050000000745058,
+          "outputDb": 12.0,
+          "bypass": true,
+          "frame": 288000
+        },
+        {
+          "driveDb": 0.0,
+          "threshold": 1.0,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 336000
+        }
+      ],
+      "initialSettings": {
+        "driveDb": 0.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "rampFrames": 480,
+      "rampConvention": "Independent linear a,T,g,b ramps; advance before applying each frame. Initial prepared defaults; no reset between events. Second channel is source polarity inverse.",
+      "sourceDefinition": "0.18*(sin(2*pi*110*t)+0.55*sin(2*pi*2700*t)); t=n/48000",
+      "listeningStatus": "Synthetic transition material; human listening pending",
+      "passed": true
+    },
+    {
+      "name": "transition-transients",
+      "sampleRateHz": 48000,
+      "channels": 2,
+      "frames": 384000,
+      "preparedBlockFrames": 127,
+      "events": [
+        {
+          "driveDb": -24.0,
+          "threshold": 1.0,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 0
+        },
+        {
+          "driveDb": 6.0,
+          "threshold": 0.5,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 48000
+        },
+        {
+          "driveDb": 18.0,
+          "threshold": 0.25,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 96000
+        },
+        {
+          "driveDb": 36.0,
+          "threshold": 0.050000000745058,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 144000
+        },
+        {
+          "driveDb": 36.0,
+          "threshold": 1.0,
+          "outputDb": -12.0,
+          "bypass": false,
+          "frame": 192000
+        },
+        {
+          "driveDb": 12.0,
+          "threshold": 0.5,
+          "outputDb": 0.0,
+          "bypass": true,
+          "frame": 240000
+        },
+        {
+          "driveDb": -24.0,
+          "threshold": 0.050000000745058,
+          "outputDb": 12.0,
+          "bypass": true,
+          "frame": 288000
+        },
+        {
+          "driveDb": 0.0,
+          "threshold": 1.0,
+          "outputDb": 0.0,
+          "bypass": false,
+          "frame": 336000
+        }
+      ],
+      "initialSettings": {
+        "driveDb": 0.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "rampFrames": 480,
+      "rampConvention": "Independent linear a,T,g,b ramps; advance before applying each frame. Initial prepared defaults; no reset between events. Second channel is source polarity inverse.",
+      "sourceDefinition": "0.18*exp(-(n%12000)/900)*(sin(2*pi*110*t)+0.55*sin(2*pi*2700*t)) plus 0.45*(1-(n%12000)/32) for first 32 frames each pulse",
+      "listeningStatus": "Synthetic transition material; human listening pending",
+      "passed": true
+    }
+  ],
+  "matchedListeningFixtures": [
+    {
+      "name": "matched-mild",
+      "sampleRateHz": 48000,
+      "channels": 2,
+      "frames": 192000,
+      "settings": {
+        "driveDb": 6.0,
+        "threshold": 0.5,
+        "outputDb": -5.785548210144043,
+        "bypass": false
+      },
+      "sourceDefinition": "0.2*sin(2*pi*440*t)+0.08*sin(2*pi*3700*t), t=n/48000; second channel polarity inverse; common scale applied to both saved files",
+      "actualWetRmsDeltaDb": -2.072684406432776e-07,
+      "rmsMatchLimitDb": 0.5,
+      "commonPeakScale": 1.0,
+      "matchingMethod": "Trim from independent reference RMS; check rendered RMS; common peak scale for source and wet if needed. These saved signals are comparison material, not listening observations.",
+      "passed": true
+    },
+    {
+      "name": "matched-aggressive",
+      "sampleRateHz": 48000,
+      "channels": 2,
+      "frames": 192000,
+      "settings": {
+        "driveDb": 18.0,
+        "threshold": 0.25,
+        "outputDb": 0.628837883472443,
+        "bypass": false
+      },
+      "sourceDefinition": "0.2*sin(2*pi*440*t)+0.08*sin(2*pi*3700*t), t=n/48000; second channel polarity inverse; common scale applied to both saved files",
+      "actualWetRmsDeltaDb": 7.309505757576035e-09,
+      "rmsMatchLimitDb": 0.5,
+      "commonPeakScale": 1.0,
+      "matchingMethod": "Trim from independent reference RMS; check rendered RMS; common peak scale for source and wet if needed. These saved signals are comparison material, not listening observations.",
+      "passed": true
+    }
+  ],
+  "latencySamples": 0,
+  "floatWavBits": 32,
+  "listeningStatus": "Pending; generated WAVs are synthetic comparison material and are not user listening evidence",
+  "qualityStatus": "Native-rate baseline for Q1; no anti-aliasing acceptance pass",
+  "failureMeaning": "Numerical, symmetry, significant-bin, and I/O failures are retained for diagnosis. Human listening and CPU qualification are separate gates.",
+  "spectraCsvWritten": true,
+  "passed": true,
+  "spectra": [
+    {
+      "name": "48000-sine1365-drive-24-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005034196515,
+      "maxEvenIndexDbr": -341.45005034196515,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.226096582189655e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.782299129728554e-09,
+      "conventionalTHDDb": -174.980388099269,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive-24-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.18523564483147,
+      "maxEvenIndexDbr": -233.33997925420417,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.074578312503037e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.566881574764767e-10,
+      "conventionalTHDDb": -188.9542261915899,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive-24-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005034196515,
+      "maxEvenIndexDbr": -341.45005034196515,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.226096582189655e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.782299129728554e-09,
+      "conventionalTHDDb": -174.980388099269,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive-24-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.18523564483147,
+      "maxEvenIndexDbr": -233.33997925420417,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.074578312503037e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.566881574764767e-10,
+      "conventionalTHDDb": -188.9542261915899,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive-24-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005034196515,
+      "maxEvenIndexDbr": -341.45005034196515,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.226096582189655e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.782299129728554e-09,
+      "conventionalTHDDb": -174.980388099269,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive-24-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.18523564483147,
+      "maxEvenIndexDbr": -233.33997925420417,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.074578312503037e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.566881574764767e-10,
+      "conventionalTHDDb": -188.9542261915899,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive0-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8192.0,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005077410275,
+      "maxEvenIndexDbr": -341.45005077410275,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 7.146345858741861e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.085929321305873e-09,
+      "conventionalTHDDb": -179.28396880554644,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive0-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8192.0,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.1028602267687,
+      "maxEvenIndexDbr": -233.2575762618569,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 9.424321830774442e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 7.533372536894234e-11,
+      "conventionalTHDDb": -202.46021111008451,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive0-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8192.0,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005077410275,
+      "maxEvenIndexDbr": -341.45005077410275,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 7.146345858741861e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.085929321305873e-09,
+      "conventionalTHDDb": -179.28396880554644,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive0-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8192.0,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.1028602267687,
+      "maxEvenIndexDbr": -233.2575762618569,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 9.424321830774442e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 7.533372536894234e-11,
+      "conventionalTHDDb": -202.46021111008451,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive0-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 828.0272216796875,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.387778780781446e-17,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 202,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -321.54314419346827,
+      "maxEvenIndexDbr": -321.54314419346827,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.909275952507676,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 2.183125413752696,
+      "conventionalTHDDb": 6.781573705811326,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive0-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 828.0272216796875,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.387778780781446e-17,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 202,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -230.19595364613423,
+      "maxEvenIndexDbr": -213.31135661308514,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.909275936917774,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.34066126280538,
+      "conventionalTHDDb": 2.546381220301064,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive12-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 32612.9375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 2.979957125504029e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.450050685053,
+      "maxEvenIndexDbr": -341.450050685053,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 6.526148172870705e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.776410108581121e-09,
+      "conventionalTHDDb": -175.00913528316573,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive12-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 32612.9375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 2.979957125504029e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.06167194495842,
+      "maxEvenIndexDbr": -233.21637505950895,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.037291330636176e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.820126657555505e-10,
+      "conventionalTHDDb": -194.79796779234772,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive12-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8989.95703125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.489302448032248e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 108,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -330.2574046409234,
+      "maxEvenIndexDbr": -330.2574046409234,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.785717419039193,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.26995346326575,
+      "conventionalTHDDb": 2.075756135383864,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive12-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8989.95703125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.489302448032248e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 108,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -238.86902590082886,
+      "maxEvenIndexDbr": -222.02372901537944,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.785717378703112,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.234830041983639,
+      "conventionalTHDDb": 1.832143736398894,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive12-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 580.3973999023438,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.862429342691652e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 666,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -306.4567614854304,
+      "maxEvenIndexDbr": -306.4567614854304,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.975908826202868,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.249719232867732,
+      "conventionalTHDDb": 10.23691681414026,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive12-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 580.3973388671875,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.862429342691652e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 666,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -201.74190647667388,
+      "maxEvenIndexDbr": -198.22094463593083,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.975908826333394,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 0.891577888680491,
+      "conventionalTHDDb": -0.99681421305819,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive36-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 12625.0830078125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 2.979801427827056e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 528,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -309.206936447623,
+      "maxEvenIndexDbr": -309.206936447623,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.961964406772677,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.319442410488933,
+      "conventionalTHDDb": 10.421302768146033,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive36-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 12625.083984375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 2.979801427827056e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 528,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -201.84586915154665,
+      "maxEvenIndexDbr": -200.9033475223573,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.961964403654704,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 0.907228117010515,
+      "conventionalTHDDb": -0.8456699698768,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive36-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 4640.2734375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.490069689857876e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1070,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -300.5131230631452,
+      "maxEvenIndexDbr": -300.5131230631452,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.976855330976403,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 2.53887805374419,
+      "conventionalTHDDb": 8.092836830724885,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive36-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 4640.2734375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.490069689857876e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1070,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -194.23067934191153,
+      "maxEvenIndexDbr": -192.23745881935085,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.976855330143113,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 0.989052266941492,
+      "conventionalTHDDb": -0.095615145923164,
+      "passed": true
+    },
+    {
+      "name": "48000-sine1365-drive36-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        999.755859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 222.41867065429688,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.862314143175059e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 8900,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -274.12567641818384,
+      "maxEvenIndexDbr": -274.12567641818384,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.99756177289449,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.208082282059981,
+      "conventionalTHDDb": 10.124909973952853,
+      "passed": true
+    },
+    {
+      "name": "48000-sine9833-drive36-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 222.418701171875,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.862314143175059e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 8901,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -167.0808054389525,
+      "maxEvenIndexDbr": -165.8740614611779,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.997561772923841,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.000042744272996,
+      "conventionalTHDDb": 0.000371264103252,
+      "passed": true
+    },
+    {
+      "name": "48000-two-tone-997-1499-mild",
+      "fixture": "two-tone",
+      "settings": {
+        "driveDb": 6.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.125,
+      "inputBins": [
+        997,
+        1499
+      ],
+      "inputFrequenciesHz": [
+        730.224609375,
+        1097.900390625
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8172.5947265625,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.489606910043406e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 2,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -342.9708890851126,
+      "maxEvenIndexDbr": -314.2310372472445,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "48000-two-tone-9833-12289-mild",
+      "fixture": "two-tone",
+      "settings": {
+        "driveDb": 6.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.125,
+      "inputBins": [
+        9833,
+        12289
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        9000.732421875
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8172.59423828125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.489734380299979e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 2,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -228.89933692438834,
+      "maxEvenIndexDbr": -228.62710175780563,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "48000-log-sweep-mild",
+      "fixture": "log-sweep",
+      "settings": {
+        "driveDb": 6.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 96000,
+      "fftFrames": 131072,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        0,
+        0
+      ],
+      "inputFrequenciesHz": [
+        0.0,
+        0.0
+      ],
+      "window": "symmetric Hann; zero padded to fftFrames",
+      "windowSum": 47999.5000000005,
+      "referencePeakMagnitude": 335.52490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.490106815715819e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 55502,
+      "maxSignificantBinDeviationDb": 0.005031409469554,
+      "dcDbr": -75.24249518407197,
+      "maxEvenIndexDbr": -6.320184527577925e-06,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "48000-two-tone-997-1499-aggressive",
+      "fixture": "two-tone",
+      "settings": {
+        "driveDb": 18.0,
+        "threshold": 0.25,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.125,
+      "inputBins": [
+        997,
+        1499
+      ],
+      "inputFrequenciesHz": [
+        730.224609375,
+        1097.900390625
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 1604.12158203125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 7.450446704027058e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 12339,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -316.82843205559055,
+      "maxEvenIndexDbr": -288.0885826900573,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "48000-two-tone-9833-12289-aggressive",
+      "fixture": "two-tone",
+      "settings": {
+        "driveDb": 18.0,
+        "threshold": 0.25,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.125,
+      "inputBins": [
+        9833,
+        12289
+      ],
+      "inputFrequenciesHz": [
+        7201.904296875,
+        9000.732421875
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 1604.0870361328125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 7.450537964359683e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 12569,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -202.44334944171675,
+      "maxEvenIndexDbr": -202.443262787279,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "48000-log-sweep-aggressive",
+      "fixture": "log-sweep",
+      "settings": {
+        "driveDb": 18.0,
+        "threshold": 0.25,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 96000,
+      "fftFrames": 131072,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        0,
+        0
+      ],
+      "inputFrequenciesHz": [
+        0.0,
+        0.0
+      ],
+      "window": "symmetric Hann; zero padded to fftFrames",
+      "windowSum": 47999.5000000005,
+      "referencePeakMagnitude": 100.93669128417969,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 7.450483119342266e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 65537,
+      "maxSignificantBinDeviationDb": 0.000399491717651,
+      "dcDbr": -36.70067230581533,
+      "maxEvenIndexDbr": -6.565311439197706e-07,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "48000-silence",
+      "fixture": "silence",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 12.0,
+        "bypass": false
+      },
+      "sampleRateHz": 48000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.0,
+      "inputBins": [
+        0,
+        0
+      ],
+      "inputFrequenciesHz": [
+        0.0,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 0.0,
+      "dbrNormalizationValid": false,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 0,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": null,
+      "maxEvenIndexDbr": null,
+      "symmetryAcceptanceApplicable": false,
+      "nonFundamentalRmsRatio": 0.0,
+      "conventionalTHDValid": false,
+      "conventionalTHDRatio": null,
+      "conventionalTHDDb": null,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive-24-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005034196515,
+      "maxEvenIndexDbr": -341.45005034196515,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.226096582189655e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.782299129728554e-09,
+      "conventionalTHDDb": -174.980388099269,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive-24-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.18523564483147,
+      "maxEvenIndexDbr": -233.33997925420417,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.074578312503037e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.566881574764767e-10,
+      "conventionalTHDDb": -188.9542261915899,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive-24-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005034196515,
+      "maxEvenIndexDbr": -341.45005034196515,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.226096582189655e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.782299129728554e-09,
+      "conventionalTHDDb": -174.980388099269,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive-24-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.18523564483147,
+      "maxEvenIndexDbr": -233.33997925420417,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.074578312503037e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.566881574764767e-10,
+      "conventionalTHDDb": -188.9542261915899,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive-24-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005034196515,
+      "maxEvenIndexDbr": -341.45005034196515,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.226096582189655e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.782299129728554e-09,
+      "conventionalTHDDb": -174.980388099269,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive-24-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": -24.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 516.8802490234375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 9.311299370429182e-10,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.18523564483147,
+      "maxEvenIndexDbr": -233.33997925420417,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.074578312503037e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.566881574764767e-10,
+      "conventionalTHDDb": -188.9542261915899,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive0-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8192.0,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005077410275,
+      "maxEvenIndexDbr": -341.45005077410275,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 7.146345858741861e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.085929321305873e-09,
+      "conventionalTHDDb": -179.28396880554644,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive0-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8192.0,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.1028602267687,
+      "maxEvenIndexDbr": -233.2575762618569,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 9.424321830774442e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 7.533372536894234e-11,
+      "conventionalTHDDb": -202.46021111008451,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive0-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8192.0,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.45005077410275,
+      "maxEvenIndexDbr": -341.45005077410275,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 7.146345858741861e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.085929321305873e-09,
+      "conventionalTHDDb": -179.28396880554644,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive0-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8192.0,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.1028602267687,
+      "maxEvenIndexDbr": -233.2575762618569,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 9.424321830774442e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 7.533372536894234e-11,
+      "conventionalTHDDb": -202.46021111008451,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive0-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 828.0272216796875,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.387778780781446e-17,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 202,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -321.54314419346827,
+      "maxEvenIndexDbr": -321.54314419346827,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.909275952507676,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 2.183125413752696,
+      "conventionalTHDDb": 6.781573705811326,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive0-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 0.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 828.0272216796875,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.387778780781446e-17,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 202,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -230.19595364613423,
+      "maxEvenIndexDbr": -213.31135661308514,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.909275936917774,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.34066126280538,
+      "conventionalTHDDb": 2.546381220301064,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive12-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 32612.9375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 2.979957125504029e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -341.450050685053,
+      "maxEvenIndexDbr": -341.450050685053,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 6.526148172870705e-08,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.776410108581121e-09,
+      "conventionalTHDDb": -175.00913528316573,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive12-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 32612.9375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 2.979957125504029e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -250.06167194495842,
+      "maxEvenIndexDbr": -233.21637505950895,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 1.037291330636176e-07,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.820126657555505e-10,
+      "conventionalTHDDb": -194.79796779234772,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive12-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8989.95703125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.489302448032248e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 108,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -330.2574046409234,
+      "maxEvenIndexDbr": -330.2574046409234,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.785717419039193,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.26995346326575,
+      "conventionalTHDDb": 2.075756135383864,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive12-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8989.95703125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.489302448032248e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 108,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -238.86902590082886,
+      "maxEvenIndexDbr": -222.02372901537944,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.785717378703112,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.234830041983639,
+      "conventionalTHDDb": 1.832143736398894,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive12-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 580.3973999023438,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.862429342691652e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 666,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -306.4567614854304,
+      "maxEvenIndexDbr": -306.4567614854304,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.975908826202868,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.249719232867732,
+      "conventionalTHDDb": 10.23691681414026,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive12-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 12.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 580.3973388671875,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.862429342691652e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 666,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -201.74190647667388,
+      "maxEvenIndexDbr": -198.22094463593083,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.975908826333394,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 0.891577888680491,
+      "conventionalTHDDb": -0.99681421305819,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive36-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 12625.0830078125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 2.979801427827056e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 528,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -309.206936447623,
+      "maxEvenIndexDbr": -309.206936447623,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.961964406772677,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.319442410488933,
+      "conventionalTHDDb": 10.421302768146033,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive36-threshold1.00",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 1.0,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 12625.083984375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 2.979801427827056e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 528,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -201.84586915154665,
+      "maxEvenIndexDbr": -200.9033475223573,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.961964403654704,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 0.907228117010515,
+      "conventionalTHDDb": -0.8456699698768,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive36-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 4640.2734375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.490069689857876e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1070,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -300.5131230631452,
+      "maxEvenIndexDbr": -300.5131230631452,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.976855330976403,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 2.53887805374419,
+      "conventionalTHDDb": 8.092836830724885,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive36-threshold0.50",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 4640.2734375,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.490069689857876e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 1070,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -194.23067934191153,
+      "maxEvenIndexDbr": -192.23745881935085,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.976855330143113,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 0.989052266941492,
+      "conventionalTHDDb": -0.095615145923164,
+      "passed": true
+    },
+    {
+      "name": "96000-sine1365-drive36-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        1365,
+        0
+      ],
+      "inputFrequenciesHz": [
+        1999.51171875,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 222.41867065429688,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.862314143175059e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 8900,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -274.12567641818384,
+      "maxEvenIndexDbr": -274.12567641818384,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.99756177289449,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 3.208082282059981,
+      "conventionalTHDDb": 10.124909973952853,
+      "passed": true
+    },
+    {
+      "name": "96000-sine9833-drive36-threshold0.05",
+      "fixture": "sine",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        9833,
+        0
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 222.418701171875,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.862314143175059e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 8901,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -167.0808054389525,
+      "maxEvenIndexDbr": -165.8740614611779,
+      "symmetryAcceptanceApplicable": true,
+      "nonFundamentalRmsRatio": 0.997561772923841,
+      "conventionalTHDValid": true,
+      "conventionalTHDRatio": 1.000042744272996,
+      "conventionalTHDDb": 0.000371264103252,
+      "passed": true
+    },
+    {
+      "name": "96000-two-tone-997-1499-mild",
+      "fixture": "two-tone",
+      "settings": {
+        "driveDb": 6.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.125,
+      "inputBins": [
+        997,
+        1499
+      ],
+      "inputFrequenciesHz": [
+        1460.44921875,
+        2195.80078125
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8172.5947265625,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.489606910043406e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 2,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -342.9708890851126,
+      "maxEvenIndexDbr": -314.2310372472445,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "96000-two-tone-9833-12289-mild",
+      "fixture": "two-tone",
+      "settings": {
+        "driveDb": 6.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.125,
+      "inputBins": [
+        9833,
+        12289
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        18001.46484375
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 8172.59423828125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.489734380299979e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 2,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -228.89933692438834,
+      "maxEvenIndexDbr": -228.62710175780563,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "96000-log-sweep-mild",
+      "fixture": "log-sweep",
+      "settings": {
+        "driveDb": 6.0,
+        "threshold": 0.5,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 192000,
+      "fftFrames": 262144,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        0,
+        0
+      ],
+      "inputFrequenciesHz": [
+        0.0,
+        0.0
+      ],
+      "window": "symmetric Hann; zero padded to fftFrames",
+      "windowSum": 95999.5000000002,
+      "referencePeakMagnitude": 570.4896850585938,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 1.49011134542576e-08,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 109467,
+      "maxSignificantBinDeviationDb": 0.005396355972115,
+      "dcDbr": -73.87997271114139,
+      "maxEvenIndexDbr": 0.0,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "96000-two-tone-997-1499-aggressive",
+      "fixture": "two-tone",
+      "settings": {
+        "driveDb": 18.0,
+        "threshold": 0.25,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.125,
+      "inputBins": [
+        997,
+        1499
+      ],
+      "inputFrequenciesHz": [
+        1460.44921875,
+        2195.80078125
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 1604.12158203125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 7.450446704027058e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 12339,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -316.82843205559055,
+      "maxEvenIndexDbr": -288.0885826900573,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "96000-two-tone-9833-12289-aggressive",
+      "fixture": "two-tone",
+      "settings": {
+        "driveDb": 18.0,
+        "threshold": 0.25,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.125,
+      "inputBins": [
+        9833,
+        12289
+      ],
+      "inputFrequenciesHz": [
+        14403.80859375,
+        18001.46484375
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 1604.0870361328125,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 7.450537964359683e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 12569,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": -202.44334944171675,
+      "maxEvenIndexDbr": -202.443262787279,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "96000-log-sweep-aggressive",
+      "fixture": "log-sweep",
+      "settings": {
+        "driveDb": 18.0,
+        "threshold": 0.25,
+        "outputDb": 0.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 192000,
+      "fftFrames": 262144,
+      "inputAmplitudePerTone": 0.25,
+      "inputBins": [
+        0,
+        0
+      ],
+      "inputFrequenciesHz": [
+        0.0,
+        0.0
+      ],
+      "window": "symmetric Hann; zero padded to fftFrames",
+      "windowSum": 95999.5000000002,
+      "referencePeakMagnitude": 181.19424438476562,
+      "dbrNormalizationValid": true,
+      "maxSampleReferenceError": 7.450495331795537e-09,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 131072,
+      "maxSignificantBinDeviationDb": 0.00066873940242,
+      "dcDbr": -28.82877902607328,
+      "maxEvenIndexDbr": -0.888037486472783,
+      "symmetryAcceptanceApplicable": false,
+      "passed": true
+    },
+    {
+      "name": "96000-silence",
+      "fixture": "silence",
+      "settings": {
+        "driveDb": 36.0,
+        "threshold": 0.050000000745058,
+        "outputDb": 12.0,
+        "bypass": false
+      },
+      "sampleRateHz": 96000,
+      "channels": 1,
+      "frames": 65536,
+      "fftFrames": 65536,
+      "inputAmplitudePerTone": 0.0,
+      "inputBins": [
+        0,
+        0
+      ],
+      "inputFrequenciesHz": [
+        0.0,
+        0.0
+      ],
+      "window": "rectangular; coherent bins",
+      "windowSum": 65536.0,
+      "referencePeakMagnitude": 0.0,
+      "dbrNormalizationValid": false,
+      "maxSampleReferenceError": 0.0,
+      "sampleReferenceTolerance": 2e-07,
+      "allFinite": true,
+      "significantReferenceBinCount": 0,
+      "maxSignificantBinDeviationDb": 0.0,
+      "dcDbr": null,
+      "maxEvenIndexDbr": null,
+      "symmetryAcceptanceApplicable": false,
+      "nonFundamentalRmsRatio": 0.0,
+      "conventionalTHDValid": false,
+      "conventionalTHDRatio": null,
+      "conventionalTHDDb": null,
+      "passed": true
+    }
+  ],
+  "evidenceScope": "Compact metrics from the complete local measurement report; full-bin CSV, harmonic/IM location arrays and WAVs are reproducible local artifacts, not included in this commit.",
+  "completeReportSha256": "d415f54463f40768d9ec441e1fb4f8b5febe6fd6ec8a0480779b794aa3b2175e",
+  "reproductionCommand": "build/windows-vs2026/Release/disdorktion_wave_folder_measurements.exe <fresh-output-directory>",
+  "dbrNormalization": "Largest non-DC reference magnitude, including Nyquist; undefined for zero reference AC power.",
+  "interpretation": "Sampled-reference agreement verifies implementation fidelity, not alias suppression. Foldback/IM collisions cannot be isolated by bin magnitude. Human listening remains pending."
+}

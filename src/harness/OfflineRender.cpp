@@ -114,6 +114,8 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
             record.mix, record.crush, record.shape, record.jitter, record.jitterSeed});
     else if (record.version == 5 && record.targetId == "tanh-saturation")
         settingsReady = engine.setTanhSaturationSettings({record.driveDb, record.outputDb, record.bypass});
+    else if (record.version == 6 && record.targetId == "wave-folder")
+        settingsReady = engine.setWaveFolderSettings({record.driveDb, record.threshold, record.outputDb, record.bypass});
     if (!engine.selectTarget(record.targetId.toStdString())
         || !settingsReady
         || !engine.prepare({record.sampleRate, record.blockSize, record.channels}))

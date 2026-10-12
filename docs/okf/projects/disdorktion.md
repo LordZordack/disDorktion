@@ -26,6 +26,11 @@ Carrier modulation and demodulation, resonant comb filtering, frequency warping,
 
 ## Evidence status
 
+The [wave-folder design](../methods/wave_folding.md) is implemented with smoothed
+controls, version-6 experiment records and native-rate measurement tools. Its
+automated correctness, spectral and three-run CPU evidence, and pending human
+listening, GUI and Q1 gates, are recorded in the [validation note](../notes/wave_folder_validation.md).
+
 The [tanh saturation method](../methods/tanh_saturation.md) passed its automated correctness, spectral, deterministic-render, example-render and revision-2 CPU qualification checks under recorded conditions; see the [validation note](../notes/tanh_saturation_validation.md). The full unpinned diagnostic completed with its expected unqualified status. Thermal/ambient conditions were unavailable or unconfirmed. Generated fixtures are not user listening observations. Human listening, GUI/VS2022 checks, Q1 antialiasing and production integration remain open.
 
 The [reusable gain design](../methods/gain.md) is implemented in the shared harness and independent plugin input/output stages. Debug and Release checks verify correctness; [gain validation](../notes/gain_validation.md) records fixtures and battery diagnostics. Human listening and manual host checks remain pending. The bit crusher's verified legacy sine and transient renders were user-auditioned as “Sounds as intended”; musical-category listening remains pending. Its three-run AC CPU baseline passed for the legacy version. Expressive CPU qualification passed; expressive WAV listening remains open.

@@ -236,3 +236,81 @@ TEST_CASE("Tanh version five records require explicit strict controls", "[experi
     tanh.mix = 0;
     REQUIRE_FALSE(tanh.validate(error));
 }
+TEST_CASE("Wave folder version six requires its own explicit controls", "[experiment][wave-folder]")
+{
+    auto json = ExperimentRecord{}.toJson();
+    auto* object = json.getDynamicObject();
+    object->setProperty("version", 6); object->setProperty("targetId", "wave-folder");
+    object->removeProperty("gain"); object->setProperty("driveDb", 18.0);
+    object->setProperty("threshold", 0.25); object->setProperty("outputDb", -6.0);
+    ExperimentRecord restored; juce::String error;
+    REQUIRE(ExperimentRecord::fromJson(json, restored, error));
+    REQUIRE(restored.version == 6); REQUIRE(restored.targetId == "wave-folder");
+    REQUIRE(static_cast<double>(restored.toJson().getDynamicObject()->getProperty("threshold")) == 0.25);
+    const auto retained = juce::JSON::toString(restored.toJson());
+    for (const auto* key : {"driveDb", "threshold", "outputDb", "bypass"})
+    {
+        auto missing = juce::JSON::parse(juce::JSON::toString(json)); missing.getDynamicObject()->removeProperty(key);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(missing, restored, error));
+        REQUIRE(juce::JSON::toString(restored.toJson()) == retained);
+    }
+    for (auto bad : {juce::var(true), juce::var("0.5"), juce::var(0.0499999999), juce::var(1.000000001),
+                    juce::var(std::numeric_limits<double>::infinity())})
+    {
+        auto invalid = juce::JSON::parse(juce::JSON::toString(json)); invalid.getDynamicObject()->setProperty("threshold", bad);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(invalid, restored, error));
+        REQUIRE(juce::JSON::toString(restored.toJson()) == retained);
+    }
+    for (int version = 1; version <= 5; ++version)
+    {
+        ExperimentRecord old; old.version = version;
+        old.targetId = version == 1 ? "reference-gain" : version == 2 ? "gain" : version == 5 ? "tanh-saturation" : "bit-crusher";
+        REQUIRE_FALSE(old.toJson().getDynamicObject()->hasProperty("threshold"));
+        REQUIRE(ExperimentRecord::fromJson(old.toJson(), restored, error));
+        auto mixed = old.toJson(); mixed.getDynamicObject()->setProperty("threshold", 1.0);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(mixed, restored, error));
+    }
+}
+TEST_CASE("Every legacy example retains all serialized fields after wave folder addition", "[experiment][wave-folder]")
+{
+    const auto directory = juce::File(DISDORKTION_SOURCE_DIR).getChildFile("examples/experiments");
+    const auto files = directory.findChildFiles(juce::File::findFiles,false,"*.json");
+    REQUIRE_FALSE(files.isEmpty()); int legacyCount = 0;
+    for (const auto& file : files)
+    {
+        const auto json = juce::JSON::parse(file.loadFileAsString());
+        if (static_cast<int>(json.getProperty("version",0)) >= 6) continue;
+        INFO(file.getFileName()); ++legacyCount;
+        ExperimentRecord restored; juce::String error;
+        REQUIRE(ExperimentRecord::fromJson(json,restored,error));
+        const auto roundtrip = restored.toJson();
+        for (const auto& field : json.getDynamicObject()->getProperties())
+        {
+            INFO(field.name.toString());
+            const auto actual = roundtrip.getProperty(field.name,{});
+            const auto numeric = [](const juce::var& v) { return v.isInt() || v.isInt64() || v.isDouble(); };
+            if (numeric(field.value))
+            {
+                REQUIRE(numeric(actual));
+                const auto key = field.name.toString();
+                const bool floatField = key == "gain" || key == "gainDb" || key == "driveDb" || key == "outputDb"
+                    || key == "captureRateHz" || key == "mix" || key == "crush" || key == "shape" || key == "jitter" || key == "monitorDb";
+                if (floatField) REQUIRE(static_cast<float>(actual) == static_cast<float>(field.value));
+                else REQUIRE(static_cast<double>(actual) == static_cast<double>(field.value));
+            }
+            else if (field.name == juce::Identifier("source"))
+            {
+                for (const auto& sourceField : field.value.getDynamicObject()->getProperties())
+                {
+                    const auto sourceActual = actual.getProperty(sourceField.name,{});
+                    if (numeric(sourceField.value))
+                    { REQUIRE(numeric(sourceActual)); REQUIRE(static_cast<double>(sourceActual) == static_cast<double>(sourceField.value)); }
+                    else REQUIRE(sourceActual == sourceField.value);
+                }
+            }
+            else REQUIRE(actual == field.value);
+        }
+        REQUIRE_FALSE(roundtrip.getDynamicObject()->hasProperty("threshold"));
+    }
+    REQUIRE(legacyCount >= 5);
+}

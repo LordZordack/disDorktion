@@ -182,9 +182,26 @@ A successful render publishes three files together:
 
 Rendering prepares/resets a fresh target, uses recorded block size, and processes an exact final partial block. It checks the WAV RIFF size budget before writing. An existing output destination is rejected, including an empty directory; the parent must already exist. A staging directory is published by a no-replace rename only after all files succeed. Failure or cancellation cleans incomplete staging; cancellation is an I/O failure. Exit codes are **0** for success/help, **2** for invalid arguments/requests, and **1** for processing/I/O failure. Monitoring fields remain provenance in the experiment and do not change rendered audio.
 
-The target registry supports reference gain, production gain, and bit crusher.
+The target registry supports reference gain, production gain, bit crusher,
+tanh saturation, and wave folder.
 The bit crusher's expressive extension uses version-4 records; its new controls
 and persistence behavior are described above.
+
+## Wave folder
+
+Select **Wave folder** for drive (-24 to +36 dB), fold threshold (0.05 to 1),
+output trim (-60 to +12 dB), and bypass. Threshold is an input fold boundary
+after drive and also sets the wet output ceiling before trim. Controls ramp
+over 10 ms; default settings preserve inputs in [-1, 1]. Monitoring remains
+independent. The module has zero latency and runs at the native sample rate.
+
+Version **6** requires target `wave-folder` and explicit numeric `driveDb`,
+`threshold`, `outputDb`, and boolean `bypass`. Versions 1–5 retain their field
+meanings and reject `threshold`; version 6 rejects gain/crusher fields.
+Restoring a record detaches processing before applying its complete state.
+Live scalar updates are independent atomic values, not a whole-state snapshot.
+See [the design](okf/methods/wave_folding.md) and
+[validation evidence](okf/notes/wave_folder_validation.md).
 
 ## Extend a target
 

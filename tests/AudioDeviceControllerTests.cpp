@@ -382,3 +382,122 @@ TEST_CASE("Prepared app callbacks including MIDI queues and malformed outputs al
     const auto counts = test::getAllocationCounts();
     REQUIRE(counts.allocations == 0); REQUIRE(counts.deallocations == 0);
 }
+
+TEST_CASE("Wave folder device restoration applies every wet control and bypass before processing", "[controller][wave-folder]")
+{
+    using namespace disdorktion;
+    for (const auto channels : {1, 2})
+    for (const auto bypass : {false, true})
+    {
+        AudioDeviceController controller;
+        CallbackDevice device(48000.0, 32, channels == 1
+            ? std::initializer_list<int>{0} : std::initializer_list<int>{0, 1});
+        auto record = callbackRecord();
+        record.version = 6; record.targetId = "wave-folder";
+        record.driveDb = 12.0f; record.threshold = 0.2f; record.outputDb = -6.0f;
+        record.bypass = bypass;
+        controller.configure(record);
+        controller.audioDeviceAboutToStart(&device);
+        REQUIRE(controller.isReady());
+        REQUIRE(controller.engine().selectedTargetId() == "wave-folder");
+        REQUIRE_FALSE(controller.isPlaying());
+        controller.setPlaying(true);
+        juce::AudioBuffer<float> audio(channels, 257), dry(channels, 257);
+        harness::SignalSource source;
+        REQUIRE(source.prepare(record.source, 48000.0, static_cast<unsigned>(channels)));
+        source.process(juce::dsp::AudioBlock<float>(dry));
+        callback(controller, audio);
+        const auto drive = std::pow(10.0L, record.driveDb / 20.0L);
+        const auto trim = std::pow(10.0L, record.outputDb / 20.0L);
+        double squares = 0.0;
+        float peak = 0.0f;
+        for (int n = 0; n < 257; ++n)
+        {
+            const auto input = dry.getSample(0, n);
+            const auto phase = std::abs(drive * input) / record.threshold;
+            const auto cell = static_cast<unsigned>(std::floor((phase + 1.0L) / 2.0L));
+            const auto reflected = (phase - 2.0L * cell) * (cell % 2 == 0 ? 1.0L : -1.0L);
+            const auto wet = static_cast<float>(trim * record.threshold * reflected * (input < 0 ? -1.0L : 1.0L));
+            const auto expected = bypass ? input : wet;
+            for (int c = 0; c < channels; ++c)
+            {
+                if (bypass) REQUIRE(audio.getSample(c, n) == expected);
+                else REQUIRE(audio.getSample(c, n) == Catch::Approx(expected).margin(2e-7));
+            }
+            peak = std::max(peak, std::abs(expected));
+            squares += static_cast<double>(expected) * expected;
+        }
+        REQUIRE(controller.engine().meters().outputPeak == Catch::Approx(peak).margin(2e-7));
+        REQUIRE(controller.engine().meters().outputRms == Catch::Approx(std::sqrt(squares / 257.0)).margin(2e-7));
+        controller.engine().setMuted(true);
+        controller.restart(); callback(controller, audio);
+        REQUIRE(audio.getMagnitude(0, 0, 257) == 0.0f);
+        REQUIRE(controller.engine().meters().outputPeak == Catch::Approx(peak).margin(2e-7));
+    }
+}
+
+TEST_CASE("Stopped wave folder restoration and device reprepare retain live settings", "[controller][wave-folder]")
+{
+    AudioDeviceController controller;
+    CallbackDevice first(48000.0, 32), second(96000.0, 64);
+    auto record = callbackRecord(SourceKind::impulse);
+    record.version = 6; record.targetId = "wave-folder";
+    controller.configure(record); controller.audioDeviceAboutToStart(&first);
+    REQUIRE(controller.engine().setWaveDriveDb(6.0f));
+    REQUIRE(controller.engine().setWaveThreshold(0.125f));
+    REQUIRE(controller.engine().setWaveOutputDb(-6.0f));
+    controller.audioDeviceStopped();
+    controller.audioDeviceAboutToStart(&second); controller.setPlaying(true);
+    juce::AudioBuffer<float> audio(2, 64);
+    callback(controller, audio);
+    const auto expected = std::pow(10.0, -6.0 / 20.0) * (0.25 * std::pow(10.0, 6.0 / 20.0) - 0.5);
+    REQUIRE(audio.getSample(0, 0) == Catch::Approx(expected).margin(2e-7));
+    REQUIRE(controller.engine().selectedTargetId() == "wave-folder");
+    controller.audioDeviceStopped();
+    auto other = callbackRecord(SourceKind::impulse);
+    other.version = 5; other.targetId = "tanh-saturation";
+    controller.configure(other); controller.audioDeviceAboutToStart(&first);
+    REQUIRE(controller.engine().selectedTargetId() == "tanh-saturation");
+    controller.audioDeviceStopped();
+    record.threshold = 0.125f; record.outputDb = -6.0f; record.bypass = true;
+    controller.configure(record); controller.audioDeviceAboutToStart(&second);
+    REQUIRE_FALSE(controller.isPlaying());
+    controller.setPlaying(true); callback(controller, audio);
+    REQUIRE(controller.engine().selectedTargetId() == "wave-folder");
+    REQUIRE(audio.getSample(0, 0) == 0.25f);
+}
+
+TEST_CASE("Wave folder callbacks and live controls allocate nothing", "[controller][wave-folder][realtime]")
+{
+    using namespace disdorktion;
+    AudioDeviceController controller;
+    CallbackDevice device;
+    auto record = callbackRecord();
+    record.version = 6; record.targetId = "wave-folder";
+    record.driveDb = 36.0f; record.threshold = 0.05f; record.outputDb = 12.0f;
+    controller.configure(record); controller.audioDeviceAboutToStart(&device); controller.setPlaying(true);
+    juce::AudioBuffer<float> audio(2, 1024);
+    callback(controller, audio);
+    std::array<float*, 4> sparse {audio.getWritePointer(0), nullptr, nullptr, audio.getWritePointer(1)};
+    std::array<float*, 1> malformed {audio.getWritePointer(0)};
+    {
+        test::ScopedAllocationTracking tracking;
+        controller.engine().setWaveDriveDb(-24.0f);
+        controller.engine().setWaveThreshold(1.0f);
+        controller.engine().setWaveOutputDb(-60.0f);
+        callback(controller, sparse.data(), 4, 1024);
+        controller.engine().setWaveDriveDb(36.0f);
+        controller.engine().setWaveThreshold(0.05f);
+        controller.engine().setWaveOutputDb(12.0f);
+        controller.engine().setBypass(true);
+        controller.restart(); callback(controller, audio);
+        controller.engine().setBypass(false);
+        callback(controller, sparse.data(), 4, 0);
+        callback(controller, malformed.data(), 1, 1024);
+        callback(controller, audio);
+        controller.setPlaying(false); callback(controller, audio);
+        controller.audioDeviceStopped(); callback(controller, audio);
+    }
+    const auto counts = test::getAllocationCounts();
+    REQUIRE(counts.allocations == 0); REQUIRE(counts.deallocations == 0);
+}
