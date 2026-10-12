@@ -35,7 +35,7 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     prepared = false;
     clearMeters();
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
-        || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec)) return false;
+        || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -58,6 +58,7 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     else if (id == "gain") selected = &productionTarget;
     else if (id == "bit-crusher") selected = &crusherTarget;
     else if (id == "tanh-saturation") selected = &saturationTarget;
+    else if (id == "wave-folder") selected = &folderTarget;
     else return false;
     reset();
     return true;
@@ -96,6 +97,30 @@ bool AuditionEngine::setTanhOutputDb(float value) noexcept
     if (!isValidTanhSaturationSettings({0.0f, value, false})) return false;
     tanhOutputDb.store(value, std::memory_order_relaxed);
     return true;
+}
+bool AuditionEngine::setWaveFolderSettings(const WaveFolderSettings& value) noexcept
+{
+    if (!isValidWaveFolderSettings(value)) return false;
+    waveDriveDb.store(value.driveDb, std::memory_order_relaxed);
+    waveThreshold.store(value.threshold, std::memory_order_relaxed);
+    waveOutputDb.store(value.outputDb, std::memory_order_relaxed);
+    waveBypass.store(value.bypass, std::memory_order_relaxed);
+    return folderTarget.setParameters(value);
+}
+bool AuditionEngine::setWaveDriveDb(float value) noexcept
+{
+    if (!isValidWaveFolderSettings({value, 1.0f, 0.0f, false})) return false;
+    waveDriveDb.store(value, std::memory_order_relaxed); return true;
+}
+bool AuditionEngine::setWaveThreshold(float value) noexcept
+{
+    if (!isValidWaveFolderSettings({0.0f, value, 0.0f, false})) return false;
+    waveThreshold.store(value, std::memory_order_relaxed); return true;
+}
+bool AuditionEngine::setWaveOutputDb(float value) noexcept
+{
+    if (!isValidWaveFolderSettings({0.0f, 1.0f, value, false})) return false;
+    waveOutputDb.store(value, std::memory_order_relaxed); return true;
 }
 bool AuditionEngine::setBitCrusherSettings(const BitCrusherSettings& value) noexcept
 {
@@ -167,11 +192,15 @@ void AuditionEngine::setModuleMuted(bool value) noexcept { moduleMuted.store(val
 void AuditionEngine::setBypass(bool value) noexcept
 {
     (selected == &target ? bypass : selected == &productionTarget ? productionBypass
-        : selected == &saturationTarget ? tanhBypass : crusherBypass)
+        : selected == &saturationTarget ? tanhBypass : selected == &folderTarget ? waveBypass : crusherBypass)
         .store(value, std::memory_order_relaxed);
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if (selected == &folderTarget)
+        return folderTarget.setParameters({waveDriveDb.load(std::memory_order_relaxed),
+            waveThreshold.load(std::memory_order_relaxed), waveOutputDb.load(std::memory_order_relaxed),
+            waveBypass.load(std::memory_order_relaxed)});
     if (selected == &saturationTarget)
         return saturationTarget.setParameters({tanhDriveDb.load(std::memory_order_relaxed),
             tanhOutputDb.load(std::memory_order_relaxed), tanhBypass.load(std::memory_order_relaxed)});

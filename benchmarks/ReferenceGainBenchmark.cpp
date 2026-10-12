@@ -10,8 +10,12 @@
 #endif
 
 #include "dsp/ReferenceGain.h"
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+#include "dsp/WaveFolder.h"
+#else
 #include "dsp/TanhSaturation.h"
+#endif
 #include "WallTimeSampling.h"
 #include "AutomationCoverage.h"
 #include "TimingWindow.h"
@@ -44,7 +48,7 @@ namespace
 {
 using Clock = std::chrono::steady_clock;
 using Nanoseconds = std::chrono::nanoseconds;
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
 constexpr std::size_t timingCapacity = disdorktion::benchmark::WallTimeSampler::targetSlots;
 #else
 constexpr std::size_t timingCapacity = 200000;
@@ -78,6 +82,10 @@ struct Options
 {
     unsigned stages = 1;
     bool tinyInput = false;
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+    bool wideInput = false;
+    bool extremeInput = false;
+#endif
     unsigned runs = 3;
     bool diagnostic = false;
     bool quick = false;
@@ -96,6 +104,11 @@ std::optional<Options> parseOptions(int argc, char** argv)
         const std::string argument = argv[i];
         auto value = [&]() -> const char* { return ++i < argc ? argv[i] : nullptr; };
         if (argument == "--diagnostic") options.diagnostic = true;
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+        else if (argument == "--tiny-input") options.tinyInput = true;
+        else if (argument == "--wide-input") options.wideInput = true;
+        else if (argument == "--extreme-input") options.extremeInput = true;
+#endif
 #if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
         else if (argument == "--tiny-input") options.tinyInput = true;
         else if (argument == "--stages")
@@ -134,6 +147,10 @@ std::optional<Options> parseOptions(int argc, char** argv)
         if (!valid) return std::nullopt;
         if (!options.filter.empty() && !options.caseId.ends_with("/" + options.filter)) return std::nullopt;
     }
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+    if (static_cast<unsigned>(options.tinyInput) + static_cast<unsigned>(options.wideInput)
+        + static_cast<unsigned>(options.extremeInput) > 1) return std::nullopt;
+#endif
     if (options.diagnostic) options.runs = 1;
     if (options.quick && !specifiedRuns) options.runs = 1;
     return options;
@@ -335,7 +352,7 @@ struct Result
     unsigned rate = 0, block = 0, actual = 0, run = 0;
     Scenario scenario = Scenario::steady;
     std::size_t count = 0, stride = 0;
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     std::size_t automationCovered = 0, automationMinimum = 0, automationMaximum = 0;
 #endif
     double warmupProjectedCallbacks = 0, calibratedCallbacks = 0, measurementSeconds = 0;
@@ -385,7 +402,23 @@ double measureTimerOverhead()
     return percentile(samples, 0.5);
 }
 
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+disdorktion::WaveFolderSettings parametersFor(Scenario scenario, std::uint64_t index)
+{
+    // The coprime permutations visit every state of each of the three controls.
+    // Joint-cycle coverage therefore proves per-control coverage for this cycle.
+    const auto state = index % 101;
+    switch (scenario)
+    {
+        case Scenario::automation: return {
+            static_cast<float>(-24.0 + static_cast<double>(state) * .6),
+            static_cast<float>(.05 + static_cast<double>((state * 3) % 101) * .0095),
+            static_cast<float>(-60.0 + static_cast<double>((state * 7) % 101) * .72), false};
+        case Scenario::bypass: return {36.0f, .05f, 12.0f, (index / 8) % 2 != 0};
+        default: return {36.0f, .05f, 12.0f, false};
+    }
+}
+#elif defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
 disdorktion::TanhSaturationSettings parametersFor(Scenario scenario, std::uint64_t index)
 {
     switch (scenario)
@@ -442,7 +475,11 @@ disdorktion::GainParameters parametersFor(Scenario scenario, std::uint64_t index
 
 Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned run,
                    bool quick, double timerOverhead, const std::string& environmentReason, unsigned stages = 1,
-                   bool tinyInput = false)
+                   bool tinyInput = false
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+                   , bool wideInput = false, bool extremeInput = false
+#endif
+                   )
 {
     Result result;
     result.rate = rate;
@@ -451,7 +488,10 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
     result.run = run;
     result.scenario = scenario;
     const auto blockDeadline = 1e9 * static_cast<double>(result.actual) / rate;
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+    const auto budgetPercent = 5u;
+    disdorktion::WaveFolder gain;
+#elif defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
     const auto budgetPercent = 5u;
     disdorktion::TanhSaturation gain;
 #elif defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
@@ -464,7 +504,7 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
 
 #if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
     GainBenchmarkPath gain(stages);
-#elif !defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) && !defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#elif !defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) && !(defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     disdorktion::ReferenceGain gain;
 #endif
     if (!gain.prepare({static_cast<double>(rate), block, 2}) || !gain.setParameters(parametersFor(scenario, 0)))
@@ -483,8 +523,14 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
         {
             auto* samples = audio.getWritePointer(channel);
             for (unsigned sample = 0; sample < result.actual; ++sample)
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+                samples[sample] = tinyInput ? (sample % 2 == 0 ? 1.0e-40f : -1.0e-40f)
+                    : extremeInput ? (sample % 2 == 0 ? std::numeric_limits<float>::max() : -std::numeric_limits<float>::max())
+                    : (wideInput ? 8.0f : 1.0f) * (static_cast<float>((sample * 37u + channel * 13u + iteration) % 257u) / 256.0f - 0.5f);
+#else
                 samples[sample] = tinyInput ? (sample % 2 == 0 ? 1.0e-40f : -1.0e-40f)
                     : static_cast<float>((sample * 37u + channel * 13u + iteration) % 257u) / 257.0f - 0.5f;
+#endif
         }
         const auto controls = parametersFor(scenario, iteration);
         const bool dynamic = scenario == Scenario::automation || scenario == Scenario::bypass || scenario == Scenario::mute;
@@ -514,7 +560,7 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
     const auto probeFinished = Clock::now();
     result.calibratedCallbacks = static_cast<double>(iteration - beforeProbe) * targetSeconds
         / std::chrono::duration<double>(probeFinished - probeStart).count();
-#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) || defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) || (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     const auto windowSeconds = quick ? 0.2 : disdorktion::benchmark::timingWindowSeconds(result.calibratedCallbacks);
     if (!quick)
     {
@@ -522,19 +568,19 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
         result.calibratedCallbacks *= windowSeconds / targetSeconds;
     }
 #endif
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     result.stride = 0; // Not applicable to revision 2 wall-time sampling.
 #else
     result.stride = static_cast<std::size_t>(selectSamplingStride(static_cast<std::uint64_t>(std::ceil(result.calibratedCallbacks))));
 #endif
     const auto measureStart = Clock::now();
-#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) || defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) || (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     const auto measureEnd = measureStart + std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(windowSeconds));
 #else
     const auto measureEnd = measureStart + (quick ? std::chrono::milliseconds(200) : measurementDuration);
 #endif
     std::uint64_t callbackNumber = 0;
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     disdorktion::benchmark::AutomationCoverage coverage;
     disdorktion::benchmark::WallTimeSampler sampler(std::chrono::duration_cast<Nanoseconds>(measureEnd - measureStart).count());
     while (true)
@@ -550,11 +596,11 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
         const bool record = scheduled && result.count < timings.size();
         if (scheduled && !record) result.reason = "200000 timing capacity exhausted; full window retained, sampled distribution truncated";
 #endif
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
         const auto controlIteration = iteration;
 #endif
         callback(record, result.count);
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
         if (record && scenario == Scenario::automation) coverage.record(controlIteration);
 #endif
         if (record) ++result.count;
@@ -570,7 +616,7 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
     }
     if (!quick && result.count < minimumTimings)
         result.reason = "fewer than 100000 sampled callbacks; revise measurement method";
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     result.automationCovered = coverage.coveredCount();
     result.automationMinimum = coverage.minimum();
     result.automationMaximum = coverage.maximum();
@@ -613,10 +659,10 @@ Result measureCase(unsigned rate, unsigned block, Scenario scenario, unsigned ru
 
 void writeHeader(std::ostream& out)
 {
-#if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK) || defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) || defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK) || defined(DISDORKTION_BIT_CRUSHER_BENCHMARK) || (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     out << "target,stages,latency_samples,input_profile,";
 #endif
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     out << "collector_revision,sampling_mode,automation_settings_covered,automation_min_samples_per_setting,automation_max_samples_per_setting,";
 #endif
     out << "mode,run,rate_hz,prepared_block,actual_block,scenario,timing_count,sampling_stride,warmup_projected_callbacks,calibrated_callbacks,measurement_seconds,median_ns,p95_ns,p99_ns,max_ns,timer_only_median_ns,p99_budget_ns,p99_block_deadline_fraction,p99_budget_fraction,qualified,reason,cpu,architecture,physical_memory,os,sdk,compiler,power_scheme_guid,ac_status,battery_percent,topology,affinity,conditions,thermal_measurement\n";
@@ -624,14 +670,17 @@ void writeHeader(std::ostream& out)
 
 void writeResult(std::ostream& out, const Result& result, const Platform& platform, const Options& options)
 {
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+    out << "wave-folder,1,0," << (options.tinyInput ? "subnormal" : options.wideInput ? "curve-envelope[-4;4]"
+        : options.extremeInput ? "finite-float-extremes" : "ordinary") << ',';
+#elif defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
     out << "tanh-saturation,1,0," << (options.tinyInput ? "subnormal" : "ordinary") << ',';
 #elif defined(DISDORKTION_BIT_CRUSHER_BENCHMARK)
     out << "bit-crusher,1,0,ordinary,";
 #elif defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
     out << "production-gain," << options.stages << ",0," << (options.tinyInput ? "subnormal" : "ordinary") << ',';
 #endif
-#if defined(DISDORKTION_TANH_SATURATION_BENCHMARK)
+#if (defined(DISDORKTION_TANH_SATURATION_BENCHMARK) || defined(DISDORKTION_WAVE_FOLDER_BENCHMARK))
     out << "2,equal-wall-time-slots-150000-no-catchup,"
         << result.automationCovered << ',' << result.automationMinimum << ',' << result.automationMaximum << ',';
 #endif
@@ -655,7 +704,9 @@ int main(int argc, char** argv)
     if (!parsed)
     {
         std::cerr << "Usage: benchmark [--runs N] [--diagnostic] [--quick] [--case NAME] [--case-id RATE/BLOCK/SCENARIO] [--conditions TEXT] [--output FILE]";
-#if defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+        std::cerr << " [--tiny-input|--wide-input|--extreme-input] (cases steady|automation|bypass|oversized)";
+#elif defined(DISDORKTION_PRODUCTION_GAIN_BENCHMARK)
         std::cerr << " [--stages 1|2|3] [--tiny-input] (cases steady|automation|bypass|oversized|mute)";
 #else
         std::cerr << " (cases steady|automation|bypass|oversized)";
@@ -668,7 +719,12 @@ int main(int argc, char** argv)
     ThreadAffinity affinity;
     const auto platform = observePlatform(options.diagnostic, affinity);
     const bool releaseBuild = compilerName().find(" Release") != std::string::npos;
-    const bool environmentQualified = releaseBuild && !options.tinyInput && !options.quick && !options.diagnostic && options.runs >= 3
+    const bool specialInput = options.tinyInput
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+        || options.wideInput || options.extremeInput
+#endif
+        ;
+    const bool environmentQualified = releaseBuild && !specialInput && !options.quick && !options.diagnostic && options.runs >= 3
         && options.filter.empty() && options.caseId.empty()
         && platform.hybridEstablished && platform.pinned && platform.onAC && platform.power != "unavailable"
         && platform.cpu.find("Ultra") != std::string::npos && platform.cpu.find("155H") != std::string::npos
@@ -678,6 +734,9 @@ int main(int argc, char** argv)
     {
         if (!releaseBuild) environmentReason = "Debug build; Release reference qualification unavailable";
         else if (options.tinyInput) environmentReason = "tiny-input diagnostic; reference qualification unavailable";
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+        else if (specialInput) environmentReason = "finite-envelope diagnostic; reference qualification unavailable";
+#endif
         else if (options.diagnostic) environmentReason = platform.onAC
             ? "unpinned diagnostic; reference qualification unavailable"
             : "unpinned battery diagnostic; reference qualification unavailable";
@@ -688,6 +747,13 @@ int main(int argc, char** argv)
     std::ofstream file;
     if (!options.output.empty())
     {
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+        const auto requested = juce::String(options.output);
+        const auto destination = juce::File::isAbsolutePath(requested) ? juce::File(requested)
+            : juce::File::getCurrentWorkingDirectory().getChildFile(requested);
+        if (destination.exists())
+        { std::cerr << "Output file must not exist; refusing to alter previous results\n"; return 2; }
+#endif
         file.open(options.output, std::ios::out | std::ios::trunc);
         if (!file) { std::cerr << "Cannot open output file: " << options.output << '\n'; return 2; }
     }
@@ -703,7 +769,11 @@ int main(int argc, char** argv)
                 {
                     if (!options.filter.empty() && options.filter != scenarioName(scenario)) continue;
                     if (!options.caseId.empty() && options.caseId != std::to_string(rate) + "/" + std::to_string(block) + "/" + scenarioName(scenario)) continue;
-                    const auto result = measureCase(rate, block, scenario, run, options.quick, timerOverhead, environmentReason, options.stages, options.tinyInput);
+                    const auto result = measureCase(rate, block, scenario, run, options.quick, timerOverhead, environmentReason, options.stages, options.tinyInput
+#if defined(DISDORKTION_WAVE_FOLDER_BENCHMARK)
+                        , options.wideInput, options.extremeInput
+#endif
+                    );
                     writeResult(out, result, platform, options);
                     out.flush();
                     allQualified &= result.qualified;

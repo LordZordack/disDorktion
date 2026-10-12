@@ -38,6 +38,7 @@ MainComponent::MainComponent()
     target.addItem("Gain (dB)", 2);
     target.addItem("Bit crusher", 3);
     target.addItem("Tanh saturation", 4);
+    target.addItem("Wave folder", 5);
     target.setSelectedId(1);
     for (const auto* name : {"Impulse", "Sine", "Two-tone", "Logarithmic sweep", "Seeded white noise", "Audio file loop", "Keyboard / MIDI sine"})
         source.addItem(name, source.getNumItems() + 1);
@@ -75,9 +76,13 @@ MainComponent::MainComponent()
     tanhOutputLabel.setText("Output trim (dB)", juce::dontSendNotification);
     tanhDrive.setRange(-24, 36, 0); tanhDrive.setValue(0);
     tanhOutput.setRange(-60, 12, 0); tanhOutput.setValue(0);
-    for (juce::Component* control : std::initializer_list<juce::Component*>{&tanhDrive, &tanhOutput, &tanhDriveLabel, &tanhOutputLabel})
+    folderThresholdLabel.setText("Fold threshold", juce::dontSendNotification);
+    folderThreshold.setRange(0.05, 1.0, 0); folderThreshold.setValue(1.0);
+    folderThreshold.setNumDecimalPlacesToDisplay(4);
+    for (juce::Component* control : std::initializer_list<juce::Component*>{&tanhDrive, &tanhOutput,
+        &tanhDriveLabel, &tanhOutputLabel, &folderThreshold, &folderThresholdLabel})
         control->setVisible(false);
-    for (auto* slider : {&gain, &monitor, &captureRateHz, &crusherMix, &crusherCrush, &crusherShape, &crusherJitter, &tanhDrive, &tanhOutput})
+    for (auto* slider : {&gain, &monitor, &captureRateHz, &crusherMix, &crusherCrush, &crusherShape, &crusherJitter, &tanhDrive, &tanhOutput, &folderThreshold})
     {
         slider->setSliderStyle(juce::Slider::LinearHorizontal);
         slider->setTextBoxStyle(juce::Slider::TextBoxRight, false, 85, 26);
@@ -91,7 +96,8 @@ MainComponent::MainComponent()
         &bypass,&moduleMuted,&muted,&apply,&load,&play,&restart,
         &save,&restore,&render,&deviceButton,&frequency,&frequency2,&amplitude,&phase,&duration,&seed,
         &renderDuration,&observations,&meterLabel,&deviceLabel,&statusLabel,&keyboard}) addAndMakeVisible(*component);
-    for (juce::Component* control : std::initializer_list<juce::Component*>{&tanhDrive, &tanhOutput, &tanhDriveLabel, &tanhOutputLabel})
+    for (juce::Component* control : std::initializer_list<juce::Component*>{&tanhDrive, &tanhOutput,
+        &tanhDriveLabel, &tanhOutputLabel, &folderThreshold, &folderThresholdLabel})
         addChildComponent(*control);
     observations.setMultiLine(true);
     observations.setReturnKeyStartsNewLine(true);
@@ -105,13 +111,14 @@ MainComponent::MainComponent()
     target.onChange = [this] {
         auto next = snapshot();
         const auto selected = target.getSelectedId();
-        next.version = selected == 4 ? 5 : selected == 3 ? 4 : selected;
-        next.targetId = selected == 1 ? "reference-gain" : selected == 2 ? "gain" : selected == 3 ? "bit-crusher" : "tanh-saturation";
+        next.version = selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
+        next.targetId = selected == 1 ? "reference-gain" : selected == 2 ? "gain" : selected == 3 ? "bit-crusher"
+            : selected == 4 ? "tanh-saturation" : "wave-folder";
         next.gain = 1.0f; next.gainDb = 0.0f; next.mute = false; next.bypass = false;
         next.bitDepth = 64; next.captureRateHz = 384000.0f;
         next.mix = 1.0f; next.crush = 0.0f; next.shape = 0.0f;
         next.jitter = 0.0f; next.jitterSeed = 1;
-        next.driveDb = 0.0f; next.outputDb = 0.0f;
+        next.driveDb = 0.0f; next.outputDb = 0.0f; next.threshold = 1.0f;
         configureRecord(next);
     };
     gain.onValueChange = [this] {
@@ -126,8 +133,17 @@ MainComponent::MainComponent()
     crusherCrush.onValueChange = [this] { audio.engine().setCrush(static_cast<float>(crusherCrush.getValue())); };
     crusherShape.onValueChange = [this] { audio.engine().setQuantizerShape(static_cast<float>(crusherShape.getValue())); };
     crusherJitter.onValueChange = [this] { audio.engine().setJitter(static_cast<float>(crusherJitter.getValue())); };
-    tanhDrive.onValueChange = [this] { audio.engine().setTanhDriveDb(static_cast<float>(tanhDrive.getValue())); };
-    tanhOutput.onValueChange = [this] { audio.engine().setTanhOutputDb(static_cast<float>(tanhOutput.getValue())); };
+    tanhDrive.onValueChange = [this] {
+        if (target.getSelectedId() == 5) audio.engine().setWaveDriveDb(static_cast<float>(tanhDrive.getValue()));
+        else if (target.getSelectedId() == 4) audio.engine().setTanhDriveDb(static_cast<float>(tanhDrive.getValue()));
+    };
+    tanhOutput.onValueChange = [this] {
+        if (target.getSelectedId() == 5) audio.engine().setWaveOutputDb(static_cast<float>(tanhOutput.getValue()));
+        else if (target.getSelectedId() == 4) audio.engine().setTanhOutputDb(static_cast<float>(tanhOutput.getValue()));
+    };
+    folderThreshold.onValueChange = [this] {
+        if (target.getSelectedId() == 5) audio.engine().setWaveThreshold(static_cast<float>(folderThreshold.getValue()));
+    };
     jitterSeed.onTextChange = [this] {
         std::uint32_t value = 0;
         if (readCrusherSeed(value))
@@ -212,6 +228,8 @@ void MainComponent::resized()
     half = row.removeFromLeft(row.getWidth() / 2);
     crusherShapeLabel.setBounds(half.removeFromLeft(75)); crusherShape.setBounds(half.reduced(2));
     crusherJitterLabel.setBounds(row.removeFromLeft(75)); crusherJitter.setBounds(row.reduced(2));
+    folderThresholdLabel.setBounds(crusherShapeLabel.getBounds().withWidth(130));
+    folderThreshold.setBounds(crusherShape.getBounds().getUnion(crusherJitter.getBounds()).withTrimmedLeft(60));
     row = bounds.removeFromTop(38);
     jitterSeedLabel.setBounds(row.removeFromLeft(90)); jitterSeed.setBounds(row.removeFromLeft(190).reduced(2));
     monitorLabel.setBounds(bounds.removeFromTop(24));
@@ -240,10 +258,11 @@ ExperimentRecord MainComponent::snapshot() const
     auto result = record;
     if (result.version == 2) { result.gainDb = static_cast<float>(gain.getValue()); result.mute = moduleMuted.getToggleState(); }
     else if (result.version == 1) result.gain = static_cast<float>(gain.getValue());
-    else if (result.version == 5)
+    else if (result.version == 5 || result.version == 6)
     {
         result.driveDb = static_cast<float>(tanhDrive.getValue());
         result.outputDb = static_cast<float>(tanhOutput.getValue());
+        result.threshold = result.version == 6 ? static_cast<float>(folderThreshold.getValue()) : 1.0f;
     }
     else
     {
@@ -321,19 +340,30 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     const auto production = record.version == 2;
     const auto crusher = record.version == 3 || record.version == 4;
     const auto saturation = record.version == 5;
-    target.setSelectedId(saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
+    const auto folder = record.version == 6;
+    const auto driven = saturation || folder;
+    target.setSelectedId(folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
     gain.setRange(production ? -60.0 : 0.0, production ? 24.0 : 4.0, 0.0);
-    gainLabel.setText(saturation ? "Tanh saturation: drive and wet output trim"
+    gainLabel.setText(folder ? "Wave folder: drive, threshold and wet output trim"
+        : saturation ? "Tanh saturation: drive and wet output trim"
         : production ? "Module gain (dB)" : "Module gain (linear amplitude)", juce::dontSendNotification);
     gain.setValue(production ? record.gainDb : record.gain, juce::dontSendNotification);
-    gain.setEnabled(!crusher && !saturation);
+    gain.setEnabled(!crusher && !driven);
     gainLabel.setEnabled(!crusher);
-    gain.setVisible(!saturation);
-    moduleMuted.setVisible(!saturation);
+    gain.setVisible(!driven);
+    moduleMuted.setVisible(!driven);
     tanhDrive.setValue(record.driveDb, juce::dontSendNotification);
     tanhOutput.setValue(record.outputDb, juce::dontSendNotification);
+    folderThreshold.setValue(record.threshold, juce::dontSendNotification);
     for (juce::Component* control : std::initializer_list<juce::Component*>{&tanhDrive, &tanhOutput, &tanhDriveLabel, &tanhOutputLabel})
-        control->setVisible(saturation);
+    {
+        control->setEnabled(driven);
+        control->setVisible(driven);
+    }
+    folderThreshold.setEnabled(folder);
+    folderThreshold.setVisible(folder);
+    folderThresholdLabel.setEnabled(folder);
+    folderThresholdLabel.setVisible(folder);
     bitDepth.setSelectedId(static_cast<int>(record.bitDepth), juce::dontSendNotification);
     updateCaptureRateMapping();
     captureRateHz.setValue(record.captureRateHz, juce::dontSendNotification);
@@ -348,7 +378,7 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
         &crusherMixLabel, &crusherCrushLabel, &crusherShapeLabel, &crusherJitterLabel, &jitterSeedLabel})
     {
         control->setEnabled(crusher);
-        control->setVisible(!saturation);
+        control->setVisible(!driven);
     }
     moduleMuted.setEnabled(production); moduleMuted.setToggleState(record.mute, juce::dontSendNotification);
     bypass.setToggleState(record.bypass, juce::dontSendNotification);
@@ -414,7 +444,8 @@ void MainComponent::setWorkerControlsEnabled(bool enabled)
     for (juce::Component* component : std::initializer_list<juce::Component*>{
         &target,&source,&apply,&load,&save,&restore,&render,&frequency,&frequency2,
         &amplitude,&phase,&duration,&renderDuration,&seed,&gain,&bitDepth,&captureRateHz,
-        &crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed,&tanhDrive,&tanhOutput,
+        &crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed,&tanhDrive,&tanhOutput,&folderThreshold,
+        &tanhDriveLabel,&tanhOutputLabel,&folderThresholdLabel,
         &bypass,&moduleMuted,&observations})
         component->setEnabled(enabled);
     gain.setEnabled(enabled && record.version < 3);
@@ -424,8 +455,11 @@ void MainComponent::setWorkerControlsEnabled(bool enabled)
         &crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed})
         control->setEnabled(enabled && (record.version == 3 || record.version == 4));
     moduleMuted.setEnabled(enabled && record.version == 2);
-    tanhDrive.setEnabled(enabled && record.version == 5);
-    tanhOutput.setEnabled(enabled && record.version == 5);
+    for (juce::Component* control : std::initializer_list<juce::Component*>{
+        &tanhDrive,&tanhOutput,&tanhDriveLabel,&tanhOutputLabel})
+        control->setEnabled(enabled && (record.version == 5 || record.version == 6));
+    folderThreshold.setEnabled(enabled && record.version == 6);
+    folderThresholdLabel.setEnabled(enabled && record.version == 6);
     // Monitoring remains available during worker activity. Its current settings
     // are retained when a newly loaded source replaces the old one.
 }

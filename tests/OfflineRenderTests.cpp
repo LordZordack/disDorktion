@@ -204,3 +204,21 @@ TEST_CASE("Offline cancellation never publishes a partial result", "[render]")
     REQUIRE(result.message.contains("cancelled")); REQUIRE_FALSE(destination.exists());
     REQUIRE(fixture.root.findChildFiles(juce::File::findDirectories, false, ".disdorktion-render-*").isEmpty());
 }
+TEST_CASE("Wave folder offline output is deterministic across blocks and bypass is exact", "[render][wave-folder]")
+{
+    RenderFixture fixture;
+    ExperimentRecord record; record.version = 6; record.targetId = "wave-folder";
+    record.driveDb = 18.0f; record.threshold = 0.25f; record.outputDb = -6.0f;
+    record.source.durationSamples = 1027; record.renderDurationSamples = 1027; record.blockSize = 17;
+    const auto first = fixture.root.getChildFile("folder-a"), second = fixture.root.getChildFile("folder-b");
+    auto result = renderExperiment(record, first); INFO(result.message); REQUIRE(result.status == RenderStatus::success);
+    record.blockSize = 127; REQUIRE(renderExperiment(record,second).status == RenderStatus::success);
+    const auto a = readFloat(first.getChildFile("rendered.wav"),1027,2);
+    const auto b = readFloat(second.getChildFile("rendered.wav"),1027,2);
+    for (int c=0;c<2;++c) for(int n=0;n<1027;++n) REQUIRE(a.getSample(c,n)==b.getSample(c,n));
+    record.bypass = true; const auto dry = fixture.root.getChildFile("folder-dry");
+    REQUIRE(renderExperiment(record,dry).status == RenderStatus::success);
+    const auto source = readFloat(dry.getChildFile("source.wav"),1027,2);
+    const auto rendered = readFloat(dry.getChildFile("rendered.wav"),1027,2);
+    for (int c=0;c<2;++c) for(int n=0;n<1027;++n) REQUIRE(source.getSample(c,n)==rendered.getSample(c,n));
+}

@@ -40,6 +40,14 @@ shared middle-section anti-aliasing work. See the
 [design](docs/okf/methods/tanh_saturation.md) and
 [validation evidence](docs/okf/notes/tanh_saturation_validation.md).
 
+The shared **Wave folder** target adds a symmetric triangle transfer with
+-24 to +36 dB drive, a 0.05 to 1 fold threshold, and -60 to +12 dB output trim.
+Select it in the audition application. Lower thresholds fold sooner and lower
+the wet output ceiling; default settings preserve inputs within [-1, 1].
+Controls and bypass ramp over 10 ms, with zero module latency. Version-6
+records retain its settings. See the [design](docs/okf/methods/wave_folding.md)
+and [validation evidence](docs/okf/notes/wave_folder_validation.md).
+
 **Design Ethos**
 Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)
 

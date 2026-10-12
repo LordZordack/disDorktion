@@ -25,6 +25,7 @@ add_library(disdorktion_dsp STATIC
     src/dsp/Gain.cpp
     src/dsp/BitCrusher.cpp
     src/dsp/TanhSaturation.cpp
+    src/dsp/WaveFolder.cpp
 )
 target_include_directories(disdorktion_dsp PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(disdorktion_dsp PUBLIC cxx_std_20)
@@ -51,6 +52,7 @@ if(BUILD_TESTING)
         tests/GainTests.cpp
         tests/BitCrusherTests.cpp
         tests/TanhSaturationTests.cpp
+        tests/WaveFolderTests.cpp
         tests/BenchmarkSamplingTests.cpp
     )
     target_link_libraries(disdorktion_dsp_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -61,6 +63,7 @@ if(BUILD_TESTING)
         tests/GainRealtimeTests.cpp
         tests/BitCrusherRealtimeTests.cpp
         tests/TanhSaturationRealtimeTests.cpp
+        tests/WaveFolderRealtimeTests.cpp
         tests/AllocationTracking.cpp
     )
     target_link_libraries(disdorktion_realtime_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -114,7 +117,13 @@ target_compile_definitions(disdorktion_bit_crusher_benchmark PRIVATE DISDORKTION
 add_executable(disdorktion_tanh_saturation_benchmark benchmarks/ReferenceGainBenchmark.cpp)
 target_link_libraries(disdorktion_tanh_saturation_benchmark PRIVATE disdorktion_dsp)
 target_compile_definitions(disdorktion_tanh_saturation_benchmark PRIVATE DISDORKTION_TANH_SATURATION_BENCHMARK=1)
+add_executable(disdorktion_wave_folder_benchmark benchmarks/ReferenceGainBenchmark.cpp)
+target_link_libraries(disdorktion_wave_folder_benchmark PRIVATE disdorktion_dsp)
+target_compile_definitions(disdorktion_wave_folder_benchmark PRIVATE DISDORKTION_WAVE_FOLDER_BENCHMARK=1)
 if(WIN32)
+    target_link_libraries(disdorktion_wave_folder_benchmark PRIVATE PowrProf)
+    target_compile_definitions(disdorktion_wave_folder_benchmark PRIVATE
+        DISDORKTION_WINDOWS_SDK_VERSION=\"${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}\")
     target_link_libraries(disdorktion_tanh_saturation_benchmark PRIVATE PowrProf)
     target_compile_definitions(disdorktion_tanh_saturation_benchmark PRIVATE
         DISDORKTION_WINDOWS_SDK_VERSION=\"${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}\")
@@ -159,6 +168,9 @@ add_executable(disdorktion_bit_crusher_measurements tools/BitCrusherMeasureMain.
 target_link_libraries(disdorktion_bit_crusher_measurements PRIVATE disdorktion_harness)
 add_executable(disdorktion_tanh_saturation_measurements tools/TanhSaturationMeasureMain.cpp)
 target_link_libraries(disdorktion_tanh_saturation_measurements PRIVATE disdorktion_harness)
+add_executable(disdorktion_wave_folder_measurements tools/WaveFolderMeasureMain.cpp)
+target_link_libraries(disdorktion_wave_folder_measurements PRIVATE disdorktion_harness)
+target_compile_definitions(disdorktion_wave_folder_measurements PRIVATE DISDORKTION_GIT_REVISION="${DISDORKTION_REVISION}")
 
 if(BUILD_TESTING)
     add_executable(disdorktion_harness_tests
@@ -169,6 +181,7 @@ if(BUILD_TESTING)
         tests/ExperimentRecordTests.cpp
         tests/OfflineRenderTests.cpp)
     target_link_libraries(disdorktion_harness_tests PRIVATE disdorktion_harness Catch2::Catch2WithMain)
+    target_compile_definitions(disdorktion_harness_tests PRIVATE DISDORKTION_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     catch_discover_tests(disdorktion_harness_tests TEST_PREFIX "harness::" PROPERTIES TIMEOUT 30)
     add_executable(disdorktion_harness_realtime_tests
         tests/HarnessRealtimeTests.cpp tests/AllocationTracking.cpp)

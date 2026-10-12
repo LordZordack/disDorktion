@@ -2,9 +2,9 @@
 type: "Index"
 title: "Papers"
 description: "Index of papers research documents."
-timestamp: "2026-10-11T13:06:31Z"
+timestamp: "2026-10-12T02:21:18Z"
 ---
 
 # Papers
 
-No entries yet.
+- [Virtual Analog Buchla 259 Wavefolder](./virtual_analog_buchla_259_wavefolder.md) — Circuit-model and aliasing research context for DisDorktion's independently designed triangle folder.

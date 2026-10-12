@@ -2,7 +2,7 @@
 type: "Index"
 title: "Hardware"
 description: "Index of hardware research documents."
-timestamp: "2026-10-11T13:06:31Z"
+timestamp: "2026-10-12T02:21:18Z"
 ---
 
 # Hardware

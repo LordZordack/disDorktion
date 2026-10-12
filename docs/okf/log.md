@@ -58,3 +58,11 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-10T23:17:23Z: Completed tanh saturation automated validation and CPU evidence
 
 - 2026-10-11T13:06:31Z: Reviewed issue 6 for publication; preserve open listening, GUI and external qualification gates
+
+- 2026-10-11T21:00:38Z: Recorded reviewed wave folding design and acceptance limits
+
+- 2026-10-11T21:16:19Z: Added wave folder implementation and validation evidence
+
+- 2026-10-12T01:09:44Z: Recorded wave folder correctness, spectral and CPU qualification results
+
+- 2026-10-12T02:21:18Z: Reviewed issue 7 for publication; include compact evidence and preserve open listening, GUI and VS2022 gates
