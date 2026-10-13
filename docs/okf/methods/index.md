@@ -2,7 +2,7 @@
 type: "Index"
 title: "Methods"
 description: "Index of methods research documents."
-timestamp: "2026-10-13T18:22:13Z"
+timestamp: "2026-10-13T19:44:48Z"
 ---
 
 # Methods
@@ -14,6 +14,7 @@ timestamp: "2026-10-13T18:22:13Z"
 - [Reusable input section](./input_section.md) — Native-rate composition of production gain and expressive bit crushing, with section acceptance limits and independent bypass semantics.
 - [Selectable Second-Order Low-Pass Filter](./low_pass_filter.md) — Design for a zero-latency low-pass module with selectable Butterworth, Chebyshev I, and Chebyshev II responses and smoothed transitions.
 - [Middle section oversampling and latency](./middle_oversampling.md) — Q1 evaluation boundary, fractional latency correction, and evidence requirements before production middle-section acceptance.
+- [Middle section qualification candidate](./middle_section.md) — Fixed 4x FIR tanh and ADAA folding integration, independent bypass controls, experiment identity and render policy.
 - [Real-time DSP processing contract](./processing_contract.md) — Implemented module interface and callback behavior for DisDorktion's JUCE DSP foundation, including the reference gain processor.
 - [Tanh saturation](./tanh_saturation.md) — Approved memoryless tanh saturation design, controls, transition behavior, and pre-implementation acceptance limits for DisDorktion.
 - [Wave folding](./wave_folding.md) — Reviewed symmetric triangle wave-folder design, controls, transitions, and pre-implementation acceptance limits.

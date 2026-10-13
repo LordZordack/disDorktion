@@ -1,5 +1,14 @@
 # Generated experiment examples
 
+`middle-section-mild.json` and `middle-section-stress.json` use version 9 and
+fixed quality `4x-fir-adaa-v1`. The first uses 0/0 dB drives and threshold 0.75;
+the second uses 36/36 dB drives and threshold 0.25. Both store each trim and
+bypass explicitly. Their generated source ends at frame 48000 and their render
+ends at 49024, capturing ring-down in trailing silence. Output remains an
+untrimmed stream with 92 samples of reported delay. These candidate examples
+make no listening or residual-alias acceptance claim. See the
+[section design](../../docs/okf/methods/middle_section.md).
+
 `high-pass-sweep.json` and `low-pass-sweep.json` are version-7, 48 kHz stereo,
 five-second sweeps from 20 Hz to 20 kHz at peak amplitude 0.25, cutoff 1 kHz,
 Butterworth, monitor −18 dB and monitoring muted. Restore in the audition app

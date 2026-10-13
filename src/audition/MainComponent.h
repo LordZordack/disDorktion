@@ -50,6 +50,9 @@ private:
     juce::Slider gain, monitor, captureRateHz, crusherMix, crusherCrush, crusherShape, crusherJitter;
     juce::Slider tanhDrive, tanhOutput, folderThreshold;
     juce::Label tanhDriveLabel, tanhOutputLabel, folderThresholdLabel;
+    juce::Slider middleFolderDrive, middleFolderOutput;
+    juce::Label middleFolderDriveLabel, middleFolderOutputLabel;
+    juce::ToggleButton middleTanhBypass{"Bypass tanh"}, middleFolderBypass{"Bypass folder"};
     juce::ToggleButton bypass{"Bypass"}, moduleMuted{"Mute module"}, muted{"Mute monitoring"};
     juce::ToggleButton gainBypass{"Bypass gain"}, crusherBypass{"Bypass crusher"};
     juce::TextButton apply{"Apply source"}, load{"Load WAV / AIFF"}, play{"Play / stop"}, restart{"Restart"};

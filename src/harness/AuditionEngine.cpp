@@ -36,7 +36,8 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     clearMeters();
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
         || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)
-        || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec) || !inputTarget.prepare(spec)) return false;
+        || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec) || !inputTarget.prepare(spec)
+        || !middleTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -63,6 +64,7 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     else if (id == "high-pass") selected = &highPassTarget;
     else if (id == "low-pass") selected = &lowPassTarget;
     else if (id == "input-section") selected = &inputTarget;
+    else if (id == "middle-section") selected = &middleTarget;
     else return false;
     reset();
     return true;
@@ -235,9 +237,51 @@ bool AuditionEngine::setInputSettings(const InputSettings& value, bool commonByp
     return inputTarget.setParameters(value);
 }
 void AuditionEngine::setInputGainBypass(bool value) noexcept { productionBypass.store(value, std::memory_order_relaxed); }
+bool AuditionEngine::setMiddleSettings(const MiddleSettings& value, bool commonBypass) noexcept
+{
+    if (!isValidTanhSaturationSettings(value.tanh) || !isValidWaveFolderSettings(value.folder)) return false;
+    middleTanhDrive.store(value.tanh.driveDb, std::memory_order_relaxed);
+    middleTanhOutput.store(value.tanh.outputDb, std::memory_order_relaxed);
+    middleFolderDrive.store(value.folder.driveDb, std::memory_order_relaxed);
+    middleFolderOutput.store(value.folder.outputDb, std::memory_order_relaxed);
+    middleThreshold.store(value.folder.threshold, std::memory_order_relaxed);
+    middleTanhBypass.store(value.tanh.bypass, std::memory_order_relaxed);
+    middleFolderBypass.store(value.folder.bypass, std::memory_order_relaxed);
+    middleBypass.store(commonBypass, std::memory_order_relaxed);
+    middleTarget.setBypass(commonBypass);
+    return middleTarget.setParameters(value);
+}
+bool AuditionEngine::setMiddleTanhDriveDb(float value) noexcept
+{
+    if (!isValidTanhSaturationSettings({value, 0.f, false})) return false;
+    middleTanhDrive.store(value, std::memory_order_relaxed); return true;
+}
+bool AuditionEngine::setMiddleTanhOutputDb(float value) noexcept
+{
+    if (!isValidTanhSaturationSettings({0.f, value, false})) return false;
+    middleTanhOutput.store(value, std::memory_order_relaxed); return true;
+}
+bool AuditionEngine::setMiddleFolderDriveDb(float value) noexcept
+{
+    if (!isValidWaveFolderSettings({value, 1.f, 0.f, false})) return false;
+    middleFolderDrive.store(value, std::memory_order_relaxed); return true;
+}
+bool AuditionEngine::setMiddleFolderOutputDb(float value) noexcept
+{
+    if (!isValidWaveFolderSettings({0.f, 1.f, value, false})) return false;
+    middleFolderOutput.store(value, std::memory_order_relaxed); return true;
+}
+bool AuditionEngine::setMiddleThreshold(float value) noexcept
+{
+    if (!isValidWaveFolderSettings({0.f, value, 0.f, false})) return false;
+    middleThreshold.store(value, std::memory_order_relaxed); return true;
+}
+void AuditionEngine::setMiddleTanhBypass(bool value) noexcept { middleTanhBypass.store(value, std::memory_order_relaxed); }
+void AuditionEngine::setMiddleFolderBypass(bool value) noexcept { middleFolderBypass.store(value, std::memory_order_relaxed); }
 void AuditionEngine::setInputCrusherBypass(bool value) noexcept { crusherBypass.store(value, std::memory_order_relaxed); }
 void AuditionEngine::setBypass(bool value) noexcept
 {
+    if (selected == &middleTarget) { middleBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &inputTarget) { inputBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &highPassTarget) { highBypass.store(value,std::memory_order_relaxed); return; }
     if (selected == &lowPassTarget) { lowBypass.store(value,std::memory_order_relaxed); return; }
@@ -247,6 +291,13 @@ void AuditionEngine::setBypass(bool value) noexcept
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if (selected == &middleTarget)
+    {
+        middleTarget.setBypass(middleBypass.load(std::memory_order_relaxed));
+        return middleTarget.setParameters({
+            {middleTanhDrive.load(std::memory_order_relaxed), middleTanhOutput.load(std::memory_order_relaxed), middleTanhBypass.load(std::memory_order_relaxed)},
+            {middleFolderDrive.load(std::memory_order_relaxed), middleThreshold.load(std::memory_order_relaxed), middleFolderOutput.load(std::memory_order_relaxed), middleFolderBypass.load(std::memory_order_relaxed)}});
+    }
     if (selected == &inputTarget)
     {
         inputTarget.setBypass(inputBypass.load(std::memory_order_relaxed));

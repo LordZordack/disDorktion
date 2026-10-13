@@ -11,7 +11,9 @@ resource: "https://github.com/LordZordack/disDorktion/issues/9"
 
 Q1 evaluates the nonlinear boundary for [DisDorktion](../projects/disdorktion.md).
 See [measured results and remaining gates](../notes/middle_oversampling_validation.md).
-Production assembly is S2 (#11); the global mixer and host adapter are C1 (#13).
+S2 (#11) integrates the [qualification candidate](./middle_section.md) into the
+audition and record/render workflow. Q1's sound and residual-alias acceptance
+remains open. The global mixer and host adapter are C1 (#13).
 
 ## Boundary and preparation
 

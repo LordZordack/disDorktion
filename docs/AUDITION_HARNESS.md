@@ -1,5 +1,35 @@
 # Audition and measurement harness
 
+## Middle section candidate
+
+Select **Middle section (candidate)** for fixed 4x FIR processing of tanh then
+ADAA triangle folding. Set tanh and folder drive/trim independently, and set
+the fold threshold. Each stage has a bypass; common **Bypass** retains both
+selections and keeps the filtered 92-sample path active. The tanh trim controls
+the level entering the folder. Quality selection is fixed during this
+qualification; isolated Tanh/Wave folder targets retain their native algorithms.
+
+Version-9 records include every stage control and `middleQuality: 4x-fir-adaa-v1`.
+Loading restores them while callbacks are detached. Unsupported quality IDs
+are rejected. Record versions 1-8 preserve their existing targets.
+
+Shared offline renders save exactly the requested number of frames, including
+the processing lead-in, without automatic latency trimming or tail padding.
+Their results expose `latencySamples: 92`,
+`renderPolicy: fixed-duration-uncompensated` and `tailFlushed: false`.
+For generated sources, choose more render frames than source frames to capture
+ring-down. File sources loop instead of appending silence. Q1's separate
+listening tool aligns and level-matches comparisons and has its own duration
+policy. Human sound and extreme-alias acceptance remain open; see the
+[section design](okf/methods/middle_section.md) and
+[evidence](okf/notes/middle_section_validation.md).
+
+```powershell
+& './build/windows-vs2026/Release/disdorktion_render.exe' --experiment './examples/experiments/middle-section-mild.json' --output-dir './renders/middle-mild-001'
+```
+
+Create the parent `renders` directory first and choose a fresh output directory.
+
 ## High-pass and low-pass targets
 
 Select **High-pass** or **Low-pass**, then set **Cutoff (Hz)** and **Response**.

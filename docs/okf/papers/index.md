@@ -2,7 +2,7 @@
 type: "Index"
 title: "Papers"
 description: "Index of papers research documents."
-timestamp: "2026-10-12T19:26:21Z"
+timestamp: "2026-10-13T19:44:48Z"
 ---
 
 # Papers

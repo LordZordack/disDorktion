@@ -22,6 +22,18 @@ The section adds zero samples of latency. See the [design](docs/okf/methods/inpu
 [qualification status](docs/okf/notes/input_section_validation.md), and
 [audition guide](docs/AUDITION_HARNESS.md).
 
+### Middle section candidate
+
+Select **Middle section (candidate)** in the audition app for tanh followed by
+ADAA triangle folding inside a fixed 4x FIR boundary. Each stage has its own
+drive, trim and bypass; common bypass retains those selections and keeps
+filtering active. The section reports 92 samples of latency. Version-9 records
+preserve both stages and the fixed quality identity. Shared offline renders
+retain their requested frame count, with untrimmed delay and no automatic tail
+flush. See the [design](docs/okf/methods/middle_section.md) and
+[qualification evidence](docs/okf/notes/middle_section_validation.md).
+Human listening and extreme residual-alias acceptance remain open.
+
 ### Launch the Release audition app
 
 From a PowerShell terminal in the project root, build and launch:

@@ -3,6 +3,7 @@
 #include "TanhSaturationTarget.h"
 #include "WaveFolderTarget.h"
 #include "CutoffFilterTarget.h"
+#include "MiddleSectionTarget.h"
 #include <atomic>
 
 namespace disdorktion::harness
@@ -50,6 +51,14 @@ public:
     bool setGainSettings(const GainSettings&) noexcept;
     bool setGainDb(float db) noexcept;
     bool setInputSettings(const InputSettings&, bool commonBypass = false) noexcept;
+    bool setMiddleSettings(const MiddleSettings&, bool commonBypass = false) noexcept;
+    bool setMiddleTanhDriveDb(float) noexcept;
+    bool setMiddleTanhOutputDb(float) noexcept;
+    bool setMiddleFolderDriveDb(float) noexcept;
+    bool setMiddleFolderOutputDb(float) noexcept;
+    bool setMiddleThreshold(float) noexcept;
+    void setMiddleTanhBypass(bool) noexcept;
+    void setMiddleFolderBypass(bool) noexcept;
     void setInputGainBypass(bool value) noexcept;
     void setInputCrusherBypass(bool value) noexcept;
     void setModuleMuted(bool value) noexcept;
@@ -74,6 +83,7 @@ private:
     GainTarget productionTarget;
     BitCrusherTarget crusherTarget;
     InputSectionTarget inputTarget;
+    MiddleSectionTarget middleTarget;
     TanhSaturationTarget saturationTarget;
     WaveFolderTarget folderTarget;
     CutoffFilterTarget<true> highPassTarget;
@@ -96,6 +106,9 @@ private:
     std::atomic<bool> crusherBypass {false};
     std::atomic<bool> moduleMuted {false}, productionBypass {false};
     std::atomic<bool> inputBypass {false};
+    std::atomic<float> middleTanhDrive {0.f}, middleTanhOutput {0.f};
+    std::atomic<float> middleFolderDrive {0.f}, middleFolderOutput {0.f}, middleThreshold {1.f};
+    std::atomic<bool> middleTanhBypass {false}, middleFolderBypass {false}, middleBypass {false};
     std::atomic<float> postGainPeak {0.0f};
     std::atomic<bool> bypass {false}, muted {true};
     std::atomic<float> inputPeak {0.0f}, inputRms {0.0f}, outputPeak {0.0f}, outputRms {0.0f};
