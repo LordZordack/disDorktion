@@ -32,9 +32,15 @@ bool ExperimentRecord::validate(juce::String& error) const
         || ((version == 3 || version == 4) && targetId == "bit-crusher")
         || (version == 5 && targetId == "tanh-saturation") || (version == 6 && targetId == "wave-folder")
         || (version == 7 && (targetId == "high-pass" || targetId == "low-pass"))
-        || (version == 8 && targetId == "input-section")))
+        || (version == 8 && targetId == "input-section") || (version == 9 && targetId == "middle-section")))
         return fail(error, "Unsupported experiment version or target");
     if (!isValidProcessSpec({ sampleRate, blockSize, channels })) return fail(error, "Invalid process specification");
+    if (middleQuality != "4x-fir-adaa-v1") return fail(error, "Unsupported middle section quality");
+    if (!isValidTanhSaturationSettings(middle.tanh) || !isValidWaveFolderSettings(middle.folder))
+        return fail(error, "Invalid middle section settings");
+    if (version != 9 && (middle.tanh.driveDb != 0.f || middle.tanh.outputDb != 0.f || middle.tanh.bypass
+        || middle.folder.driveDb != 0.f || middle.folder.outputDb != 0.f || middle.folder.threshold != 1.f || middle.folder.bypass))
+        return fail(error, "Foreign middle section settings");
     if (version == 7 && (!isValidCutoffSettings({cutoffHz,bypass,response}) || driveDb != 0.f || outputDb != 0.f))
         return fail(error,"Invalid or foreign filter settings");
     if (version != 7 && (cutoffHz != 1000.f || response != FilterResponse::butterworth))
@@ -56,7 +62,7 @@ bool ExperimentRecord::validate(juce::String& error) const
     if (version >= 5 && (!std::isfinite(driveDb) || driveDb < -24 || driveDb > 36
         || !std::isfinite(outputDb) || outputDb < -60 || outputDb > 12))
         return fail(error, "Invalid tanh saturation settings");
-    if ((version < 5 || version == 8) && (driveDb != 0.0f || outputDb != 0.0f))
+    if ((version < 5 || version == 8 || version == 9) && (driveDb != 0.0f || outputDb != 0.0f))
         return fail(error, "Foreign tanh saturation settings");
     if (version == 6 && (!std::isfinite(threshold) || threshold < 0.05f || threshold > 1.0f))
         return fail(error, "Invalid wave folder threshold");
@@ -100,6 +106,13 @@ juce::var ExperimentRecord::toJson() const
     put("version", version); put("targetId", targetId);
     if (version == 1) put("gain", gain);
     else if (version == 2) { put("gainDb", gainDb); put("mute", mute); }
+    else if (version == 9)
+    {
+        put("middleQuality", middleQuality);
+        put("tanhDriveDb", middle.tanh.driveDb); put("tanhOutputDb", middle.tanh.outputDb); put("tanhBypass", middle.tanh.bypass);
+        put("folderDriveDb", middle.folder.driveDb); put("folderOutputDb", middle.folder.outputDb);
+        put("folderThreshold", middle.folder.threshold); put("folderBypass", middle.folder.bypass);
+    }
     else if (version == 8)
     {
         put("gainDb", gainDb); put("mute", mute);
@@ -146,7 +159,7 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto get = [o](const char* key) { return o->getProperty(key); };
     for (auto key : {"targetId", "filePath", "fileHash", "sourceConversion", "midiDevice", "buildIdentity", "observations"})
         if (!get(key).isString()) return fail(error, juce::String("Missing or invalid string: ") + key);
-    if (!integer(get("version"), 1, 8)) return fail(error, "Unsupported or missing version");
+    if (!integer(get("version"), 1, 9)) return fail(error, "Unsupported or missing version");
     const auto version = static_cast<int>(get("version"));
     if ((version == 1 && get("targetId").toString() != "reference-gain")
         || (version == 2 && get("targetId").toString() != "gain")
@@ -154,7 +167,8 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
         || (version == 5 && get("targetId").toString() != "tanh-saturation")
         || (version == 6 && get("targetId").toString() != "wave-folder")
         || (version == 7 && get("targetId").toString() != "high-pass" && get("targetId").toString() != "low-pass")
-        || (version == 8 && get("targetId").toString() != "input-section"))
+        || (version == 8 && get("targetId").toString() != "input-section")
+        || (version == 9 && get("targetId").toString() != "middle-section"))
         return fail(error, "Unsupported target for version");
     if ((version != 1 && o->hasProperty("gain"))
         || (version != 2 && version != 8 && (o->hasProperty("gainDb") || o->hasProperty("mute")))
@@ -164,9 +178,26 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
         return fail(error, "Mixed target schemas");
     if (version != 8 && (o->hasProperty("gainBypass") || o->hasProperty("crusherBypass")))
         return fail(error, "Mixed target schemas");
-    if ((version < 5 || version == 7 || version == 8) && (o->hasProperty("driveDb") || o->hasProperty("outputDb")))
+    if ((version < 5 || version == 7 || version == 8 || version == 9) && (o->hasProperty("driveDb") || o->hasProperty("outputDb")))
         return fail(error, "Mixed target schemas");
     if (version != 6 && o->hasProperty("threshold")) return fail(error, "Mixed target schemas");
+    for (const auto key : {"middleQuality", "tanhDriveDb", "tanhOutputDb", "tanhBypass", "folderDriveDb", "folderOutputDb", "folderThreshold", "folderBypass"})
+        if (version != 9 && o->hasProperty(key)) return fail(error, "Mixed target schemas");
+    if (version == 9)
+    {
+        if (!get("middleQuality").isString() || get("middleQuality").toString() != "4x-fir-adaa-v1"
+            || !get("tanhBypass").isBool() || !get("folderBypass").isBool())
+            return fail(error, "Missing or unsupported middle quality or bypass");
+        for (const auto key : {"tanhDriveDb", "tanhOutputDb", "folderDriveDb", "folderOutputDb", "folderThreshold"})
+        {
+            if (!number(get(key))) return fail(error, "Missing middle section number");
+            const double n = static_cast<double>(get(key));
+            const juce::String name(key);
+            const double low = name == "folderThreshold" ? .05 : name.endsWith("DriveDb") ? -24. : -60.;
+            const double high = name == "folderThreshold" ? 1. : name.endsWith("DriveDb") ? 36. : 12.;
+            if (!std::isfinite(n) || n < low || n > high) return fail(error, "Middle setting out of range");
+        }
+    }
     if (version == 6 && (!number(get("threshold")) || !std::isfinite(static_cast<double>(get("threshold")))
         || static_cast<double>(get("threshold")) < 0.05 || static_cast<double>(get("threshold")) > 1.0))
         return fail(error, "Missing or invalid wave folder threshold");
@@ -246,6 +277,12 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     candidate.version = version; candidate.targetId = get("targetId").toString();
     if (version == 1) candidate.gain = static_cast<float>(gainValue);
     else if (version == 2) { candidate.gainDb = static_cast<float>(gainValue); candidate.mute = static_cast<bool>(get("mute")); }
+    else if (version == 9)
+    {
+        candidate.middleQuality = get("middleQuality").toString();
+        candidate.middle = {{static_cast<float>(get("tanhDriveDb")), static_cast<float>(get("tanhOutputDb")), static_cast<bool>(get("tanhBypass"))},
+            {static_cast<float>(get("folderDriveDb")), static_cast<float>(get("folderThreshold")), static_cast<float>(get("folderOutputDb")), static_cast<bool>(get("folderBypass"))}};
+    }
     else if (version == 8)
     {
         candidate.gainDb = static_cast<float>(gainValue); candidate.mute = static_cast<bool>(get("mute"));

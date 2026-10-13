@@ -54,6 +54,12 @@ If a failed configure leaves empty compiler flags in the build directory, reconf
 
 ## Build outputs
 
+The middle candidate uses the existing audition app and `disdorktion_render`
+targets. Q1 comparison executables remain `disdorktion_middle_measurements`
+and `disdorktion_middle_listening`; use the Release build for CPU measurements.
+See [middle qualification](okf/notes/middle_section_validation.md) for current
+checks and open listening/quality gates.
+
 For the full plugin presets, expected outputs include:
 
 ```text

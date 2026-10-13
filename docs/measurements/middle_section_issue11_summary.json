@@ -1,0 +1,416 @@
+{
+    "schemaVersion":  1,
+    "issue":  11,
+    "status":  "Implementation candidate; production qualification remains open",
+    "quality":  "4x-fir-adaa-v1",
+    "latencySamples":  92,
+    "gitRevision":  "acea5f6",
+    "buildId":  "0.1.0-acea5f6-Release",
+    "cpuModel":  "Intel(R) Core(TM) Ultra 7 155H",
+    "compiler":  "MSVC 195136252",
+    "juceVersion":  "JUCE v8.0.14",
+    "cpuProtocol":  "128 warmup blocks; 21 batches of 128; nearest-rank p95 batch mean; preallocated input copy included; no real-time priority/power policy control; not per-callback deadline tails.",
+    "sourceSha256":  {
+                         "CMakeLists.txt":  "d753196c0473707523d5e473188d2f9bbd153bce8f1fbb2a41fdb40f0b6e04b8",
+                         "src/dsp/MiddleSection.cpp":  "3dee09b877af45ae1e5fbd906140144ac70b88391eb20e9475a2ae65c0da636d",
+                         "src/dsp/MiddleSection.h":  "29546694b0ac1be48f2307b0afabe3a197f40cb2cc27bdd08d5e7ec74c3516ac",
+                         "src/dsp/TanhSaturation.cpp":  "85a80bb1ccd502f4ed05e5b4615431bd661f0277fccc3bbaeb0d3ddea356327a",
+                         "src/dsp/AdaaWaveFolder.cpp":  "20882fb1fab3a1a19530c77ed2cee059ceb1bf473b9c9ca1361f0f528644acee",
+                         "src/harness/MiddleSectionTarget.h":  "0955b2bb012ff883217f1d180a5a71bf9470fece3c2654b4683ddb1fe49c3289",
+                         "src/harness/AuditionEngine.cpp":  "cc66016d6f9eaaf2f6a7066c7fa24656e59299938889e99184b20ef207585dcf",
+                         "src/harness/AuditionEngine.h":  "e8de584077b5b0beae380410396e4fafc7dd4c19c2160b9866400533de1907a5",
+                         "src/harness/ExperimentRecord.cpp":  "1771bb30ba7157a16208dbd24282768cef413dcda097cd34a2b9c4208feddcef",
+                         "src/harness/ExperimentRecord.h":  "d7b6f2bede6b927300ce5da6b597c83ffbb776687998b199c897f1e16914dcb3",
+                         "src/harness/OfflineRender.cpp":  "c203de893a1a85d2b1cf246c5dd547ff4b6e33678afc237ac943d401276f83a6",
+                         "src/audition/AudioDeviceController.cpp":  "9a460bf001413cc396f94c72aa8a84441a27c92085c0b7c5ff9f28cbf4f1f123",
+                         "src/audition/MainComponent.cpp":  "12377d05908302026e17be6480b9c05d0f8e5972ba7d0cf3afedd59e9e6eb2c3",
+                         "src/audition/MainComponent.h":  "05319714d2283dcbcad980c26584f205d153093380f25d12a8b07eab4f6653d4",
+                         "tests/MiddleSectionQualificationTests.cpp":  "c931fb9446ac8a1c50e2e683cd90e921977b44ee9eca86b64d1a568ea630af84",
+                         "tests/MiddleSectionHarnessTests.cpp":  "9991980755f0e766f52d1a78ddfb58fb2276ec44b53ad0910cc3679559daba3f",
+                         "tests/MiddleSectionHarnessRealtimeTests.cpp":  "f20ec5b3205d2ce9082002e779cd6832e5cdc6aa61bb778a4faad5d3b4df2301",
+                         "tests/AudioDeviceControllerTests.cpp":  "269e11aa74d95a73c49236b2f5988fcd37fe5b1ce1a1cd4c321106585d97e4d3",
+                         "tools/MiddleSectionMeasureMain.cpp":  "e87f3d9409976257f90bcf8fca42717c93c8b33bb43b4740f3ccc05510bb13ef",
+                         "tools/MiddleSectionListenMain.cpp":  "8057d3b9d71ae2bd49c154a3ffa231fc20aab8eb3cb9de9986edb6a3f746d7b3",
+                         "scripts/validate_middle_measurements.py":  "8244ff5ed8e4dc03833e0f4e560cff0f0cf043feb798b773790994ff3f3f19ad",
+                         "examples/experiments/middle-section-mild.json":  "ce0d85adfda1c51f81948b4379fafaa878058d5ccb8f536dacc2d3194860c8bf",
+                         "examples/experiments/middle-section-stress.json":  "9d7103186df34ab52a2145c9cdcc49131a7fd0bafe6b5a0247c9b2452c416608"
+                     },
+    "measurementExecutableSha256":  "c5d305a6f0480d36f282d3b68b0a8dc36d26792cdb799d20a371ff6612d89ecd",
+    "runs":  [
+                 {
+                     "representativeAliasGatePassed":  true,
+                     "cpuGatePassed":  false,
+                     "createdUtc":  "2026-10-13T15:22:37.488-04:00",
+                     "spectralCases":  900,
+                     "stressAliasRangeDbc":  [
+                                                 -27.258189554328276,
+                                                 15.526346719881005
+                                             ],
+                     "filterGatePassed":  true,
+                     "cpuCases":  144,
+                     "validatedWavs":  90,
+                     "fourTimesCascadeCpu":  [
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  32,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  16963.28125,
+                                                     "p95BatchMeanNs":  24142.1875,
+                                                     "p95BatchMeanDeadlineFraction":  0.03621328125,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  128,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  67329.6875,
+                                                     "p95BatchMeanNs":  132959.375,
+                                                     "p95BatchMeanDeadlineFraction":  0.049859765625,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  512,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  308166.40625,
+                                                     "p95BatchMeanNs":  537452.34375,
+                                                     "p95BatchMeanDeadlineFraction":  0.050386157226563,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  32,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  32950.0,
+                                                     "p95BatchMeanNs":  61885.9375,
+                                                     "p95BatchMeanDeadlineFraction":  0.09282890625,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  128,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  188184.375,
+                                                     "p95BatchMeanNs":  265742.1875,
+                                                     "p95BatchMeanDeadlineFraction":  0.0996533203125,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  512,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  734906.25,
+                                                     "p95BatchMeanNs":  896190.625,
+                                                     "p95BatchMeanDeadlineFraction":  0.08401787109375,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  32,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  18600.78125,
+                                                     "p95BatchMeanNs":  41648.4375,
+                                                     "p95BatchMeanDeadlineFraction":  0.1249453125,
+                                                     "localBudgetPassed":  false
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  128,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  79886.71875,
+                                                     "p95BatchMeanNs":  115433.59375,
+                                                     "p95BatchMeanDeadlineFraction":  0.0865751953125,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  512,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  103060.9375,
+                                                     "p95BatchMeanNs":  112728.90625,
+                                                     "p95BatchMeanDeadlineFraction":  0.021136669921875,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  32,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  12492.96875,
+                                                     "p95BatchMeanNs":  16860.15625,
+                                                     "p95BatchMeanDeadlineFraction":  0.05058046875,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  128,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  50342.1875,
+                                                     "p95BatchMeanNs":  59652.34375,
+                                                     "p95BatchMeanDeadlineFraction":  0.0447392578125,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  512,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  201152.34375,
+                                                     "p95BatchMeanNs":  218539.84375,
+                                                     "p95BatchMeanDeadlineFraction":  0.040976220703125,
+                                                     "localBudgetPassed":  true
+                                                 }
+                                             ],
+                     "artifactValidationPassed":  true,
+                     "fourTimesFilters":  [
+                                              {
+                                                  "sampleRate":  44100.0,
+                                                  "factor":  4,
+                                                  "latencySamples":  92,
+                                                  "impulsePeakSample":  92,
+                                                  "maxMagnitudeDeviationDbTo04Fs":  0.0319584099828,
+                                                  "maxResidualPhaseDegreesTo04Fs":  0.000651168383178,
+                                                  "maxResidualGroupDelaySamplesTo04Fs":  0.0003644586000035588,
+                                                  "maxHalfBlendDeviationDbTo04Fs":  0.0159645068004,
+                                                  "filterTargetsPassed":  true
+                                              },
+                                              {
+                                                  "sampleRate":  48000.0,
+                                                  "factor":  4,
+                                                  "latencySamples":  92,
+                                                  "impulsePeakSample":  92,
+                                                  "maxMagnitudeDeviationDbTo04Fs":  0.0319584099828,
+                                                  "maxResidualPhaseDegreesTo04Fs":  0.000651168383178,
+                                                  "maxResidualGroupDelaySamplesTo04Fs":  0.0003644586000035588,
+                                                  "maxHalfBlendDeviationDbTo04Fs":  0.0159645068004,
+                                                  "filterTargetsPassed":  true
+                                              },
+                                              {
+                                                  "sampleRate":  96000.0,
+                                                  "factor":  4,
+                                                  "latencySamples":  92,
+                                                  "impulsePeakSample":  92,
+                                                  "maxMagnitudeDeviationDbTo04Fs":  0.0319584099828,
+                                                  "maxResidualPhaseDegreesTo04Fs":  0.000651168383178,
+                                                  "maxResidualGroupDelaySamplesTo04Fs":  0.0003644586000035588,
+                                                  "maxHalfBlendDeviationDbTo04Fs":  0.0159645068004,
+                                                  "filterTargetsPassed":  true
+                                              }
+                                          ],
+                     "worst4xCpuDeadlineFraction":  0.1249453125,
+                     "filterResponses":  15
+                 },
+                 {
+                     "representativeAliasGatePassed":  true,
+                     "cpuGatePassed":  false,
+                     "createdUtc":  "2026-10-13T15:25:11.343-04:00",
+                     "spectralCases":  900,
+                     "stressAliasRangeDbc":  [
+                                                 -27.258189554328276,
+                                                 15.526346719881005
+                                             ],
+                     "filterGatePassed":  true,
+                     "cpuCases":  144,
+                     "validatedWavs":  90,
+                     "fourTimesCascadeCpu":  [
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  32,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  12439.0625,
+                                                     "p95BatchMeanNs":  32300.0,
+                                                     "p95BatchMeanDeadlineFraction":  0.04845,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  128,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  90284.375,
+                                                     "p95BatchMeanNs":  153602.34375,
+                                                     "p95BatchMeanDeadlineFraction":  0.05760087890625,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  512,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  317832.8125,
+                                                     "p95BatchMeanNs":  431055.46875,
+                                                     "p95BatchMeanDeadlineFraction":  0.040411450195313,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  32,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  34812.5,
+                                                     "p95BatchMeanNs":  40902.34375,
+                                                     "p95BatchMeanDeadlineFraction":  0.061353515625,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  128,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  127705.46875,
+                                                     "p95BatchMeanNs":  186253.90625,
+                                                     "p95BatchMeanDeadlineFraction":  0.06984521484375,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  48000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  512,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  1183588.28125,
+                                                     "p95BatchMeanNs":  1458777.34375,
+                                                     "p95BatchMeanDeadlineFraction":  0.136760375976563,
+                                                     "localBudgetPassed":  false
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  32,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  12560.15625,
+                                                     "p95BatchMeanNs":  15878.90625,
+                                                     "p95BatchMeanDeadlineFraction":  0.04763671875,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  128,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  81476.5625,
+                                                     "p95BatchMeanNs":  146210.15625,
+                                                     "p95BatchMeanDeadlineFraction":  0.1096576171875,
+                                                     "localBudgetPassed":  false
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  1,
+                                                     "blockSize":  512,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  303307.03125,
+                                                     "p95BatchMeanNs":  530836.71875,
+                                                     "p95BatchMeanDeadlineFraction":  0.099531884765625,
+                                                     "localBudgetPassed":  true
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  32,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  55366.40625,
+                                                     "p95BatchMeanNs":  65670.3125,
+                                                     "p95BatchMeanDeadlineFraction":  0.1970109375,
+                                                     "localBudgetPassed":  false
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  128,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  142485.9375,
+                                                     "p95BatchMeanNs":  236458.59375,
+                                                     "p95BatchMeanDeadlineFraction":  0.1773439453125,
+                                                     "localBudgetPassed":  false
+                                                 },
+                                                 {
+                                                     "sampleRate":  96000.0,
+                                                     "factor":  4,
+                                                     "channels":  2,
+                                                     "blockSize":  512,
+                                                     "path":  "cascade",
+                                                     "medianBatchMeanNs":  689510.15625,
+                                                     "p95BatchMeanNs":  1190764.0625,
+                                                     "p95BatchMeanDeadlineFraction":  0.22326826171875,
+                                                     "localBudgetPassed":  false
+                                                 }
+                                             ],
+                     "artifactValidationPassed":  true,
+                     "fourTimesFilters":  [
+                                              {
+                                                  "sampleRate":  44100.0,
+                                                  "factor":  4,
+                                                  "latencySamples":  92,
+                                                  "impulsePeakSample":  92,
+                                                  "maxMagnitudeDeviationDbTo04Fs":  0.0319584099828,
+                                                  "maxResidualPhaseDegreesTo04Fs":  0.000651168383178,
+                                                  "maxResidualGroupDelaySamplesTo04Fs":  0.0003644586000035588,
+                                                  "maxHalfBlendDeviationDbTo04Fs":  0.0159645068004,
+                                                  "filterTargetsPassed":  true
+                                              },
+                                              {
+                                                  "sampleRate":  48000.0,
+                                                  "factor":  4,
+                                                  "latencySamples":  92,
+                                                  "impulsePeakSample":  92,
+                                                  "maxMagnitudeDeviationDbTo04Fs":  0.0319584099828,
+                                                  "maxResidualPhaseDegreesTo04Fs":  0.000651168383178,
+                                                  "maxResidualGroupDelaySamplesTo04Fs":  0.0003644586000035588,
+                                                  "maxHalfBlendDeviationDbTo04Fs":  0.0159645068004,
+                                                  "filterTargetsPassed":  true
+                                              },
+                                              {
+                                                  "sampleRate":  96000.0,
+                                                  "factor":  4,
+                                                  "latencySamples":  92,
+                                                  "impulsePeakSample":  92,
+                                                  "maxMagnitudeDeviationDbTo04Fs":  0.0319584099828,
+                                                  "maxResidualPhaseDegreesTo04Fs":  0.000651168383178,
+                                                  "maxResidualGroupDelaySamplesTo04Fs":  0.0003644586000035588,
+                                                  "maxHalfBlendDeviationDbTo04Fs":  0.0159645068004,
+                                                  "filterTargetsPassed":  true
+                                              }
+                                          ],
+                     "worst4xCpuDeadlineFraction":  0.22326826171875,
+                     "filterResponses":  15
+                 }
+             ],
+    "humanListening":  "pending",
+    "residualAliasApproval":  "pending",
+    "performanceAcceptance":  "failed provisional 10% local batch-mean gate",
+    "hostTiming":  "pending",
+    "deterministicRepeatFiles":  93
+}

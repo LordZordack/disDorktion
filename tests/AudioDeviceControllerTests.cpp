@@ -566,3 +566,63 @@ TEST_CASE("Wave folder callbacks and live controls allocate nothing", "[controll
     const auto counts = test::getAllocationCounts();
     REQUIRE(counts.allocations == 0); REQUIRE(counts.deallocations == 0);
 }
+
+TEST_CASE("Middle callback restoration retains candidate settings bypasses and latency", "[controller][middle-section][realtime]")
+{
+    using namespace disdorktion;
+    for(unsigned flags=0;flags<8;++flags)
+    {
+        AudioDeviceController controller;CallbackDevice device(48000.,7);
+        auto record=callbackRecord();record.version=9;record.targetId="middle-section";
+        record.middle={{12.f,-6.f,(flags&1)!=0},{24.f,.125f,-12.f,(flags&2)!=0}};record.bypass=(flags&4)!=0;
+        controller.configure(record);controller.audioDeviceAboutToStart(&device);REQUIRE(controller.isReady());controller.setPlaying(true);
+        harness::SignalSource source;REQUIRE(source.prepare(record.source,48000.,2));
+        MiddleSection core;auto effective=record.middle;if(record.bypass)effective.tanh.bypass=effective.folder.bypass=true;
+        REQUIRE(core.setParameters(effective));REQUIRE(core.prepare({48000.,7,2},4,MiddleLatencyCorrection::fir,MiddleFoldAlgorithm::adaaTriangle));
+        juce::AudioBuffer<float> audio(2,1031),expected(2,1031);
+        source.process(juce::dsp::AudioBlock<float>(expected));REQUIRE(core.process(juce::dsp::AudioBlock<float>(expected)));callback(controller,audio);
+        REQUIRE(controller.engine().selectedTargetId()=="middle-section");REQUIRE(controller.engine().getLatencySamples()==92);
+        for(int c=0;c<2;++c)for(int n=0;n<1031;++n)REQUIRE(audio.getSample(c,n)==expected.getSample(c,n));
+        {
+            test::ScopedAllocationTracking tracking;
+            controller.engine().setMiddleTanhDriveDb(-24.f);controller.engine().setMiddleFolderDriveDb(36.f);
+            controller.engine().setMiddleThreshold(.05f);controller.engine().setMiddleTanhBypass(true);
+            controller.engine().setMiddleFolderBypass(false);controller.engine().setBypass(true);callback(controller,audio);
+            controller.engine().setBypass(false);controller.restart();callback(controller,audio);
+        }
+        const auto counts=test::getAllocationCounts();REQUIRE(counts.allocations==0);REQUIRE(counts.deallocations==0);
+        controller.audioDeviceStopped();CallbackDevice second(96000.,32);controller.audioDeviceAboutToStart(&second);
+        REQUIRE(controller.isReady());REQUIRE(controller.engine().getLatencySamples()==92);
+        controller.audioDeviceStopped();controller.configure(record);controller.audioDeviceAboutToStart(&device);
+        REQUIRE_FALSE(controller.isPlaying());controller.setPlaying(true);callback(controller,audio);
+        for(int c=0;c<2;++c)for(int n=0;n<1031;++n)REQUIRE(audio.getSample(c,n)==expected.getSample(c,n));
+    }
+}
+
+TEST_CASE("Middle live edits survive device reprepare and common bypass release", "[controller][middle-section]")
+{
+    using namespace disdorktion;
+    for(unsigned flags=0;flags<4;++flags)
+    {
+        AudioDeviceController controller;CallbackDevice first(48000.,7),second(96000.,32);
+        auto record=callbackRecord();record.version=9;record.targetId="middle-section";
+        controller.configure(record);controller.audioDeviceAboutToStart(&first);
+        MiddleSettings edited {{36.f,-6.f,(flags&1)!=0},{24.f,.05f,-12.f,(flags&2)!=0}};
+        REQUIRE(controller.engine().setMiddleTanhDriveDb(edited.tanh.driveDb));REQUIRE(controller.engine().setMiddleTanhOutputDb(edited.tanh.outputDb));
+        REQUIRE(controller.engine().setMiddleFolderDriveDb(edited.folder.driveDb));REQUIRE(controller.engine().setMiddleFolderOutputDb(edited.folder.outputDb));
+        REQUIRE(controller.engine().setMiddleThreshold(edited.folder.threshold));
+        controller.engine().setMiddleTanhBypass(edited.tanh.bypass);controller.engine().setMiddleFolderBypass(edited.folder.bypass);controller.engine().setBypass(true);
+        controller.audioDeviceStopped();controller.audioDeviceAboutToStart(&second);REQUIRE(controller.isReady());controller.setPlaying(true);
+        harness::SignalSource source;REQUIRE(source.prepare(record.source,96000.,2));
+        MiddleSection core;auto effective=edited;effective.tanh.bypass=effective.folder.bypass=true;
+        REQUIRE(core.setParameters(effective));REQUIRE(core.prepare({96000.,32,2},4,MiddleLatencyCorrection::fir,MiddleFoldAlgorithm::adaaTriangle));
+        juce::AudioBuffer<float> actual(2,1031),expected(2,1031);
+        for(unsigned event=0;event<3;++event)
+        {
+            if(event==1){controller.engine().setBypass(false);REQUIRE(core.setParameters(edited));}
+            source.process(juce::dsp::AudioBlock<float>(expected));REQUIRE(core.process(juce::dsp::AudioBlock<float>(expected)));callback(controller,actual);
+            for(int c=0;c<2;++c)for(int n=0;n<1031;++n)REQUIRE(actual.getSample(c,n)==expected.getSample(c,n));
+            REQUIRE(controller.engine().getLatencySamples()==92);
+        }
+    }
+}

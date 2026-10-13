@@ -122,6 +122,8 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     else if (record.version == 8)
         settingsReady = engine.setInputSettings({{record.gainDb, record.mute, record.gainBypass},
             {record.bitDepth, record.captureRateHz, record.crusherBypass, record.mix, record.crush, record.shape, record.jitter, record.jitterSeed}}, record.bypass);
+    else if (record.version == 9)
+        settingsReady = engine.setMiddleSettings(record.middle, record.bypass);
     if (!engine.selectTarget(record.targetId.toStdString())
         || !settingsReady
         || !engine.prepare({record.sampleRate, record.blockSize, record.channels}))
@@ -174,6 +176,12 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     if (record.version == 8) object->setProperty("postGainPeak", result.postGainPeak);
     object->setProperty("overloaded", result.overloaded); object->setProperty("latencySamples", static_cast<int>(result.latencySamples));
     object->setProperty("experiment", record.toJson());
+    if (record.version == 9)
+    {
+        object->setProperty("renderPolicy", "fixed-duration-uncompensated");
+        object->setProperty("tailFlushed", false);
+        object->setProperty("middleQuality", record.middleQuality);
+    }
     object->setProperty("rendererBuildIdentity", ExperimentRecord{}.buildIdentity);
     if (!staging.directory.getChildFile("result.json").replaceWithText(juce::JSON::toString(json)))
     { result.message = "Result JSON write failed"; return result; }

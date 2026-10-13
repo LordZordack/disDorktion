@@ -58,6 +58,7 @@ if(BUILD_TESTING)
         tests/TanhSaturationTests.cpp
         tests/WaveFolderTests.cpp
         tests/MiddleSectionTests.cpp
+        tests/MiddleSectionQualificationTests.cpp
         tests/AdaaWaveFolderTests.cpp
         tests/CutoffFilterTests.cpp
         tests/BenchmarkSamplingTests.cpp
@@ -203,6 +204,7 @@ target_compile_definitions(disdorktion_wave_folder_measurements PRIVATE DISDORKT
 
 if(BUILD_TESTING)
     add_executable(disdorktion_harness_tests
+        tests/MiddleSectionHarnessTests.cpp
         tests/InputSectionHarnessTests.cpp
         tests/HarnessEngineTests.cpp
         tests/CutoffHarnessTests.cpp
@@ -215,6 +217,7 @@ if(BUILD_TESTING)
     target_compile_definitions(disdorktion_harness_tests PRIVATE DISDORKTION_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     catch_discover_tests(disdorktion_harness_tests TEST_PREFIX "harness::" PROPERTIES TIMEOUT 30)
     add_executable(disdorktion_harness_realtime_tests
+        tests/MiddleSectionHarnessRealtimeTests.cpp
         tests/InputSectionHarnessRealtimeTests.cpp
         tests/CutoffHarnessRealtimeTests.cpp
         tests/HarnessRealtimeTests.cpp tests/AllocationTracking.cpp)
