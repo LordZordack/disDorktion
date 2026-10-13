@@ -84,3 +84,9 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-13T14:03:09Z: Issue 9 PR preparation: fresh Debug/Release 171-test suites and documentation checks pass; publish the evaluation for review with sound acceptance open.
 
 - 2026-10-13T14:09:45Z: Issue 9 final publication audit: 32 source/test/documentation files, 188 symbols and 14 flows; complete HIGH-risk graph audit, draft quality gates retained.
+
+- 2026-10-13T15:18:40Z: Added input section design and qualification note for issue #10
+
+- 2026-10-13T17:33:18Z: Qualified issue #10 input section: Debug/Release 191 tests each, DSP-only 160, exact repeated interaction fixtures, user synthetic listening acceptance, and 270 pinned AC CPU cases below the 6% limit; raw audits passed 39,815,902 baseline and 13,349,159 diagnostic observations. Representative music and actual GUI/device inspection remain unperformed; complete CRITICAL graph risk recorded.
+
+- 2026-10-13T18:22:13Z: Issue 10 PR preparation: fresh Debug/Release 191-test and DSP-only 160-test suites pass; corrected validator encoding prefix, revalidated both measurement runs and corrupted-reference rejection; compact qualification evidence retained for publication.

@@ -24,6 +24,10 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
         processor.setWaveFolderSettings({settings.driveDb, settings.threshold, settings.outputDb, settings.bypass});
     else if (settings.version == 7)
         processor.setFilterSettings({settings.cutoffHz,settings.bypass,settings.response});
+    else if (settings.version == 8)
+        processor.setInputSettings({{settings.gainDb, settings.mute, settings.gainBypass},
+            {settings.bitDepth, settings.captureRateHz, settings.crusherBypass, settings.mix,
+             settings.crush, settings.shape, settings.jitter, settings.jitterSeed}}, settings.bypass);
     processor.setMonitorDb(settings.monitorDb);
     processor.setMuted(settings.muted);
     playing.store(false);

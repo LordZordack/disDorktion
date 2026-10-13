@@ -23,6 +23,7 @@ struct ExperimentRecord
     std::uint32_t jitterSeed = 1;
     bool mute = false;
     bool bypass = false;
+    bool gainBypass = false, crusherBypass = false;
     SourceSettings source;
     double sampleRate = 48000.0;
     unsigned channels = 2, blockSize = 256;

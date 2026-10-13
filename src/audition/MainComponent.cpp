@@ -41,6 +41,7 @@ MainComponent::MainComponent()
     target.addItem("Wave folder", 5);
     target.addItem("High-pass", 6);
     target.addItem("Low-pass", 7);
+    target.addItem("Input section", 8);
     target.setSelectedId(1);
     for (const auto* name : {"Impulse", "Sine", "Two-tone", "Logarithmic sweep", "Seeded white noise", "Audio file loop", "Keyboard / MIDI sine"})
         source.addItem(name, source.getNumItems() + 1);
@@ -104,7 +105,7 @@ MainComponent::MainComponent()
         &target,&source,&gain,&monitor,&bitDepth,&captureRateHz,&bitDepthLabel,&captureRateLabel,&effectiveRateLabel,&fullRateLabel,
         &crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed,
         &crusherMixLabel,&crusherCrushLabel,&crusherShapeLabel,&crusherJitterLabel,&jitterSeedLabel,
-        &bypass,&moduleMuted,&muted,&apply,&load,&play,&restart,
+        &bypass,&moduleMuted,&muted,&gainBypass,&crusherBypass,&apply,&load,&play,&restart,
         &save,&restore,&render,&deviceButton,&frequency,&frequency2,&amplitude,&phase,&duration,&seed,
         &renderDuration,&observations,&meterLabel,&deviceLabel,&statusLabel,&keyboard}) addAndMakeVisible(*component);
     for (juce::Component* control : std::initializer_list<juce::Component*>{&tanhDrive, &tanhOutput,
@@ -121,13 +122,15 @@ MainComponent::MainComponent()
     apply.onClick = [this] { applySource(); };
     source.onChange = [this] { applySource(); };
     moduleMuted.setEnabled(false);
+    gainBypass.setVisible(false); crusherBypass.setVisible(false);
     target.onChange = [this] {
         auto next = snapshot();
         const auto selected = target.getSelectedId();
-        next.version = selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
+        next.version = selected == 8 ? 8 : selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
         next.targetId = selected == 1 ? "reference-gain" : selected == 2 ? "gain" : selected == 3 ? "bit-crusher"
-            : selected == 4 ? "tanh-saturation" : selected == 5 ? "wave-folder" : selected == 6 ? "high-pass" : "low-pass";
+            : selected == 4 ? "tanh-saturation" : selected == 5 ? "wave-folder" : selected == 6 ? "high-pass" : selected == 7 ? "low-pass" : "input-section";
         next.gain = 1.0f; next.gainDb = 0.0f; next.mute = false; next.bypass = false;
+        next.gainBypass = false; next.crusherBypass = false;
         next.bitDepth = 64; next.captureRateHz = 384000.0f;
         next.mix = 1.0f; next.crush = 0.0f; next.shape = 0.0f;
         next.jitter = 0.0f; next.jitterSeed = 1;
@@ -137,7 +140,7 @@ MainComponent::MainComponent()
         configureRecord(next);
     };
     gain.onValueChange = [this] {
-        if (target.getSelectedId() == 2) audio.engine().setGainDb(static_cast<float>(gain.getValue()));
+        if (target.getSelectedId() == 2 || target.getSelectedId() == 8) audio.engine().setGainDb(static_cast<float>(gain.getValue()));
         else if (target.getSelectedId() == 1) audio.engine().setGain(static_cast<float>(gain.getValue()));
     };
     bitDepth.onChange = [this] { audio.engine().setBitDepth(static_cast<unsigned>(bitDepth.getSelectedId())); };
@@ -174,6 +177,8 @@ MainComponent::MainComponent()
     };
     moduleMuted.onClick = [this] { audio.engine().setModuleMuted(moduleMuted.getToggleState()); };
     bypass.onClick = [this] { audio.engine().setBypass(bypass.getToggleState()); };
+    gainBypass.onClick = [this] { audio.engine().setInputGainBypass(gainBypass.getToggleState()); };
+    crusherBypass.onClick = [this] { audio.engine().setInputCrusherBypass(crusherBypass.getToggleState()); };
     monitor.onValueChange = [this] { audio.engine().setMonitorDb(static_cast<float>(monitor.getValue())); };
     muted.onClick = [this] { audio.engine().setMuted(muted.getToggleState()); };
     play.onClick = [this] { running = !audio.isPlaying(); audio.setPlaying(running); play.setButtonText(running ? "Stop" : "Play"); };
@@ -181,7 +186,7 @@ MainComponent::MainComponent()
     load.onClick = [this] {
         chooseFile(false, "*.wav;*.aif;*.aiff", [this](const auto& file) {
             std::uint32_t parsedSeed = 0;
-            if ((record.version == 3 || record.version == 4) && !readCrusherSeed(parsedSeed))
+            if ((record.version == 3 || record.version == 4 || record.version == 8) && !readCrusherSeed(parsedSeed))
             { status("Jitter seed must be an unsigned 32-bit integer."); return; }
             auto next = snapshot(); next.source.kind = SourceKind::file; next.filePath = file.getFullPathName();
             next.fileHash.clear(); loadAudio(file, next, false);
@@ -231,6 +236,11 @@ void MainComponent::resized()
     play.setBounds(row.removeFromLeft(130).reduced(3)); restart.setBounds(row.removeFromLeft(130).reduced(3));
     gainLabel.setBounds(bounds.removeFromTop(24));
     row = bounds.removeFromTop(38); bypass.setBounds(row.removeFromRight(120));
+    if (record.version == 8)
+    {
+        crusherBypass.setBounds(row.removeFromRight(140));
+        gainBypass.setBounds(row.removeFromRight(130));
+    }
     moduleMuted.setBounds(row.removeFromRight(140)); gain.setBounds(row);
     row = bounds.removeFromTop(46);
     bitDepthLabel.setBounds(row.removeFromLeft(75)); bitDepth.setBounds(row.removeFromLeft(90).reduced(2));
@@ -281,7 +291,7 @@ void MainComponent::handleNoteOff(juce::MidiKeyboardState*, int, int note, float
 ExperimentRecord MainComponent::snapshot() const
 {
     auto result = record;
-    if (result.version == 2) { result.gainDb = static_cast<float>(gain.getValue()); result.mute = moduleMuted.getToggleState(); }
+    if (result.version == 2 || result.version == 8) { result.gainDb = static_cast<float>(gain.getValue()); result.mute = moduleMuted.getToggleState(); }
     else if (result.version == 1) result.gain = static_cast<float>(gain.getValue());
     else if (result.version == 7)
     {
@@ -294,9 +304,9 @@ ExperimentRecord MainComponent::snapshot() const
         result.outputDb = static_cast<float>(tanhOutput.getValue());
         result.threshold = result.version == 6 ? static_cast<float>(folderThreshold.getValue()) : 1.0f;
     }
-    else
+    if (result.version == 3 || result.version == 4 || result.version == 8)
     {
-        result.version = 4; // Saving a restored v3 record upgrades it to the expressive schema.
+        if (result.version == 3) result.version = 4; // Upgrade legacy crusher records on save.
         result.bitDepth = static_cast<unsigned>(bitDepth.getSelectedId());
         result.captureRateHz = static_cast<float>(captureRateHz.getValue());
         result.mix = static_cast<float>(crusherMix.getValue());
@@ -305,6 +315,11 @@ ExperimentRecord MainComponent::snapshot() const
         result.jitter = static_cast<float>(crusherJitter.getValue());
         std::uint32_t parsedSeed = 0;
         if (readCrusherSeed(parsedSeed)) result.jitterSeed = parsedSeed;
+    }
+    if (result.version == 8)
+    {
+        result.gainBypass = gainBypass.getToggleState();
+        result.crusherBypass = crusherBypass.getToggleState();
     }
     result.bypass = bypass.getToggleState();
     result.monitorDb = static_cast<float>(monitor.getValue()); result.muted = muted.getToggleState();
@@ -342,7 +357,7 @@ void MainComponent::updateCaptureRateMapping()
 bool MainComponent::readSourceControls(ExperimentRecord& next)
 {
     std::uint32_t parsedSeed = 0;
-    if ((next.version == 3 || next.version == 4) && !readCrusherSeed(parsedSeed))
+    if ((next.version == 3 || next.version == 4 || next.version == 8) && !readCrusherSeed(parsedSeed))
     { status("Jitter seed must be an unsigned 32-bit integer."); return false; }
     double sourceFrames = 0, renderFrames = 0, seedValue = 0;
     if (!number(frequency, next.source.frequency) || !number(frequency2, next.source.frequency2)
@@ -367,21 +382,23 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     record = next;
     running = false; play.setButtonText("Play"); keyboardState.reset();
     source.setSelectedId(static_cast<int>(record.source.kind) + 1, juce::dontSendNotification);
-    const auto production = record.version == 2;
-    const auto crusher = record.version == 3 || record.version == 4;
+    const auto section = record.version == 8;
+    const auto production = record.version == 2 || section;
+    const auto crusher = record.version == 3 || record.version == 4 || section;
     const auto saturation = record.version == 5;
     const auto folder = record.version == 6;
     const auto filtering = record.version == 7;
     const auto driven = saturation || folder;
-    target.setSelectedId(filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
+    target.setSelectedId(section ? 8 : filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
     gain.setRange(production ? -60.0 : 0.0, production ? 24.0 : 4.0, 0.0);
     gainLabel.setText(filtering ? "Output filter: cutoff and response; 10 ms transitions"
         : folder ? "Wave folder: drive, threshold and wet output trim"
         : saturation ? "Tanh saturation: drive and wet output trim"
+        : section ? "Input section: gain (dB) then bit crusher"
         : production ? "Module gain (dB)" : "Module gain (linear amplitude)", juce::dontSendNotification);
     gain.setValue(production ? record.gainDb : record.gain, juce::dontSendNotification);
-    gain.setEnabled(!crusher && !driven && !filtering);
-    gainLabel.setEnabled(!crusher);
+    gain.setEnabled((!crusher || section) && !driven && !filtering);
+    gainLabel.setEnabled(!crusher || section);
     gain.setVisible(!driven && !filtering);
     moduleMuted.setVisible(!driven && !filtering);
     filterCutoff.setValue(record.cutoffHz,juce::dontSendNotification);
@@ -417,6 +434,10 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
         control->setVisible(!driven && !filtering);
     }
     moduleMuted.setEnabled(production); moduleMuted.setToggleState(record.mute, juce::dontSendNotification);
+    gainBypass.setVisible(section); crusherBypass.setVisible(section);
+    gainBypass.setEnabled(section); crusherBypass.setEnabled(section);
+    gainBypass.setToggleState(record.gainBypass, juce::dontSendNotification);
+    crusherBypass.setToggleState(record.crusherBypass, juce::dontSendNotification);
     bypass.setToggleState(record.bypass, juce::dontSendNotification);
     monitor.setValue(record.monitorDb, juce::dontSendNotification); muted.setToggleState(record.muted, juce::dontSendNotification);
     frequency.setText(juce::String(record.source.frequency), false);
@@ -430,6 +451,7 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     // after refreshing the widgets, while processing is still detached.
     audio.configure(record);
     devices.addAudioCallback(&audio);
+    resized();
 }
 
 void MainComponent::applySource()
@@ -482,15 +504,17 @@ void MainComponent::setWorkerControlsEnabled(bool enabled)
         &amplitude,&phase,&duration,&renderDuration,&seed,&gain,&bitDepth,&captureRateHz,
         &crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed,&tanhDrive,&tanhOutput,&folderThreshold,
         &tanhDriveLabel,&tanhOutputLabel,&folderThresholdLabel,
-        &bypass,&moduleMuted,&observations})
+        &bypass,&moduleMuted,&gainBypass,&crusherBypass,&observations})
         component->setEnabled(enabled);
-    gain.setEnabled(enabled && record.version < 3);
-    bitDepth.setEnabled(enabled && (record.version == 3 || record.version == 4));
-    captureRateHz.setEnabled(enabled && (record.version == 3 || record.version == 4));
+    gain.setEnabled(enabled && (record.version < 3 || record.version == 8));
+    bitDepth.setEnabled(enabled && (record.version == 3 || record.version == 4 || record.version == 8));
+    captureRateHz.setEnabled(enabled && (record.version == 3 || record.version == 4 || record.version == 8));
     for (juce::Component* control : std::initializer_list<juce::Component*>{
         &crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed})
-        control->setEnabled(enabled && (record.version == 3 || record.version == 4));
-    moduleMuted.setEnabled(enabled && record.version == 2);
+        control->setEnabled(enabled && (record.version == 3 || record.version == 4 || record.version == 8));
+    moduleMuted.setEnabled(enabled && (record.version == 2 || record.version == 8));
+    gainBypass.setEnabled(enabled && record.version == 8);
+    crusherBypass.setEnabled(enabled && record.version == 8);
     for (juce::Component* control : std::initializer_list<juce::Component*>{
         &tanhDrive,&tanhOutput,&tanhDriveLabel,&tanhOutputLabel})
         control->setEnabled(enabled && (record.version == 5 || record.version == 6));
@@ -534,7 +558,7 @@ void MainComponent::loadAudio(const juce::File& file, ExperimentRecord next, boo
 void MainComponent::saveExperiment()
 {
     std::uint32_t parsedSeed = 0;
-    if ((record.version == 3 || record.version == 4) && !readCrusherSeed(parsedSeed))
+    if ((record.version == 3 || record.version == 4 || record.version == 8) && !readCrusherSeed(parsedSeed))
     { status("Jitter seed must be an unsigned 32-bit integer."); return; }
     auto next = snapshot();
     juce::String error;
@@ -561,7 +585,7 @@ void MainComponent::loadExperiment()
 void MainComponent::renderExperiment()
 {
     std::uint32_t parsedSeed = 0;
-    if ((record.version == 3 || record.version == 4) && !readCrusherSeed(parsedSeed))
+    if ((record.version == 3 || record.version == 4 || record.version == 8) && !readCrusherSeed(parsedSeed))
     { status("Jitter seed must be an unsigned 32-bit integer."); return; }
     auto next = snapshot();
     juce::String error;
@@ -628,6 +652,7 @@ void MainComponent::timerCallback()
     applicationHadFocus = appFocused;
     meterLabel.setText("Input peak " + juce::String(meter.inputPeak, 4) + "   RMS " + juce::String(meter.inputRms, 4)
         + "       Output peak " + juce::String(meter.outputPeak, 4) + "   RMS " + juce::String(meter.outputRms, 4)
+        + (record.version == 8 ? "   Post-gain " + juce::String(meter.postGainPeak, 4) : juce::String())
         + (now < overloadVisibleUntil ? "   OVERLOAD" : ""), juce::dontSendNotification);
     deviceLabel.setText(juce::String(audio.sampleRate(), 0) + " Hz   " + juce::String(audio.channelCount())
         + " channels   " + juce::String(audio.blockSize()) + " frames   " + (audio.isReady() ? "Ready" : "Stopped / source unavailable"), juce::dontSendNotification);

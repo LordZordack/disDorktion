@@ -1,5 +1,55 @@
 # Performance procedure and proposed budgets
 
+## Input section budget (S1)
+
+Before implementation, issue #10 allocated **6% of the incoming block deadline**
+to native-rate Gain -> BitCrusher section DSP: 1% gain + 5% crusher. This includes
+control application, section dispatch and the post-gain peak scan. Shared
+harness source generation, atomic transport, input/output RMS and monitoring
+are outside this isolated DSP timing; the future complete wet-chain ceiling
+remains 25%. Acceptance evidence is recorded in
+[input section qualification](okf/notes/input_section_validation.md).
+
+Qualify Release x64 stereo at 48/96 kHz and capacities 32/64/127/256/1024 with
+steady neutral, expressive worst settings, simultaneous automation, all four
+child bypass states, gain mute and oversized callbacks. Follow the existing
+equal-wall-time adaptive collector: 2-second warmup, 2-second probe, 10-120 second
+window, 100000-200000 timings, all 101 automation residues with at least 100
+observations each, and explicit depth/bypass sampled coverage. Require three
+AC-powered performance-core-pinned runs with recorded environment. Keep raw
+distributions and timer overhead. Run after builds/tests finish; quick and
+unpinned runs are deliberately unqualified.
+
+`disdorktion_input_benchmark` reuses the timing infrastructure with input-only
+workload and coverage checks. Expressive cases use an interior input amplitude
+so gain saturation does not make fractional powers artificially cheap, and
+capture at host rate minus 1 Hz to exercise jitter near every frame. The dynamic
+`bypass` case cycles all four child bypass states every eight callbacks and
+requires 100 sampled observations in each state; fixed bypass states remain
+separate cases. Power is checked before and after each case outside timing.
+The fresh summary CSV has a `.timings.csv` sidecar containing every retained
+elapsed time and its control iteration. Neither raw scheduler outliers nor
+timer overhead are subtracted from the p99 acceptance statistic.
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_input_benchmark.exe --runs 3 --conditions "Record actual power/thermal conditions; no competing builds/tests" --output input_section_cpu_baseline.csv
+./build/windows-vs2026/Release/disdorktion_input_benchmark.exe --diagnostic --conditions "Record actual power/thermal conditions; unpinned diagnostic" --output input_section_cpu_diagnostic.csv
+```
+
+There are 90 cases per run: two rates, five capacities and nine scenarios.
+Preserve source/executable hashes alongside a starting Git revision when the
+worktree is uncommitted; a Git revision alone does not identify the measured
+local implementation. Thermal and ambient limitations must remain explicit.
+
+Issue-10 baseline: **270/270 cases qualified** across three pinned AC runs.
+Independent auditing of 39,815,902 raw observations confirmed the percentiles,
+budgets and control coverage. Worst p99 was **3.74052% of incoming deadline**
+(6% limit). The separate 90-case unpinned diagnostic had a worst p99 of 1.89%
+and remains unqualified. See the [baseline CSV](measurements/input_section_cpu_baseline_issue10.csv),
+[baseline audit](measurements/input_section_cpu_baseline_audit_issue10.json)
+and [qualification note](okf/notes/input_section_validation.md) for conditions,
+provenance, raw-data hashes and manual evidence limits.
+
 ## Output filter measurements
 
 `disdorktion_cutoff_filter_measurements` generates HP/LP impulse response and

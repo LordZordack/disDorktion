@@ -147,6 +147,25 @@ reseeds on the next frame without resetting capture phase. Latency is zero.
 See the [bit crushing method](okf/methods/bit_crushing.md) and its
 [validation note](okf/notes/bit_crusher_validation.md).
 
+## Input section (S1)
+
+`InputSection` implements the host module interface with
+`InputSettings { GainSettings gain; BitCrusherSettings crusher; }`. It validates
+the entire specification/settings pair before child mutation, then processes
+each capacity-bounded chunk through Gain followed by BitCrusher. Both children
+retain their original parameter, transition, bypass and clock semantics.
+Crusher dry/mix input is post-gain; gain mute can leave a captured sample held
+until the next capture. Native rate, zero latency, no normalization/limiter,
+finite input envelope float maximum /16. Rejected processing and valid empty
+blocks do not alter state; reset clears both histories and interstage peak.
+
+`getPostGainPeak()` is an exclusive processing-thread getter for the last
+successful nonempty call, aggregated across chunks. The shared harness publishes
+its own atomic copy and latches overload before crusher clamping can hide it.
+The harness-only common bypass forces effective child bypasses while retaining
+their separate selections and continuing their processing. Version-8 records
+preserve this state. See [input section design](okf/methods/input_section.md).
+
 ## Tanh saturation
 
 `TanhSaturation` uses `TanhSaturationSettings { driveDb, outputDb, bypass }`.

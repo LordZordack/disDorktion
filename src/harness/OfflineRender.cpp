@@ -119,6 +119,9 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
         settingsReady = engine.setWaveFolderSettings({record.driveDb, record.threshold, record.outputDb, record.bypass});
     else if (record.version == 7)
         settingsReady = engine.setFilterSettings({record.cutoffHz,record.bypass,record.response});
+    else if (record.version == 8)
+        settingsReady = engine.setInputSettings({{record.gainDb, record.mute, record.gainBypass},
+            {record.bitDepth, record.captureRateHz, record.crusherBypass, record.mix, record.crush, record.shape, record.jitter, record.jitterSeed}}, record.bypass);
     if (!engine.selectTarget(record.targetId.toStdString())
         || !settingsReady
         || !engine.prepare({record.sampleRate, record.blockSize, record.channels}))
@@ -149,6 +152,7 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
         if (!sourceWriter->writeFromAudioSampleBuffer(audio, 0, frames))
         { result.message = "Source WAV write failed"; return result; }
         if (!engine.process(block, false)) { result.message = "Target processing failed"; return result; }
+        result.postGainPeak = std::max(result.postGainPeak, static_cast<double>(engine.meters().postGainPeak));
         output.add(audio, frames);
         if (!renderedWriter->writeFromAudioSampleBuffer(audio, 0, frames))
         { result.message = "Rendered WAV write failed"; return result; }
@@ -161,12 +165,13 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     result.inputPeak = input.peak; result.outputPeak = output.peak;
     const auto values = static_cast<double>(result.samples) * record.channels;
     result.inputRms = std::sqrt(input.squares / values); result.outputRms = std::sqrt(output.squares / values);
-    result.overloaded = output.peak > 1.0;
+    result.overloaded = output.peak > 1.0 || result.postGainPeak > 1.0;
     auto* object = new juce::DynamicObject;
     juce::var json(object);
     object->setProperty("version", 1); object->setProperty("samples", static_cast<juce::int64>(result.samples));
     object->setProperty("inputPeak", result.inputPeak); object->setProperty("inputRms", result.inputRms);
     object->setProperty("outputPeak", result.outputPeak); object->setProperty("outputRms", result.outputRms);
+    if (record.version == 8) object->setProperty("postGainPeak", result.postGainPeak);
     object->setProperty("overloaded", result.overloaded); object->setProperty("latencySamples", static_cast<int>(result.latencySamples));
     object->setProperty("experiment", record.toJson());
     object->setProperty("rendererBuildIdentity", ExperimentRecord{}.buildIdentity);

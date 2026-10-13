@@ -36,7 +36,7 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     clearMeters();
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
         || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)
-        || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec)) return false;
+        || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec) || !inputTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -62,6 +62,7 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     else if (id == "wave-folder") selected = &folderTarget;
     else if (id == "high-pass") selected = &highPassTarget;
     else if (id == "low-pass") selected = &lowPassTarget;
+    else if (id == "input-section") selected = &inputTarget;
     else return false;
     reset();
     return true;
@@ -215,8 +216,29 @@ bool AuditionEngine::setGainDb(float value) noexcept
     gainDb.store(value, std::memory_order_relaxed); return true;
 }
 void AuditionEngine::setModuleMuted(bool value) noexcept { moduleMuted.store(value, std::memory_order_relaxed); }
+bool AuditionEngine::setInputSettings(const InputSettings& value, bool commonBypass) noexcept
+{
+    if (!isValidInputSettings(value)) return false;
+    gainDb.store(value.gain.gainDb, std::memory_order_relaxed);
+    moduleMuted.store(value.gain.mute, std::memory_order_relaxed);
+    productionBypass.store(value.gain.bypass, std::memory_order_relaxed);
+    bitDepth.store(value.crusher.bitDepth, std::memory_order_relaxed);
+    captureRateHz.store(value.crusher.captureRateHz, std::memory_order_relaxed);
+    crusherBypass.store(value.crusher.bypass, std::memory_order_relaxed);
+    crusherMix.store(value.crusher.mix, std::memory_order_relaxed);
+    crush.store(value.crusher.crush, std::memory_order_relaxed);
+    quantizerShape.store(value.crusher.shape, std::memory_order_relaxed);
+    jitter.store(value.crusher.jitter, std::memory_order_relaxed);
+    jitterSeed.store(value.crusher.jitterSeed, std::memory_order_relaxed);
+    inputBypass.store(commonBypass, std::memory_order_relaxed);
+    inputTarget.setBypass(commonBypass);
+    return inputTarget.setParameters(value);
+}
+void AuditionEngine::setInputGainBypass(bool value) noexcept { productionBypass.store(value, std::memory_order_relaxed); }
+void AuditionEngine::setInputCrusherBypass(bool value) noexcept { crusherBypass.store(value, std::memory_order_relaxed); }
 void AuditionEngine::setBypass(bool value) noexcept
 {
+    if (selected == &inputTarget) { inputBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &highPassTarget) { highBypass.store(value,std::memory_order_relaxed); return; }
     if (selected == &lowPassTarget) { lowBypass.store(value,std::memory_order_relaxed); return; }
     (selected == &target ? bypass : selected == &productionTarget ? productionBypass
@@ -225,6 +247,15 @@ void AuditionEngine::setBypass(bool value) noexcept
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if (selected == &inputTarget)
+    {
+        inputTarget.setBypass(inputBypass.load(std::memory_order_relaxed));
+        return inputTarget.setParameters({
+            {gainDb.load(std::memory_order_relaxed), moduleMuted.load(std::memory_order_relaxed), productionBypass.load(std::memory_order_relaxed)},
+            {bitDepth.load(std::memory_order_relaxed), captureRateHz.load(std::memory_order_relaxed), crusherBypass.load(std::memory_order_relaxed),
+             crusherMix.load(std::memory_order_relaxed), crush.load(std::memory_order_relaxed), quantizerShape.load(std::memory_order_relaxed),
+             jitter.load(std::memory_order_relaxed), jitterSeed.load(std::memory_order_relaxed)}});
+    }
     if (selected == &highPassTarget)
         return highPassTarget.setParameters({highCutoff.load(std::memory_order_relaxed), highBypass.load(std::memory_order_relaxed),
             static_cast<FilterResponse>(highResponse.load(std::memory_order_relaxed))});
@@ -270,6 +301,7 @@ bool AuditionEngine::process(juce::dsp::AudioBlock<float> block, bool applyMonit
         block.clear();
         inputPeak.store(0.0f, std::memory_order_relaxed); inputRms.store(0.0f, std::memory_order_relaxed);
         outputPeak.store(0.0f, std::memory_order_relaxed); outputRms.store(0.0f, std::memory_order_relaxed);
+        postGainPeak.store(0.0f, std::memory_order_relaxed);
         return false;
     }
     const auto before = measure(block);
@@ -282,9 +314,16 @@ bool AuditionEngine::process(juce::dsp::AudioBlock<float> block, bool applyMonit
         block.clear();
         outputPeak.store(0.0f, std::memory_order_relaxed); outputRms.store(0.0f, std::memory_order_relaxed);
         if (!before.finite) overload.store(true, std::memory_order_relaxed);
+        postGainPeak.store(0.0f, std::memory_order_relaxed);
         return false;
     }
     const auto after = measure(block);
+    if (block.getNumSamples() != 0)
+    {
+        const auto interstage = selected == &inputTarget ? inputTarget.getPostGainPeak() : 0.0f;
+        postGainPeak.store(interstage, std::memory_order_relaxed);
+        if (interstage > 1.0f) overload.store(true, std::memory_order_relaxed);
+    }
     outputPeak.store(after.peak, std::memory_order_relaxed);
     outputRms.store(after.rms, std::memory_order_relaxed);
     if (after.peak > 1.0f || !after.finite) overload.store(true, std::memory_order_relaxed);
@@ -306,7 +345,7 @@ MeterSnapshot AuditionEngine::meters() const noexcept
     // Scalar readings may span adjacent callbacks; no retry loop blocks processing.
     return {inputPeak.load(std::memory_order_relaxed), inputRms.load(std::memory_order_relaxed),
             outputPeak.load(std::memory_order_relaxed), outputRms.load(std::memory_order_relaxed),
-            overload.load(std::memory_order_relaxed)};
+            overload.load(std::memory_order_relaxed), postGainPeak.load(std::memory_order_relaxed)};
 }
 bool AuditionEngine::consumeOverload() noexcept { return overload.exchange(false, std::memory_order_relaxed); }
 void AuditionEngine::clearMeters() noexcept
@@ -314,5 +353,6 @@ void AuditionEngine::clearMeters() noexcept
     inputPeak.store(0.0f, std::memory_order_relaxed); inputRms.store(0.0f, std::memory_order_relaxed);
     outputPeak.store(0.0f, std::memory_order_relaxed); outputRms.store(0.0f, std::memory_order_relaxed);
     overload.store(false, std::memory_order_relaxed);
+    postGainPeak.store(0.0f, std::memory_order_relaxed);
 }
 }

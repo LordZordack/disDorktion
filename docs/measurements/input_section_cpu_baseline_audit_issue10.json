@@ -1,0 +1,17 @@
+{
+  "cases": 270,
+  "rawObservations": 39815902,
+  "diagnostic": false,
+  "worstCase": [
+    2,
+    96000,
+    64,
+    "oversized"
+  ],
+  "worstP99Ns": 75200.0,
+  "worstDeadlinePercent": 3.7405181347150256,
+  "source": "docs\\measurements\\input_section_cpu_baseline_issue10.csv",
+  "passed": true,
+  "rawSha256": "efd0116d6713a7b41400aca2de7a8e7d40204af6089fc0acea7f65eab29588fc",
+  "summarySha256": "4146592961ae7fbbb49d2765b5e590525d1316f6c22511c54f7eb436c9c73dc5"
+}

@@ -112,6 +112,46 @@ and [validation note](okf/notes/bit_crusher_validation.md). Expressive
 Debug/Release/headless suites and render checks pass; extension CPU qualification,
 new-WAV listening, and manual GUI restore/save inspection remain pending.
 
+## Input section
+
+Select **Input section** to run production input gain followed by the expressive
+bit crusher. Both control groups remain available. **Bypass gain** and
+**Bypass crusher** retain individual selections; common **Bypass** forces both
+temporarily. **Mute module** mutes gain; a crusher hold may persist until the
+next capture. Monitor mute/volume remain independent of rendered samples.
+
+The meter adds **Post-gain** peak. Its overload indicator latches interstage
+overshoot even when the fully wet crusher clamps final output below unity.
+Version-8 records contain gain/mute, both child bypasses, all crusher controls
+including exact uint32 seed, and common bypass. Older record schemas remain
+supported for their respective targets. Section processing reports zero latency.
+
+The committed `examples/experiments/input-section-overload.json` reproduces a
+generated overload fixture through the existing renderer:
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_render.exe --experiment examples/experiments/input-section-overload.json --output-dir input-overload-render
+```
+
+The destination must be fresh. Its `result.json` includes `postGainPeak` and
+marks overload at either the post-gain or final-output stage. See the
+[section design](okf/methods/input_section.md) and
+[qualification evidence](okf/notes/input_section_validation.md).
+
+For eight-second gain/crusher interaction schedules, generate source/post-gain/
+wet/sequential-reference float WAVs and independently validate the results:
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_input_measurements.exe input-section-measurements
+uv run --no-project --python 3.12 scripts/validate_input_measurements.py input-section-measurements
+```
+
+The fresh destination holds five synthetic fixtures at 48/96 kHz, event settings,
+peak/RMS/overload counts, exact reference errors and spectral observations.
+Float WAVs preserve values above unity; no normalization is applied. Generated
+files provide reproducible listening material, while human observations are
+recorded separately in the qualification note.
+
 ## Start an audition
 
 Build with the [full Windows preset](BUILDING.md), then launch:

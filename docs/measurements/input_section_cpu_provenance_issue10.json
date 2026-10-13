@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "gitHead": "8efb31da64de9f1bf8b24526a1e4797bdfb20c68",
+  "build": "0.1.0-8efb31d-Release",
+  "juce": "JUCE v8.0.14",
+  "note": "Base starting git HEAD is 8efb31d; worktree implementation is dirty/uncommitted. Source SHA256 hashes identify the actual local implementation; executable SHA256 hashes identify the measured Release tools. Validator hash includes narrowly corrected RMS summation-order tolerance. Dependency revisions are pinned in cmake/Dependencies.cmake and tool versions in cmake/tools-lock.json. Validator EOF whitespace corrected without behavior changes; source hash refreshed. PR verification removed six mojibake BOM prefix bytes; unchanged validator body was rerun successfully before publication.",
+  "sources": {
+    "src/dsp/InputSection.h": "fb1dfb825746c1977408a09527065f4cdbfab0cf64aeea19fb52cd7eda1a2f57",
+    "src/dsp/InputSection.cpp": "1fc7aa125cd8014a4e6791297e9606786ffd6a3efd33a0ccd0ca67dbaab4057c",
+    "src/dsp/Gain.h": "d134ec6f113c42a762a601e4590ae661a131f167bed5bfdbf9e05ab1822c58fb",
+    "src/dsp/Gain.cpp": "18f363b02cfc56704c0adec13e9e97dd87819fe18358aa67b0622e425ecf021e",
+    "src/dsp/BitCrusher.h": "e351ad9e95236769648d50f6ed4b644f3d3aca9dee299e18aba99ddad7ddf89b",
+    "src/dsp/BitCrusher.cpp": "1fbf05a234cff980ed2f414b94549ba80d31fa08a52dfb188b3aad230f554df0",
+    "src/dsp/BlockDispatcher.h": "e7bfeb5fa88c7cdc42e611aa7a62059a39c3f94ac80bfd565a694d92977e5f4c",
+    "src/dsp/ModuleContract.h": "7b235e3fe0ef53c4a2c68f51c2957538eaef0784a08dabc8ba9ac046e864a016",
+    "tools/InputSectionMeasureMain.cpp": "15957acc97071056d81608dd80982a898b17608fa72cc5b319199403368bd0d6",
+    "scripts/validate_input_measurements.py": "e361de9fc7379efc25b150ecd5fbb76e9e0f7cb2bde2e55e90b78f713f760105",
+    "benchmarks/ReferenceGainBenchmark.cpp": "c8896d3cd77367df5e5e77d3016083b0a76f26405e8f1acc979c4ba9770b1a54",
+    "benchmarks/InputSectionBenchmarkPath.h": "ee42ae4f5f268e5459d06e6c57079c609fe88fb71bc0d67d2b6c4b256a9804fc",
+    "benchmarks/WallTimeSampling.h": "d3eb1d28df50ad0e66d25191e6cc2a1a652be94d2f95cdb45d0f5d1d6336bd20",
+    "benchmarks/AutomationCoverage.h": "09513d3e1f8df8866c20495edae9108572f4f7e156fadefbd8ff4dc0c0a53867",
+    "benchmarks/TimingWindow.h": "3307463baba6e56caf6aa45432f0ee9ec08580a0f0ea7bde40f28348bf0ae5d2",
+    "benchmarks/GainBenchmarkPath.h": "c9445b4fe08ae94c13f46c9436e8580571901218f5bbd6dbc74f4ce61b7726a7",
+    "CMakeLists.txt": "200ef66f3aec3f0dbf196ffa5be3defa70b77f84fbd5a3e221902b420a33d5a4",
+    "CMakePresets.json": "e6f6473c4b8867ec9ca5eae757cbdf2c8abb2b3926868b75c2cc67728fa51268",
+    "cmake/Dependencies.cmake": "2f10af52b1394c69d61861c599ced1b6d5e49a29797cb8f1cfe0e0749247f37d",
+    "cmake/tools-lock.json": "a6c3ba76e39936c07cd1f8e184b2ff6425560f371e2c01497ad04a899f920312"
+  },
+  "executables": {
+    "build/windows-vs2026/Release/disdorktion_input_measurements.exe": "fc86dd3c46aabeb3f79df9e5e3865f5d936278c4d1e70d77f2e8a4fa18a6dfc0",
+    "build/windows-vs2026/Release/disdorktion_input_benchmark.exe": "7389f26e8f84b146b81fb4a4fa3fcd1e4eba1fa44d987601b95a4d8085457bca"
+  },
+  "provenanceRefresh": {
+    "reason": "Final dynamic-bypass benchmark rebuild completed; source/executable hashes refreshed for subsequent CPU evidence",
+    "measurementExecutableUnchanged": true,
+    "benchmarkRebuilt": true,
+    "coreAndMeasurementSourceHashesUnchanged": true
+  }
+}
