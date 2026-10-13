@@ -4,10 +4,16 @@ namespace disdorktion
 {
 bool TanhSaturation::prepare(const juce::dsp::ProcessSpec& spec) noexcept
 {
-    if (!dispatcher.prepare(spec)) return false;
-    drive.reset(spec.sampleRate, 0.010);
-    output.reset(spec.sampleRate, 0.010);
-    bypass.reset(spec.sampleRate, 0.010);
+    return prepareOversampled(spec, 1);
+}
+
+bool TanhSaturation::prepareOversampled(const juce::dsp::ProcessSpec& spec, unsigned factor) noexcept
+{
+    if (!dispatcher.prepareOversampled(spec, factor)) return false;
+    const auto rate = spec.sampleRate * factor;
+    drive.reset(rate, 0.010);
+    output.reset(rate, 0.010);
+    bypass.reset(rate, 0.010);
     reset();
     return true;
 }

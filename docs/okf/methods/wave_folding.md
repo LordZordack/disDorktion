@@ -9,6 +9,12 @@ resource: "https://github.com/LordZordack/disDorktion/issues/7"
 
 # Wave folding
 
+Q1's [shared oversampling boundary](./middle_oversampling.md) adds explicit
+internal-rate preparation while preserving this triangle transfer and native
+host limits. [Comparison evidence](../notes/middle_oversampling_validation.md)
+documents substantial aggressive-setting aliases even at raised rates; a later
+alias-treatment revision must repeat affected M4 validation before S2 acceptance.
+
 Design accepted for implementation on 2026-10-11 following Antigravity review. This page records the transfer and acceptance limits before implementation; it makes no measurement or listening acceptance claim. It informs the [DisDorktion project](../projects/disdorktion.md), follows the [processing contract](./processing_contract.md), and complements [tanh saturation](./tanh_saturation.md). See the [validation record](../notes/wave_folder_validation.md) for evidence.
 
 The native-rate module is independent of the future shared Q1 oversampling boundary. It can be prepared from 8 through 384 kHz under the F1 contract. Q1/S2 changes to transfer, controls, or anti-aliasing require renewed affected validation.

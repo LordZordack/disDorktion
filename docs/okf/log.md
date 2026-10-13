@@ -70,3 +70,17 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-12T12:58:50Z: Added high-pass and low-pass response designs and numerical/realtime/diagnostic CPU evidence; listening and reference CPU qualification pending
 
 - 2026-10-12T15:59:47Z: Documented Release audition launch and publication artifacts for issue 8
+
+- 2026-10-12T17:42:15Z: Q1: evaluated native/FIR and separate ADAA folding; revised fractional latency correction; quality approval remains open
+
+- 2026-10-12T17:43:46Z: Q1: preserve bundle-only concept links and identify external measurement artifacts by repository path
+
+- 2026-10-12T17:49:36Z: Q1 final verification: Debug/Release 170 tests each; ADAA 93 deterministic files; CPU and sound acceptance open
+
+- 2026-10-12T18:00:40Z: Q1 graph audit complete: 161 symbols/13 processes, HIGH risk retained; sound and CPU approval open
+
+- 2026-10-12T19:26:21Z: Issue 9: equivalent FIR CPU optimization, repeated quality checks, and matched user-clip listening with gentler settings; approval remains open.
+
+- 2026-10-13T14:03:09Z: Issue 9 PR preparation: fresh Debug/Release 171-test suites and documentation checks pass; publish the evaluation for review with sound acceptance open.
+
+- 2026-10-13T14:09:45Z: Issue 9 final publication audit: 32 source/test/documentation files, 188 symbols and 14 flows; complete HIGH-risk graph audit, draft quality gates retained.

@@ -10,8 +10,16 @@ class BlockDispatcher
 public:
     bool prepare(const juce::dsp::ProcessSpec& spec) noexcept
     {
-        if (!isValidProcessSpec(spec)) return false;
-        configuration = spec;
+        return prepareOversampled(spec, 1);
+    }
+    // Validate the host domain before translating into a bounded internal domain.
+    bool prepareOversampled(const juce::dsp::ProcessSpec& hostSpec, unsigned factor) noexcept
+    {
+        if (!isValidProcessSpec(hostSpec) || factor == 0 || factor > 16
+            || (factor & (factor - 1)) != 0) return false;
+        configuration = hostSpec;
+        configuration.sampleRate *= factor;
+        configuration.maximumBlockSize *= factor;
         prepared = true;
         return true;
     }

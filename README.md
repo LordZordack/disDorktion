@@ -76,6 +76,21 @@ modules report zero added latency. See the [high-pass design](docs/okf/methods/h
 the output filters for later section integration.
 
 **Design Ethos**
+
+Q1's offline **middle-section comparison** tool evaluates native, 2x, 4x, 8x
+and 16x FIR tanh/folding processing. It saves spectra, filter phase and blend
+responses, diagnostic CPU timings, and aligned RMS-matched listening files.
+The evaluated 4x FIR latency correction reports 92 samples.
+The `--adaa` option evaluates cleaner triangle folding with the same 92-sample
+4x latency. Representative alias suppression improves, while extreme-setting
+residuals and changed character keep approval open. The equivalent FIR layout
+optimization passes the provisional local CPU budget in two runs; host timing
+and human listening remain outstanding. A separate listening tool renders
+matched comparisons from a user-supplied WAV with gentle and stress settings.
+See the [design](docs/okf/methods/middle_oversampling.md),
+[evidence](docs/okf/notes/middle_oversampling_validation.md), and
+[commands](docs/AUDITION_HARNESS.md#middle-section-quality-comparisons-q1).
+
 Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)
 
 To test each function, a simple GUI either with prerecorded looped input or simple keyboard MIDI sinwave synth input should be used. Settings for the given module should be modifiable, and there should be a way to control output volume. This way, each module is able to be a sort of "standalone plugin". (but more importantly, it allows for rapid testing)

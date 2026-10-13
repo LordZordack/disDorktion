@@ -26,6 +26,8 @@ add_library(disdorktion_dsp STATIC
     src/dsp/BitCrusher.cpp
     src/dsp/TanhSaturation.cpp
     src/dsp/WaveFolder.cpp
+    src/dsp/MiddleSection.cpp
+    src/dsp/AdaaWaveFolder.cpp
 )
 target_include_directories(disdorktion_dsp PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(disdorktion_dsp PUBLIC cxx_std_20)
@@ -53,6 +55,8 @@ if(BUILD_TESTING)
         tests/BitCrusherTests.cpp
         tests/TanhSaturationTests.cpp
         tests/WaveFolderTests.cpp
+        tests/MiddleSectionTests.cpp
+        tests/AdaaWaveFolderTests.cpp
         tests/CutoffFilterTests.cpp
         tests/BenchmarkSamplingTests.cpp
     )
@@ -65,6 +69,7 @@ if(BUILD_TESTING)
         tests/BitCrusherRealtimeTests.cpp
         tests/TanhSaturationRealtimeTests.cpp
         tests/WaveFolderRealtimeTests.cpp
+        tests/MiddleSectionRealtimeTests.cpp
         tests/CutoffFilterRealtimeTests.cpp
         tests/AllocationTracking.cpp
     )
@@ -174,6 +179,12 @@ add_executable(disdorktion_wave_folder_measurements tools/WaveFolderMeasureMain.
 target_link_libraries(disdorktion_wave_folder_measurements PRIVATE disdorktion_harness)
 add_executable(disdorktion_cutoff_filter_measurements tools/CutoffFilterMeasureMain.cpp)
 target_link_libraries(disdorktion_cutoff_filter_measurements PRIVATE disdorktion_harness)
+add_executable(disdorktion_middle_measurements tools/MiddleSectionMeasureMain.cpp)
+target_link_libraries(disdorktion_middle_measurements PRIVATE disdorktion_harness)
+target_compile_definitions(disdorktion_middle_measurements PRIVATE DISDORKTION_GIT_REVISION="${DISDORKTION_REVISION}")
+add_executable(disdorktion_middle_listening tools/MiddleSectionListenMain.cpp)
+target_link_libraries(disdorktion_middle_listening PRIVATE disdorktion_harness juce::juce_cryptography)
+target_compile_definitions(disdorktion_middle_listening PRIVATE DISDORKTION_GIT_REVISION="${DISDORKTION_REVISION}")
 target_compile_definitions(disdorktion_wave_folder_measurements PRIVATE DISDORKTION_GIT_REVISION="${DISDORKTION_REVISION}")
 
 if(BUILD_TESTING)
