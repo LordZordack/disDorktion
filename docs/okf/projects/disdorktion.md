@@ -48,6 +48,12 @@ Describe unimplemented designs as **proposed behavior**. The reference gain foun
 
 ## Open research questions
 
+Q1 now has a [tested evaluation boundary](../methods/middle_oversampling.md) and
+[native/FIR comparison evidence](../notes/middle_oversampling_validation.md).
+Its 4x fractional-delay correction passes the measured phase/blend targets;
+aggressive triangle-folding residuals prevent unconditional 4x quality approval.
+Human listening and the residual-alias decision remain open before S2.
+
 - Choose and qualify the shared anti-aliasing boundary for the nonlinear middle section.
 - Establish parameter ranges, defaults, transitions, and identity behavior for each module before implementation.
 - Determine whether the experimental modules meet their acceptance gates and merit integration.

@@ -22,6 +22,7 @@ class WaveFolder
 {
 public:
     bool prepare(const juce::dsp::ProcessSpec&) noexcept;
+    bool prepareOversampled(const juce::dsp::ProcessSpec& hostSpec, unsigned factor) noexcept;
     void reset() noexcept;
     bool setParameters(const WaveFolderSettings&) noexcept;
     bool process(juce::dsp::AudioBlock<float>) noexcept;

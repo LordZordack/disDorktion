@@ -16,6 +16,31 @@ unsigned int getLatencySamples() const noexcept;
 
 Each module supplies its own typed parameter structure. Preparation accepts a finite sample rate in `[8000, 384000]` Hz, block capacity in `[1, 65536]`, and exactly one or two channels. A failed preparation preserves an existing valid preparation; a new module stays unprepared. Successful preparation establishes required storage and resets history against retained parameter targets.
 
+## Q1 preparation at the internal rate
+
+`BlockDispatcher`, `TanhSaturation`, and `WaveFolder` additionally expose
+`prepareOversampled(hostSpec, factor)`. Validate the host specification against
+the domain above and a power-of-two factor in 1–16, then translate rate and
+capacity to the internal domain (up to 6.144 MHz and 1,048,576 frames). Do not
+validate the translated specification as a host specification. Native `prepare`
+keeps its original domain. Invalid requests preserve the previous preparation
+and smoothers; successful preparation retains parameter targets and uses the
+actual internal rate for 10 ms ramps.
+
+The Q1 `MiddleSection` evaluation boundary exposes the usual host module
+interface plus stopped-processing factor, latency-correction and folding-mode
+configuration. It splits host blocks before upsampling and keeps filtering
+active in every individual module-bypass state. It reports integer host latency.
+Nominal inputs are [-1,1]; the resampling/correction filters can ring or overshoot,
+so arbitrary finite float extremes are not promised to remain finite.
+
+The separate `AdaaWaveFolder` is an internal evaluation processor, not a host
+`Module`: its nominal linear/bypass delay is fractional (1.5 internal samples).
+The surrounding boundary corrects and reports host latency. Native WaveFolder
+transfer/bypass behavior remains available separately. See the
+[Q1 design](okf/methods/middle_oversampling.md) for controls, correction and
+open quality/performance gates.
+
 ## Storage and thread use
 
 Only `prepare` may allocate. Audio blocks are caller-owned views of valid writable storage; modules do not resize or own audio. Stereo channels must point to separate sample storage. Future modules that need scratch audio or control storage allocate it during preparation, up to the validated capacity. Do not use block-sized stack arrays in callbacks.

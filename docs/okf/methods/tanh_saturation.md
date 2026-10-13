@@ -9,6 +9,11 @@ resource: "https://github.com/LordZordack/disDorktion/issues/6"
 
 # Tanh saturation
 
+Q1's [shared oversampling boundary](./middle_oversampling.md) adds explicit
+internal-rate preparation while preserving the native transfer and host limits.
+See [comparison evidence](../notes/middle_oversampling_validation.md) for alias
+and latency results; native acceptance alone does not qualify a driven cascade.
+
 ## Status and scope
 
 Design approved on 2026-10-10 before DSP implementation. This page records the approved behavior and pre-implementation acceptance limits; measured outcomes are in the [validation note](../notes/tanh_saturation_validation.md). The implementation, automated/native-rate validation, and pinned revision-2 CPU baseline are complete under recorded conditions. Human listening, GUI/VS2022 checks, and Q1 antialiasing/production integration remain pending. The method informs the [DisDorktion project](../projects/disdorktion.md) and follows the [processing contract](./processing_contract.md).

@@ -239,6 +239,72 @@ Live scalar updates are independent atomic values, not a whole-state snapshot.
 See [the design](okf/methods/wave_folding.md) and
 [validation evidence](okf/notes/wave_folder_validation.md).
 
+## Middle section quality comparisons (Q1)
+
+This offline evaluation uses shared DSP and is available in full and DSP-only
+builds. It compares native/2x/4x/8x/16x maximum-quality FIR for tanh, folder and
+their cascade. Choose a new output directory:
+
+```powershell
+cmake --build --preset windows-vs2026-release --target disdorktion_middle_measurements
+& './build/windows-vs2026/Release/disdorktion_middle_measurements.exe' './renders/middle-comparison-001'
+uv run --no-project --python 3.12 scripts/validate_middle_measurements.py './renders/middle-comparison-001'
+& './build/windows-vs2026/Release/disdorktion_middle_measurements.exe' './renders/middle-adaa-001' --adaa
+```
+
+`--adaa` selects the separate first-order antialiased triangle candidate. It
+retains the settled DC fold curve but changes transients and harmonic levels;
+its latency includes the internal averaging/compensation. The plain triangle
+comparison remains the default. Neither option is production-qualified yet.
+
+Existing destinations return exit 2; processing/I/O failure returns exit 1 and
+retains partial output for diagnosis. A successful run returns 0 after writing
+900 spectral cases (compressed full `spectra.csv.gz` and `alias_summary.csv`),
+15 impulse filter/phase/group-delay and dry-blend responses, 144 diagnostic CPU
+cases, 90 listening WAVs and `result.json`. Record the evaluated source snapshot
+alongside results when using an uncommitted working tree; build identity records
+starting revision/configuration. CPU figures include preallocated input copying
+and report batch means under uncontrolled local conditions.
+
+For a repeat, use another fresh directory, then pass `--repeat OTHER_DIRECTORY`
+to the validator. It compares spectral summaries, filter data, compressed spectra
+and all listening WAVs; timings and provenance JSON vary. The validator reports
+engineering gates separately from artifact validity and never approves listening.
+
+Compare factors within the same `path-kind-drive-threshold` filename group.
+Files are integer-delay aligned, RMS matched and jointly peak scaled. Tones,
+transients and sweeps are synthetic; capture listener/playback details and add
+real material before final musical acceptance. See the [design](okf/methods/middle_oversampling.md)
+and [measured limitations](okf/notes/middle_oversampling_validation.md).
+
+### Compare your own WAV
+
+```powershell
+cmake --build --preset windows-vs2026-release --target disdorktion_middle_listening
+& './build/windows-vs2026/Release/disdorktion_middle_listening.exe' 'C:/path/to/input.wav' './renders/middle-listening-001'
+```
+
+The input must be mono/stereo WAV, 8--384 kHz, finite and within [-1,1]. The tool
+uses up to the first 30 seconds, preserving rate and input level. It writes a
+reference plus plain 4x, ADAA 4x and ADAA 8x for four cascade recipes:
+
+| Recipe | Tanh drive | Folder drive | Threshold |
+| --- | --- | --- | --- |
+| mild | 0 dB | 0 dB | 0.75 |
+| moderate | 6 dB | 0 dB | 0.5 |
+| stress-12 | 12 dB | 12 dB | 0.25 |
+| stress-36 | 36 dB | 36 dB | 0.25 |
+
+All 13 floating-point WAVs have the same length, integer-delay alignment,
+whole-excerpt RMS matching within 0.001 dB and one common peak scale capped at
+0.8. Start with moderate or mild settings if the stress settings obscure the
+source. Keep playback volume fixed; compare source recognition, attacks,
+high-note whistles and the desired distortion character. `result.json` records
+source SHA256, build/revision/JUCE identity, parameters, latency and matching
+gains. Save a source snapshot beside uncommitted results. Existing output returns
+2; invalid input/processing/I/O returns 1 with partial output retained. Success
+returns 0 and does not supply listening approval.
+
 ## Extend a target
 
 `src/harness/AuditionTarget.h` defines a descriptor and adapter interface. `ReferenceGainTarget.h` translates the `gain` control and bypass into the module's typed parameters, delegating prepare, reset, process, and latency reporting to `ReferenceGain`.
