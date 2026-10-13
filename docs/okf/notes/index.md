@@ -2,7 +2,7 @@
 type: "Index"
 title: "Notes"
 description: "Index of notes research documents."
-timestamp: "2026-10-12T19:26:21Z"
+timestamp: "2026-10-13T18:22:13Z"
 ---
 
 # Notes
@@ -12,6 +12,7 @@ timestamp: "2026-10-12T19:26:21Z"
 - [Reusable gain validation](./gain_validation.md) — Observed correctness, integration, transition fixtures and battery diagnostics for the reusable input/output gain module.
 - [Audition harness validation](./harness_validation.md) — Issue #3 validation evidence and remaining manual device and listening checks, distinguished from tool implementation.
 - [High-Pass Module Validation](./high_pass_validation.md) — Numerical, realtime and diagnostic CPU evidence for selectable output filtering; human listening and reference CPU qualification remain pending.
+- [Input section qualification](./input_section_validation.md) — Recorded correctness, realtime, interaction, CPU and listening evidence for issue 10, with unresolved gates kept explicit.
 - [Low-Pass Module Validation](./low_pass_validation.md) — Numerical, realtime and diagnostic CPU evidence for selectable output filtering; human listening and reference CPU qualification remain pending.
 - [Middle section anti-aliasing validation](./middle_oversampling_validation.md) — Q1 measured FIR and ADAA comparisons, equivalent CPU optimization, and pending listening and production acceptance.
 - [Tanh saturation validation](./tanh_saturation_validation.md) — Numerical, realtime, spectral, performance and listening evidence for the native-rate tanh module.

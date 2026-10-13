@@ -11,6 +11,17 @@
 - [Proposed performance budgets and benchmark procedure](docs/PERFORMANCE.md)
 - [Production gain design and acceptance limits](docs/okf/methods/gain.md)
 
+### Input section
+
+Select **Input section** in the shared audition app to process production gain
+then the expressive bit crusher at the device rate. Gain and crusher have
+independent bypasses; common bypass retains those selections. Post-gain metering
+and a latched overload indicator reveal quantizer overload that wet clamping
+could hide. Version-8 records reproduce both modules and all bypass settings.
+The section adds zero samples of latency. See the [design](docs/okf/methods/input_section.md),
+[qualification status](docs/okf/notes/input_section_validation.md), and
+[audition guide](docs/AUDITION_HARNESS.md).
+
 ### Launch the Release audition app
 
 From a PowerShell terminal in the project root, build and launch:

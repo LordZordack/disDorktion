@@ -12,6 +12,7 @@ struct RenderResult
     std::uint64_t samples = 0;
     double inputPeak = 0, inputRms = 0, outputPeak = 0, outputRms = 0;
     bool overloaded = false;
+    double postGainPeak = 0;
     unsigned latencySamples = 0;
 };
 // Blocking, device-free worker/CLI operation. Existing destinations are rejected.

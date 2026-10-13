@@ -1,0 +1,17 @@
+{
+  "cases": 90,
+  "rawObservations": 13349159,
+  "diagnostic": true,
+  "worstCase": [
+    1,
+    96000,
+    32,
+    "automation"
+  ],
+  "worstP99Ns": 6300.0,
+  "worstDeadlinePercent": 1.8900000000000001,
+  "source": "docs\\measurements\\input_section_cpu_diagnostic_issue10.csv",
+  "passed": true,
+  "rawSha256": "2e414daf98aa27a5cd564838ef7d0d1ea19d13794fdcbb5ba4fae79d5870758e",
+  "summarySha256": "e6520d85f1d36cc23c4624be70b8c3d56a719503e8671edb35fe8380b484240b"
+}

@@ -496,6 +496,42 @@ TEST_CASE("Filter device restoration retains mode cutoff and live controls acros
     }
 }
 
+TEST_CASE("Input section callback restoration uses both modules and reports interstage overload", "[controller][input-section][realtime]")
+{
+    using namespace disdorktion;
+    AudioDeviceController controller;
+    CallbackDevice device;
+    auto record=callbackRecord();
+    record.version=8;record.targetId="input-section";
+    record.gainDb=24.f;record.bitDepth=4;record.captureRateHz=12345.5f;
+    controller.configure(record);controller.audioDeviceAboutToStart(&device);controller.setPlaying(true);
+    juce::AudioBuffer<float> audio(2,1024);
+    callback(controller,audio);
+    REQUIRE(controller.engine().meters().postGainPeak>1.f);
+    REQUIRE(audio.getMagnitude(0,1024)<=1.f);
+    REQUIRE(controller.engine().consumeOverload());
+    {
+        test::ScopedAllocationTracking tracking;
+        controller.engine().setGainDb(-12.f);
+        controller.engine().setInputGainBypass(true);
+        controller.engine().setInputCrusherBypass(true);
+        controller.engine().setBypass(true);
+        callback(controller,audio);
+        controller.engine().setBypass(false);
+        controller.restart();callback(controller,audio);
+        controller.engine().setInputGainBypass(false);controller.engine().setInputCrusherBypass(false);
+        callback(controller,audio);
+    }
+    const auto count=test::getAllocationCounts();
+    REQUIRE(count.allocations==0);REQUIRE(count.deallocations==0);
+    controller.audioDeviceStopped();
+    record.bypass=true;record.gainBypass=false;record.crusherBypass=true;record.mute=true;
+    controller.configure(record);controller.audioDeviceAboutToStart(&device);controller.setPlaying(true);
+    callback(controller,audio);
+    REQUIRE(audio.getMagnitude(0,1024)>0.f);
+    REQUIRE(audio.getMagnitude(0,1024)<=.25f);
+}
+
 TEST_CASE("Wave folder callbacks and live controls allocate nothing", "[controller][wave-folder][realtime]")
 {
     using namespace disdorktion;

@@ -1,0 +1,5593 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "sine-48000",
+      "fixture": "sine",
+      "rateHz": 48000,
+      "frames": 384000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 48000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96048,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96096,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96144,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96240,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96288,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96336,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96432,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96480,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96528,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96624,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96672,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96720,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 144000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 240000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 336000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.25,
+        "rms": 0.152581944984634,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 3.962233066558838,
+        "rms": 1.483485374425695,
+        "overloadSamples": 232233
+      },
+      "output": {
+        "peak": 3.962233066558838,
+        "rms": 1.191912631765235,
+        "overloadSamples": 151972
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.250433842653105
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001152081487697
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000325501620093
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000188385687912
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 1.256298585268476
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.004151421414805
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.001730131034036
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000711955839611
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.066592412687223
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000480560330857
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000169729285608
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000060625118967
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.255207639631217
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.017583394881271
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.006981451588464
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.002412840075476
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 1.100044577200799
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.009370705067186
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.007455482046066
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.005023816376912
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.969109011727862
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.018259260877815
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.005158853469996
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.002985712275988
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.250433842653105
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001152081487698
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000325501620093
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000188385687911
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "transients-48000",
+      "fixture": "transients",
+      "rateHz": 48000,
+      "frames": 384000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 48000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96048,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96096,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96144,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96240,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96288,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96336,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96432,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96480,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96528,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96624,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96672,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96720,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 144000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 240000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 336000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.243310287594795,
+        "rms": 0.031140965739342,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 3.856208324432373,
+        "rms": 0.299587680208451,
+        "overloadSamples": 17277
+      },
+      "output": {
+        "peak": 3.856208324432373,
+        "rms": 0.257307937253828,
+        "overloadSamples": 11210
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 5.085484697903441e-6
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 4.724813218823896e-8
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.5104205810183e-8
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 9.369014139234646e-9
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 1.021932773949145e-6
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 9.49455417998165e-9
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 3.035204663419523e-9
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 1.882711349026654e-9
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.000060449626998
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 5.616243780635592e-7
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.795392264020265e-7
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 1.113667393334255e-7
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.000080599502657
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 7.488324548300893e-7
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 2.393855982824274e-7
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 1.484889245056248e-7
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 5.085484697903442e-6
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 4.724813218825204e-8
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.510420581018906e-8
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 9.369014139218862e-9
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "high-sine-48000",
+      "fixture": "high-sine",
+      "rateHz": 48000,
+      "frames": 384000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 48000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96048,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96096,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96144,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96240,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96288,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96336,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96432,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96480,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96528,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96624,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96672,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96720,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 144000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 240000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 336000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.25,
+        "rms": 0.152581943161545,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 3.962233066558838,
+        "rms": 1.483490284936825,
+        "overloadSamples": 217627
+      },
+      "output": {
+        "peak": 3.962233066558838,
+        "rms": 1.158287263770304,
+        "overloadSamples": 144685
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.000387323863661
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000577642915138
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.249999997860716
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000333502294317
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.00191854077349
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.002852018041209
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.202391520322538
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.001476313172081
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.00140468933267
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000441598630711
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.05199012068578
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000210517604005
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.036560039143021
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.011895949458129
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 2.98984614269439
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.005302906912594
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.061364756479142
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.114626382237895
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.232712119705259
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.012357426514285
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.00613866966635
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.009155023415824
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 3.962233025044056
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.005285655267783
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.000387323863637
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000577642915123
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.249999997860716
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000333502294332
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "two-tone-48000",
+      "fixture": "two-tone",
+      "rateHz": 48000,
+      "frames": 384000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 48000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96048,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96096,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96144,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96240,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96288,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96336,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96432,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96480,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96528,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96624,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96672,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96720,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 144000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 240000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 336000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.374986290931702,
+        "rms": 0.170591800713098,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 5.943132400512695,
+        "rms": 1.658588139764787,
+        "overloadSamples": 226972
+      },
+      "output": {
+        "peak": 5.943132400512695,
+        "rms": 1.300529427637664,
+        "overloadSamples": 147643
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.250581508853086
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001033614829316
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.12529328171309
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.00007252701395
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 1.169505562932237
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.003947787959843
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.333574331991199
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.002766840225928
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.064524126388253
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000860842404777
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.025954292755901
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000109866477236
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.238402485998275
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.019918702455677
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.49836536473601
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.001372642542771
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.924245966359127
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.064093466272302
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.090599728220195
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.011071160501386
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.971449367264347
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.016381689887981
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.985764741178143
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.00114947715055
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.250581508853087
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001033614829316
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.125293281713089
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000072527013954
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sweep-48000",
+      "fixture": "sweep",
+      "rateHz": 48000,
+      "frames": 384000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 48000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96048,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96096,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96144,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96240,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96288,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96336,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96432,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96480,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96528,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96624,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96672,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96720,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 96768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 144000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 240000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 336000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.25,
+        "rms": 0.152581770338647,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 3.962233066558838,
+        "rms": 1.483490396082556,
+        "overloadSamples": 232182
+      },
+      "output": {
+        "peak": 3.962233066558838,
+        "rms": 1.156301005597901,
+        "overloadSamples": 148008
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.001415139220731
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0032356761159
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.00033324342446
+        },
+        {
+          "startFrame": 45952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.00013013161733
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.003748783640505
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.004363313143961
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.002040064228586
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.003726427160625
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.00264933674332
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000583339639543
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000552362150361
+        },
+        {
+          "startFrame": 141952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000141505470949
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.033351495220348
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.013910493803761
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 2.049282133923359
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.006743468683837
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.184350095701557
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.131834644413823
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.021826690690456
+        },
+        {
+          "startFrame": 237952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.009385082334424
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.004431569333213
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.003074568981227
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.011096257403267
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.014513487775572
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.000163126363969
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000203428567405
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000102456754189
+        },
+        {
+          "startFrame": 333952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.003719619632613
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sine-96000",
+      "fixture": "sine",
+      "rateHz": 96000,
+      "frames": 768000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 192000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192096,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192288,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192480,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192672,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192864,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192960,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193056,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193152,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193248,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193344,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193440,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193536,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 384000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 480000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 576000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 672000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.25,
+        "rms": 0.15258194500314,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 3.962233066558838,
+        "rms": 1.483485122314409,
+        "overloadSamples": 464463
+      },
+      "output": {
+        "peak": 3.962233066558838,
+        "rms": 1.191547639846313,
+        "overloadSamples": 303718
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.252154296203507
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001653161447535
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000403197270729
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000233207119329
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 1.262747466935572
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.013501579711349
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.002513240849322
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.001279565641677
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.066990498978197
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001017812067295
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000317427640898
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000098527770172
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.286909690135192
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.025452785132516
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.003860672003201
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.005442704849007
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 1.123639476692486
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.007598739702158
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.010957812611948
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.012877505453419
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.996376366986088
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.026200843797794
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.006390245966939
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.003696083678335
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.252154296203507
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001653161447535
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000403197270729
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000233207119329
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "transients-96000",
+      "fixture": "transients",
+      "rateHz": 96000,
+      "frames": 768000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 192000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192096,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192288,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192480,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192672,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192864,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192960,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193056,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193152,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193248,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193344,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193440,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193536,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 384000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 480000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 576000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 672000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.236860230565071,
+        "rms": 0.022010040871155,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 3.753981828689575,
+        "rms": 0.210129015352432,
+        "overloadSamples": 16397
+      },
+      "output": {
+        "peak": 3.753981828689575,
+        "rms": 0.181279451289728,
+        "overloadSamples": 10567
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.174548657503085e-11
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 3.944936900916716e-13
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.186298749486128e-13
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 7.12256107234883e-14
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 6.379284367094966e-12
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 7.927386828149348e-14
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 2.383878069171805e-14
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 1.43128476355367e-14
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.773490495843945e-10
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 4.68922770009627e-12
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.410117269644743e-12
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 8.466373075300796e-13
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 5.031320667536402e-10
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 6.252303418193102e-12
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.880156531689037e-12
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 1.128849877471479e-12
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.174548657499329e-11
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 3.944936900678708e-13
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.186298750815762e-13
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 7.122561055704753e-14
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "high-sine-96000",
+      "fixture": "high-sine",
+      "rateHz": 96000,
+      "frames": 768000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 192000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192096,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192288,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192480,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192672,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192864,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192960,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193056,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193152,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193248,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193344,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193440,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193536,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 384000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 480000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 576000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 672000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.25,
+        "rms": 0.152581943785354,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 3.962233066558838,
+        "rms": 1.483490252620221,
+        "overloadSamples": 506282
+      },
+      "output": {
+        "peak": 3.962233066558838,
+        "rms": 1.158061346305177,
+        "overloadSamples": 313489
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.001156699688446
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001197530108405
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.249999995363574
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000619887198451
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.006417783118622
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.006578359189012
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.251925361808684
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.002275288103408
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.000877289951012
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000567032836801
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.05140284047872
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000376327276853
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.094663151429825
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.037047518090013
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 2.987658529051887
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.007312939877835
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.050896530619843
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.082146605052241
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.206230675023705
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.004603530495647
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.018332454954261
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.018979573516654
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 3.962232988714722
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.009824550263001
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.001156699688449
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001197530108397
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.249999995363574
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000619887198458
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "two-tone-96000",
+      "fixture": "two-tone",
+      "rateHz": 96000,
+      "frames": 768000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 192000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192096,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192288,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192480,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192672,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192864,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192960,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193056,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193152,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193248,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193344,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193440,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193536,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 384000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 480000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 576000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 672000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.374986290931702,
+        "rms": 0.170591800779082,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 5.943132400512695,
+        "rms": 1.658587921414712,
+        "overloadSamples": 453671
+      },
+      "output": {
+        "peak": 5.943132400512695,
+        "rms": 1.299899178333084,
+        "overloadSamples": 295091
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.251957050747716
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001460870318816
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.124596806987321
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000350026294989
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 1.176896384825431
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.008345835281623
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.325802291285851
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.002549253136176
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.064035278823318
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000819413059526
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.025288223996123
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000088095190411
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.25960025346147
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.005066079620442
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.485710908178527
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.00750788241561
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.956792759973664
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.037828864437046
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.095350561900656
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.007270586714176
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 3.993250233673041
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.023153235881353
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.974726356990639
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.005547539483324
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.251957050747704
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001460870318823
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.124596806987345
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000350026295015
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sweep-96000",
+      "fixture": "sweep",
+      "rateHz": 96000,
+      "frames": 768000,
+      "channels": 2,
+      "events": [
+        {
+          "frame": 0,
+          "gainDb": 0.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 64,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 96000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 384000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.0,
+          "shape": 0.0,
+          "jitter": 0.0,
+          "jitterSeed": 1
+        },
+        {
+          "frame": 192000,
+          "gainDb": 12.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 3,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": -0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192096,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192192,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192288,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192384,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192480,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192576,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192672,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192768,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192864,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 192960,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193056,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193152,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193248,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193344,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193440,
+          "gainDb": 24,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 2,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.600000023841858,
+          "shape": 0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 193536,
+          "gainDb": -12,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 16,
+          "captureRateHz": 8000.0,
+          "crusherBypass": false,
+          "mix": 0.2,
+          "crush": 0.600000023841858,
+          "shape": -0.8,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 288000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 4,
+          "captureRateHz": 4000.0,
+          "crusherBypass": false,
+          "mix": 0.25,
+          "crush": 1.0,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        },
+        {
+          "frame": 384000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 2,
+          "captureRateHz": 6000.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": -0.800000011920929,
+          "jitter": 0.699999988079071,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 480000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": false,
+          "bitDepth": 1,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 1.0,
+          "crush": 1.0,
+          "shape": 1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 576000,
+          "gainDb": 24.0,
+          "mute": false,
+          "gainBypass": true,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": true,
+          "mix": 0.0,
+          "crush": 1.0,
+          "shape": -1.0,
+          "jitter": 1.0,
+          "jitterSeed": 17
+        },
+        {
+          "frame": 672000,
+          "gainDb": 24.0,
+          "mute": true,
+          "gainBypass": false,
+          "bitDepth": 8,
+          "captureRateHz": 100.0,
+          "crusherBypass": false,
+          "mix": 1.0,
+          "crush": 0.5,
+          "shape": 0.800000011920929,
+          "jitter": 1.0,
+          "jitterSeed": 123
+        }
+      ],
+      "source": {
+        "peak": 0.25,
+        "rms": 0.152581770339348,
+        "overloadSamples": 0
+      },
+      "postGain": {
+        "peak": 3.962233066558838,
+        "rms": 1.483490388287012,
+        "overloadSamples": 464145
+      },
+      "output": {
+        "peak": 3.962233066558838,
+        "rms": 1.155659974586943,
+        "overloadSamples": 295463
+      },
+      "compositionMaxError": 0.0,
+      "postGainMeterMaxError": 0.0,
+      "latencySamples": 0,
+      "spectralProjections": [
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.003506721736456
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.008120729186143
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000542479627232
+        },
+        {
+          "startFrame": 93952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000300275060655
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.012869635366909
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.017229941410025
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000763930982023
+        },
+        {
+          "startFrame": 189952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.007293145274386
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.002218685737381
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.001947702371308
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.001431263024423
+        },
+        {
+          "startFrame": 285952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.000611583177277
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.033181800941688
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.017469062296674
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 1.831050828658561
+        },
+        {
+          "startFrame": 381952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.005014752304122
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.116177868272272
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.159490912493806
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.031275403174203
+        },
+        {
+          "startFrame": 477952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.013629649692243
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.010096695059044
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.010448247453243
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.004962827107642
+        },
+        {
+          "startFrame": 573952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.040166962354792
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.000631327921568
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.000573557223206
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.000229988295173
+        },
+        {
+          "startFrame": 669952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.00761425316262
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 440.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 2000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 6000.0,
+          "amplitude": 0.0
+        },
+        {
+          "startFrame": 765952,
+          "frames": 2048,
+          "frequencyHz": 10000.0,
+          "amplitude": 0.0
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "build": "0.1.0-8efb31d-Release",
+  "juce": "JUCE v8.0.14",
+  "gitRevision": "8efb31d",
+  "sourceIdentity": "Deterministic synthetic v1; mono formula at L, R=-0.7*L; float32 stereo WAV, no normalization; duration 8 seconds",
+  "reference": "Separately prepared production Gain then BitCrusher; identical events/blocks, capacity 127; exact same-build tolerance 0",
+  "blocks": "32,64,127,256,1024 cyclic, split at exact event frames; includes oversized calls",
+  "listening": "Pending human audition; synthetic fixtures do not qualify musical sources or human listening",
+  "passed": true
+}

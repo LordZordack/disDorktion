@@ -26,6 +26,16 @@ Carrier modulation and demodulation, resonant comb filtering, frequency warping,
 
 ## Evidence status
 
+The reusable [input section](../methods/input_section.md) composes production
+gain then expressive bit crushing at the host rate, with independent bypasses,
+interstage overload metering, zero added latency and version-8 shared-harness
+records. Its [qualification note](../notes/input_section_validation.md) records
+191-test Debug/Release suites, 160 DSP-only tests, exact interaction measurements,
+user acceptance of the synthetic audition and 270 qualified pinned AC CPU cases
+(worst p99 3.74052% of deadline, 6% limit). Representative music and actual
+GUI/device inspection remain unperformed.
+Full-chain plugin integration remains a later milestone.
+
 The independently selectable [high-pass](../methods/high_pass_filter.md) and
 [low-pass](../methods/low_pass_filter.md) modules implement Butterworth,
 Chebyshev I and Chebyshev II responses with smoothed cutoff/mode/bypass and

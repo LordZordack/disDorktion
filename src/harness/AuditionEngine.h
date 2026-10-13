@@ -14,6 +14,7 @@ struct MeterSnapshot
     float outputPeak = 0.0f;
     float outputRms = 0.0f;
     bool overloaded = false;
+    float postGainPeak = 0.0f;
 };
 
 class AuditionEngine
@@ -48,6 +49,9 @@ public:
     void setJitterSeed(std::uint32_t) noexcept;
     bool setGainSettings(const GainSettings&) noexcept;
     bool setGainDb(float db) noexcept;
+    bool setInputSettings(const InputSettings&, bool commonBypass = false) noexcept;
+    void setInputGainBypass(bool value) noexcept;
+    void setInputCrusherBypass(bool value) noexcept;
     void setModuleMuted(bool value) noexcept;
     void setBypass(bool bypass) noexcept;
     void setMonitorDb(float db) noexcept;
@@ -69,6 +73,7 @@ private:
     ReferenceGainTarget target;
     GainTarget productionTarget;
     BitCrusherTarget crusherTarget;
+    InputSectionTarget inputTarget;
     TanhSaturationTarget saturationTarget;
     WaveFolderTarget folderTarget;
     CutoffFilterTarget<true> highPassTarget;
@@ -90,6 +95,8 @@ private:
     std::atomic<std::uint32_t> jitterSeed {1};
     std::atomic<bool> crusherBypass {false};
     std::atomic<bool> moduleMuted {false}, productionBypass {false};
+    std::atomic<bool> inputBypass {false};
+    std::atomic<float> postGainPeak {0.0f};
     std::atomic<bool> bypass {false}, muted {true};
     std::atomic<float> inputPeak {0.0f}, inputRms {0.0f}, outputPeak {0.0f}, outputRms {0.0f};
     std::atomic<bool> overload {false};

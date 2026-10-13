@@ -222,7 +222,8 @@ TEST_CASE("Harness rejects malformed controls and preparation and silences failu
     REQUIRE_FALSE(engine.setMonitoring(-61.0f,false)); REQUIRE_FALSE(engine.setMonitoring(1.0f,false));
     REQUIRE_FALSE(engine.setMonitoring(std::numeric_limits<float>::quiet_NaN(),false));
     REQUIRE_FALSE(engine.selectTarget("missing")); REQUIRE(engine.selectTarget("reference-gain"));
-    REQUIRE(auditionTargets().size() == 5);
+    REQUIRE(auditionTargets().size() == 6);
+    REQUIRE(auditionTargets().back().id == "input-section");
     REQUIRE(engine.prepare({8000.0,1,1}));
     juce::AudioBuffer<float> mono(1,8), stereo(2,8);
     fillHarness(mono,0.25f); REQUIRE(engine.process(juce::dsp::AudioBlock<float>(mono),false));
