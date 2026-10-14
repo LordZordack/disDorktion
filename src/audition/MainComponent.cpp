@@ -43,6 +43,7 @@ MainComponent::MainComponent()
     target.addItem("Low-pass", 7);
     target.addItem("Input section", 8);
     target.addItem("Middle section (candidate)", 9);
+    target.addItem("Output section", 10);
     target.setSelectedId(1);
     for (const auto* name : {"Impulse", "Sine", "Two-tone", "Logarithmic sweep", "Seeded white noise", "Audio file loop", "Keyboard / MIDI sine"})
         source.addItem(name, source.getNumItems() + 1);
@@ -96,6 +97,16 @@ MainComponent::MainComponent()
     filterResponse.addItem("Chebyshev I (1 dB ripple)",2);
     filterResponse.addItem("Chebyshev II (40 dB stopband)",3);
     filterResponse.setTooltip("Cutoff is the half-power (-3.0103 dB) point in every response mode.");
+    outputLowCutoffLabel.setText("Low-pass cutoff (Hz)",juce::dontSendNotification);
+    outputLowResponseLabel.setText("Low-pass response",juce::dontSendNotification);
+    outputLowCutoff.setRange(20,20000,0); outputLowCutoff.setSkewFactorFromMidPoint(1000);
+    outputLowCutoff.setSliderStyle(juce::Slider::LinearHorizontal);
+    outputLowCutoff.setTextBoxStyle(juce::Slider::TextBoxRight,false,85,26);
+    outputLowResponse.addItem("Butterworth",1);
+    outputLowResponse.addItem("Chebyshev I (1 dB ripple)",2);
+    outputLowResponse.addItem("Chebyshev II (40 dB stopband)",3);
+    for (juce::Component* control : std::initializer_list<juce::Component*>{&outputLowCutoff,&outputLowResponse,
+        &outputLowCutoffLabel,&outputLowResponseLabel,&outputHighBypass,&outputLowBypass}) addChildComponent(*control);
     for (juce::Component* control : std::initializer_list<juce::Component*>{&tanhDrive, &tanhOutput,
         &tanhDriveLabel, &tanhOutputLabel, &folderThreshold, &folderThresholdLabel})
         control->setVisible(false);
@@ -134,9 +145,9 @@ MainComponent::MainComponent()
     target.onChange = [this] {
         auto next = snapshot();
         const auto selected = target.getSelectedId();
-        next.version = selected == 9 ? 9 : selected == 8 ? 8 : selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
+        next.version = selected == 10 ? 10 : selected == 9 ? 9 : selected == 8 ? 8 : selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
         next.targetId = selected == 1 ? "reference-gain" : selected == 2 ? "gain" : selected == 3 ? "bit-crusher"
-            : selected == 4 ? "tanh-saturation" : selected == 5 ? "wave-folder" : selected == 6 ? "high-pass" : selected == 7 ? "low-pass" : selected == 8 ? "input-section" : "middle-section";
+            : selected == 4 ? "tanh-saturation" : selected == 5 ? "wave-folder" : selected == 6 ? "high-pass" : selected == 7 ? "low-pass" : selected == 8 ? "input-section" : selected == 9 ? "middle-section" : "output-section";
         next.gain = 1.0f; next.gainDb = 0.0f; next.mute = false; next.bypass = false;
         next.gainBypass = false; next.crusherBypass = false;
         next.bitDepth = 64; next.captureRateHz = 384000.0f;
@@ -146,6 +157,7 @@ MainComponent::MainComponent()
         next.cutoffHz = selected == 6 ? 20.f : selected == 7 ? 20000.f : 1000.f;
         next.response = FilterResponse::butterworth;
         next.middle = {};
+        next.output = {};
         next.middleQuality = "4x-fir-adaa-v1";
         configureRecord(next);
     };
@@ -179,11 +191,24 @@ MainComponent::MainComponent()
     middleFolderOutput.onValueChange = [this] { audio.engine().setMiddleFolderOutputDb(static_cast<float>(middleFolderOutput.getValue())); };
     middleTanhBypass.onClick = [this] { audio.engine().setMiddleTanhBypass(middleTanhBypass.getToggleState()); };
     middleFolderBypass.onClick = [this] { audio.engine().setMiddleFolderBypass(middleFolderBypass.getToggleState()); };
-    filterCutoff.onValueChange = [this] { audio.engine().setFilterCutoffHz(static_cast<float>(filterCutoff.getValue())); };
+    filterCutoff.onValueChange = [this] {
+        if (target.getSelectedId()==10) audio.engine().setOutputCutoffHz(true,static_cast<float>(filterCutoff.getValue()));
+        else audio.engine().setFilterCutoffHz(static_cast<float>(filterCutoff.getValue()));
+    };
     filterResponse.onChange = [this] {
         if(filterResponse.getSelectedId()>0)
-            audio.engine().setFilterResponse(static_cast<FilterResponse>(filterResponse.getSelectedId()-1));
+        {
+            const auto value=static_cast<FilterResponse>(filterResponse.getSelectedId()-1);
+            if (target.getSelectedId()==10) audio.engine().setOutputResponse(true,value);
+            else audio.engine().setFilterResponse(value);
+        }
     };
+    outputLowCutoff.onValueChange=[this] { audio.engine().setOutputCutoffHz(false,static_cast<float>(outputLowCutoff.getValue())); };
+    outputLowResponse.onChange=[this] {
+        if(outputLowResponse.getSelectedId()>0) audio.engine().setOutputResponse(false,static_cast<FilterResponse>(outputLowResponse.getSelectedId()-1));
+    };
+    outputHighBypass.onClick=[this] { audio.engine().setOutputStageBypass(true,outputHighBypass.getToggleState()); };
+    outputLowBypass.onClick=[this] { audio.engine().setOutputStageBypass(false,outputLowBypass.getToggleState()); };
     jitterSeed.onTextChange = [this] {
         std::uint32_t value = 0;
         if (readCrusherSeed(value))
@@ -263,6 +288,11 @@ void MainComponent::resized()
         middleFolderBypass.setBounds(row.removeFromRight(140));
         middleTanhBypass.setBounds(row.removeFromRight(130));
     }
+    if (record.version == 10)
+    {
+        outputLowBypass.setBounds(row.removeFromRight(150));
+        outputHighBypass.setBounds(row.removeFromRight(150));
+    }
     moduleMuted.setBounds(row.removeFromRight(140)); gain.setBounds(row);
     row = bounds.removeFromTop(46);
     bitDepthLabel.setBounds(row.removeFromLeft(75)); bitDepth.setBounds(row.removeFromLeft(90).reduced(2));
@@ -303,6 +333,18 @@ void MainComponent::resized()
     filterInfo.setBounds(crusherShapeLabel.getBounds().getUnion(crusherJitter.getBounds()));
     row = bounds.removeFromTop(38);
     jitterSeedLabel.setBounds(row.removeFromLeft(90)); jitterSeed.setBounds(row.removeFromLeft(190).reduced(2));
+    if (record.version == 10)
+    {
+        filterInfo.setBounds(gain.getBounds());
+        auto highRow=bitDepthLabel.getBounds().getUnion(effectiveRateLabel.getBounds());
+        filterCutoffLabel.setBounds(highRow.removeFromLeft(170)); filterCutoff.setBounds(highRow.reduced(2));
+        auto modeRow=crusherMixLabel.getBounds().getUnion(crusherCrush.getBounds());
+        filterResponseLabel.setBounds(modeRow.removeFromLeft(170)); filterResponse.setBounds(modeRow.removeFromLeft(310).reduced(2));
+        auto lowRow=crusherShapeLabel.getBounds().getUnion(crusherJitter.getBounds());
+        outputLowCutoffLabel.setBounds(lowRow.removeFromLeft(170)); outputLowCutoff.setBounds(lowRow.reduced(2));
+        auto lowModeRow=jitterSeedLabel.getBounds().getUnion(row);
+        outputLowResponseLabel.setBounds(lowModeRow.removeFromLeft(170)); outputLowResponse.setBounds(lowModeRow.removeFromLeft(310).reduced(2));
+    }
     monitorLabel.setBounds(bounds.removeFromTop(24));
     row = bounds.removeFromTop(38); muted.setBounds(row.removeFromRight(180)); monitor.setBounds(row);
     meterLabel.setBounds(bounds.removeFromTop(40));
@@ -327,6 +369,9 @@ void MainComponent::handleNoteOff(juce::MidiKeyboardState*, int, int note, float
 ExperimentRecord MainComponent::snapshot() const
 {
     auto result = record;
+    if (result.version == 10)
+        result.output={{static_cast<float>(filterCutoff.getValue()),outputHighBypass.getToggleState(),static_cast<FilterResponse>(filterResponse.getSelectedId()-1)},
+            {static_cast<float>(outputLowCutoff.getValue()),outputLowBypass.getToggleState(),static_cast<FilterResponse>(outputLowResponse.getSelectedId()-1)}};
     if (result.version == 2 || result.version == 8) { result.gainDb = static_cast<float>(gain.getValue()); result.mute = moduleMuted.getToggleState(); }
     else if (result.version == 1) result.gain = static_cast<float>(gain.getValue());
     else if (result.version == 7)
@@ -429,12 +474,14 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     const auto crusher = record.version == 3 || record.version == 4 || section;
     const auto saturation = record.version == 5;
     const auto folder = record.version == 6;
-    const auto filtering = record.version == 7;
+    const auto outputSection = record.version == 10;
+    const auto filtering = record.version == 7 || outputSection;
     const auto middle = record.version == 9;
     const auto driven = saturation || folder || middle;
-    target.setSelectedId(middle ? 9 : section ? 8 : filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
+    target.setSelectedId(outputSection ? 10 : middle ? 9 : section ? 8 : filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
     gain.setRange(production ? -60.0 : 0.0, production ? 24.0 : 4.0, 0.0);
-    gainLabel.setText(middle ? "Middle candidate: tanh then ADAA folder | 4x FIR | 92 samples | sound acceptance pending"
+    gainLabel.setText(outputSection ? "Output section: high-pass then low-pass | independent responses and bypasses"
+        : middle ? "Middle candidate: tanh then ADAA folder | 4x FIR | 92 samples | sound acceptance pending"
         : filtering ? "Output filter: cutoff and response; 10 ms transitions"
         : folder ? "Wave folder: drive, threshold and wet output trim"
         : saturation ? "Tanh saturation: drive and wet output trim"
@@ -445,8 +492,17 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     gainLabel.setEnabled(!crusher || section);
     gain.setVisible(!driven && !filtering);
     moduleMuted.setVisible(!driven && !filtering);
-    filterCutoff.setValue(record.cutoffHz,juce::dontSendNotification);
-    filterResponse.setSelectedId(static_cast<int>(record.response)+1,juce::dontSendNotification);
+    filterCutoffLabel.setText(outputSection ? "High-pass cutoff (Hz)" : "Cutoff (Hz)",juce::dontSendNotification);
+    filterResponseLabel.setText(outputSection ? "High-pass response" : "Response",juce::dontSendNotification);
+    filterCutoff.setValue(outputSection ? record.output.highPass.cutoffHz : record.cutoffHz,juce::dontSendNotification);
+    filterResponse.setSelectedId(static_cast<int>(outputSection ? record.output.highPass.response : record.response)+1,juce::dontSendNotification);
+    outputLowCutoff.setValue(record.output.lowPass.cutoffHz,juce::dontSendNotification);
+    outputLowResponse.setSelectedId(static_cast<int>(record.output.lowPass.response)+1,juce::dontSendNotification);
+    outputHighBypass.setToggleState(record.output.highPass.bypass,juce::dontSendNotification);
+    outputLowBypass.setToggleState(record.output.lowPass.bypass,juce::dontSendNotification);
+    for (juce::Component* control : std::initializer_list<juce::Component*>{&outputLowCutoff,&outputLowResponse,
+        &outputLowCutoffLabel,&outputLowResponseLabel,&outputHighBypass,&outputLowBypass})
+    {control->setVisible(outputSection);control->setEnabled(outputSection);}
     for(juce::Component* control:std::initializer_list<juce::Component*>{&filterCutoff,&filterResponse,&filterCutoffLabel,&filterResponseLabel,&filterInfo})
     {control->setVisible(filtering);control->setEnabled(filtering);}
     tanhDriveLabel.setText(middle ? "Tanh drive (dB)" : "Drive (dB)", juce::dontSendNotification);
@@ -576,8 +632,11 @@ void MainComponent::setWorkerControlsEnabled(bool enabled)
     for (juce::Component* control : std::initializer_list<juce::Component*>{&middleFolderDrive,
         &middleFolderOutput, &middleFolderDriveLabel, &middleFolderOutputLabel, &middleTanhBypass, &middleFolderBypass})
         control->setEnabled(enabled && record.version == 9);
-    filterCutoff.setEnabled(enabled && record.version == 7);
-    filterResponse.setEnabled(enabled && record.version == 7);
+    filterCutoff.setEnabled(enabled && (record.version == 7 || record.version == 10));
+    filterResponse.setEnabled(enabled && (record.version == 7 || record.version == 10));
+    for (juce::Component* control : std::initializer_list<juce::Component*>{&outputLowCutoff,&outputLowResponse,
+        &outputLowCutoffLabel,&outputLowResponseLabel,&outputHighBypass,&outputLowBypass})
+        control->setEnabled(enabled && record.version == 10);
     // Monitoring remains available during worker activity. Its current settings
     // are retained when a newly loaded source replaces the old one.
 }
@@ -684,6 +743,13 @@ void MainComponent::showDevices()
 void MainComponent::timerCallback()
 {
     updateCaptureRateMapping();
+    if(record.version==10)
+    {
+        const auto rate=audio.sampleRate()>0 ? audio.sampleRate() : record.sampleRate;
+        filterInfo.setText("Effective HP " + juce::String(std::min(filterCutoff.getValue(),.45*rate),1)
+            + " Hz | LP " + juce::String(std::min(outputLowCutoff.getValue(),.45*rate),1)
+            + " Hz | 0 samples added",juce::dontSendNotification);
+    }
     if(record.version==7)
     {
         const auto rate=audio.sampleRate()>0 ? audio.sampleRate() : record.sampleRate;

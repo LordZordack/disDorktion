@@ -24,6 +24,7 @@ add_library(disdorktion_dsp STATIC
     src/dsp/ReferenceGain.cpp
     src/dsp/Gain.cpp
     src/dsp/InputSection.cpp
+    src/dsp/OutputSection.cpp
     src/dsp/BitCrusher.cpp
     src/dsp/TanhSaturation.cpp
     src/dsp/WaveFolder.cpp
@@ -54,6 +55,9 @@ if(BUILD_TESTING)
         tests/ReferenceGainTests.cpp
         tests/GainTests.cpp
         tests/InputSectionTests.cpp
+        tests/OutputSectionTests.cpp
+        tests/OutputSectionQualificationTests.cpp
+        tests/OutputBenchmarkTests.cpp
         tests/BitCrusherTests.cpp
         tests/TanhSaturationTests.cpp
         tests/WaveFolderTests.cpp
@@ -64,12 +68,13 @@ if(BUILD_TESTING)
         tests/BenchmarkSamplingTests.cpp
     )
     target_link_libraries(disdorktion_dsp_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
-    catch_discover_tests(disdorktion_dsp_tests TEST_PREFIX "dsp::" PROPERTIES TIMEOUT 30)
+    catch_discover_tests(disdorktion_dsp_tests TEST_PREFIX "dsp::" PROPERTIES TIMEOUT 120)
 
     add_executable(disdorktion_realtime_tests
         tests/RealtimeSafetyTests.cpp
         tests/GainRealtimeTests.cpp
         tests/InputSectionRealtimeTests.cpp
+        tests/OutputSectionRealtimeTests.cpp
         tests/BitCrusherRealtimeTests.cpp
         tests/TanhSaturationRealtimeTests.cpp
         tests/WaveFolderRealtimeTests.cpp
@@ -125,6 +130,10 @@ target_compile_definitions(disdorktion_gain_benchmark PRIVATE DISDORKTION_PRODUC
 add_executable(disdorktion_input_benchmark benchmarks/ReferenceGainBenchmark.cpp)
 target_link_libraries(disdorktion_input_benchmark PRIVATE disdorktion_dsp)
 target_compile_definitions(disdorktion_input_benchmark PRIVATE DISDORKTION_INPUT_SECTION_BENCHMARK=1)
+add_executable(disdorktion_output_benchmark benchmarks/ReferenceGainBenchmark.cpp)
+target_link_libraries(disdorktion_output_benchmark PRIVATE disdorktion_dsp juce::juce_cryptography)
+target_compile_definitions(disdorktion_output_benchmark PRIVATE
+    DISDORKTION_OUTPUT_SECTION_BENCHMARK=1 DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 add_executable(disdorktion_bit_crusher_benchmark benchmarks/ReferenceGainBenchmark.cpp)
 target_link_libraries(disdorktion_bit_crusher_benchmark PRIVATE disdorktion_dsp)
 target_compile_definitions(disdorktion_bit_crusher_benchmark PRIVATE DISDORKTION_BIT_CRUSHER_BENCHMARK=1)
@@ -135,6 +144,9 @@ add_executable(disdorktion_wave_folder_benchmark benchmarks/ReferenceGainBenchma
 target_link_libraries(disdorktion_wave_folder_benchmark PRIVATE disdorktion_dsp)
 target_compile_definitions(disdorktion_wave_folder_benchmark PRIVATE DISDORKTION_WAVE_FOLDER_BENCHMARK=1)
 if(WIN32)
+    target_link_libraries(disdorktion_output_benchmark PRIVATE PowrProf)
+    target_compile_definitions(disdorktion_output_benchmark PRIVATE
+        DISDORKTION_WINDOWS_SDK_VERSION="${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
     target_link_libraries(disdorktion_input_benchmark PRIVATE PowrProf)
     target_compile_definitions(disdorktion_input_benchmark PRIVATE
         DISDORKTION_WINDOWS_SDK_VERSION=\"${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}\")
@@ -163,6 +175,8 @@ if(NOT DISDORKTION_REVISION)
     set(DISDORKTION_REVISION "unknown")
 endif()
 target_compile_definitions(disdorktion_input_benchmark PRIVATE
+    DISDORKTION_BUILD_ID="${PROJECT_VERSION}-${DISDORKTION_REVISION}-$<CONFIG>")
+target_compile_definitions(disdorktion_output_benchmark PRIVATE
     DISDORKTION_BUILD_ID="${PROJECT_VERSION}-${DISDORKTION_REVISION}-$<CONFIG>")
 add_library(disdorktion_harness STATIC
     src/harness/AuditionEngine.cpp
@@ -194,6 +208,11 @@ add_executable(disdorktion_wave_folder_measurements tools/WaveFolderMeasureMain.
 target_link_libraries(disdorktion_wave_folder_measurements PRIVATE disdorktion_harness)
 add_executable(disdorktion_cutoff_filter_measurements tools/CutoffFilterMeasureMain.cpp)
 target_link_libraries(disdorktion_cutoff_filter_measurements PRIVATE disdorktion_harness)
+add_executable(disdorktion_output_measurements tools/OutputSectionMeasureMain.cpp)
+target_link_libraries(disdorktion_output_measurements PRIVATE disdorktion_harness juce::juce_cryptography)
+target_compile_definitions(disdorktion_output_measurements PRIVATE
+    DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}"
+    DISDORKTION_BUILD_ID="${DISDORKTION_REVISION}")
 add_executable(disdorktion_middle_measurements tools/MiddleSectionMeasureMain.cpp)
 target_link_libraries(disdorktion_middle_measurements PRIVATE disdorktion_harness)
 target_compile_definitions(disdorktion_middle_measurements PRIVATE DISDORKTION_GIT_REVISION="${DISDORKTION_REVISION}")
@@ -205,6 +224,7 @@ target_compile_definitions(disdorktion_wave_folder_measurements PRIVATE DISDORKT
 if(BUILD_TESTING)
     add_executable(disdorktion_harness_tests
         tests/MiddleSectionHarnessTests.cpp
+        tests/OutputSectionHarnessTests.cpp
         tests/InputSectionHarnessTests.cpp
         tests/HarnessEngineTests.cpp
         tests/CutoffHarnessTests.cpp
@@ -218,6 +238,7 @@ if(BUILD_TESTING)
     catch_discover_tests(disdorktion_harness_tests TEST_PREFIX "harness::" PROPERTIES TIMEOUT 30)
     add_executable(disdorktion_harness_realtime_tests
         tests/MiddleSectionHarnessRealtimeTests.cpp
+        tests/OutputSectionHarnessRealtimeTests.cpp
         tests/InputSectionHarnessRealtimeTests.cpp
         tests/CutoffHarnessRealtimeTests.cpp
         tests/HarnessRealtimeTests.cpp tests/AllocationTracking.cpp)

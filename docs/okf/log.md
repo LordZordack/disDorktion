@@ -96,3 +96,11 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-13T19:35:05Z: Recorded S2 functional verification, deterministic quality artifacts, failing CPU gate and graph-review limits
 
 - 2026-10-13T19:44:48Z: Preserved S2 CPU/quality failures and recommended qualification follow-up for candidate merge
+
+- 2026-10-13T23:35:34Z: Added output section design and qualification record; linked independent filter evidence and shared reproduction workflow
+
+- 2026-10-13T23:58:01Z: Recorded output section: 221 Debug/Release and 187 headless tests; repeated independent response evidence; 400 CPU diagnostic cases with raw audits; manual/reference CPU and fresh graph gates remain open
+
+- 2026-10-14T03:47:09Z: Issue 12 PR qualification: 600 pinned AC stereo CPU cases independently audited across 89408001 raw timings, worst p99 0.87 percent of deadline; fresh graph review completed; retained manual and individual filter gates; compact evidence prepared for publication
+
+- 2026-10-14T03:54:07Z: Preserve issue 12 compact qualification artifact bytes with scoped Git attributes; verified staged CSV/JSON hashes match the independently audited original evidence

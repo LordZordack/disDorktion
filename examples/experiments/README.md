@@ -1,5 +1,14 @@
 # Generated experiment examples
 
+Version-10 output-section records `output-section-wide.json`,
+`output-section-narrow.json` and `output-section-crossed.json` use the same
+native-rate HP -> LP target as the audition app. They preserve independent
+cutoffs, response selections and stage bypasses plus common bypass. Each uses a
+five-second 48 kHz stereo log sweep, peak 0.25, block 256. Wide uses
+20/20000 Hz Butterworth; narrow uses 800/2500 Hz Chebyshev I; crossed uses
+8000/200 Hz Chebyshev II. Listening observations are pending. Use fresh offline
+output directories; monitoring does not alter rendered samples.
+
 `middle-section-mild.json` and `middle-section-stress.json` use version 9 and
 fixed quality `4x-fir-adaa-v1`. The first uses 0/0 dB drives and threshold 0.75;
 the second uses 36/36 dB drives and threshold 0.25. Both store each trim and

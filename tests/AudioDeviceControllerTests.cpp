@@ -599,6 +599,34 @@ TEST_CASE("Middle callback restoration retains candidate settings bypasses and l
     }
 }
 
+TEST_CASE("Output live controls survive device reprepare and common bypass release", "[controller][output-section]")
+{
+    using namespace disdorktion;
+    for(unsigned flags=0;flags<4;++flags)
+    {
+        AudioDeviceController controller;CallbackDevice first(48000.,7),second(8000.,32);
+        auto record=callbackRecord();record.version=10;record.targetId="output-section";
+        record.output={{200,false,FilterResponse::chebyshev1},{8000,false,FilterResponse::chebyshev2}};
+        controller.configure(record);controller.audioDeviceAboutToStart(&first);REQUIRE(controller.isReady());
+        OutputSettings edited {{20000.f,(flags&1)!=0,FilterResponse::chebyshev2},{20.f,(flags&2)!=0,FilterResponse::chebyshev1}};
+        REQUIRE(controller.engine().setOutputCutoffHz(true,edited.highPass.cutoffHz));REQUIRE(controller.engine().setOutputCutoffHz(false,edited.lowPass.cutoffHz));
+        REQUIRE(controller.engine().setOutputResponse(true,edited.highPass.response));REQUIRE(controller.engine().setOutputResponse(false,edited.lowPass.response));
+        controller.engine().setOutputStageBypass(true,edited.highPass.bypass);controller.engine().setOutputStageBypass(false,edited.lowPass.bypass);controller.engine().setBypass(true);
+        controller.audioDeviceStopped();controller.audioDeviceAboutToStart(&second);REQUIRE(controller.isReady());controller.setPlaying(true);
+        harness::SignalSource source;REQUIRE(source.prepare(record.source,8000.,2));
+        OutputSection core;auto effective=edited;effective.highPass.bypass=effective.lowPass.bypass=true;
+        REQUIRE(core.setParameters(effective));REQUIRE(core.prepare({8000.,32,2}));
+        juce::AudioBuffer<float> actual(2,1031),expected(2,1031);
+        for(unsigned event=0;event<3;++event)
+        {
+            if(event==1){controller.engine().setBypass(false);REQUIRE(core.setParameters(edited));}
+            source.process(juce::dsp::AudioBlock<float>(expected));REQUIRE(core.process(juce::dsp::AudioBlock<float>(expected)));callback(controller,actual);
+            for(int c=0;c<2;++c)for(int n=0;n<1031;++n)REQUIRE(actual.getSample(c,n)==expected.getSample(c,n));
+            REQUIRE(controller.engine().getLatencySamples()==0);
+        }
+    }
+}
+
 TEST_CASE("Middle live edits survive device reprepare and common bypass release", "[controller][middle-section]")
 {
     using namespace disdorktion;

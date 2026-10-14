@@ -1,5 +1,36 @@
 # Audition and measurement harness
 
+## Output section
+
+Select **Output section** for high-pass followed by low-pass at the device rate.
+Set each stage's cutoff, response and bypass independently. Common **Bypass**
+temporarily bypasses both stages and retains their choices. All response banks
+stay warm. Cutoffs range from 20 to 20000 Hz; processing caps each to 45% of the
+device rate, while preserving requested Hz in the record. Equal/crossed values
+are valid and may strongly attenuate the source. Default wide filtering is not
+exact unity; full settled bypass is exact dry.
+
+Version 10 requires `targetId: output-section`, `hpCutoffHz`, `lpCutoffHz`,
+`hpResponse`, `lpResponse`, `hpBypass`, `lpBypass` plus common `bypass` and the
+existing source/monitor/build fields. Response IDs are `butterworth`,
+`chebyshev-1`, `chebyshev-2`. Missing/foreign fields, numeric booleans and
+unknown modes reject transactionally. Versions 1-9 preserve their target and
+version. Offline/live processing uses the same target; offline monitoring is
+disabled, requested frame count is preserved and tails are not appended.
+
+```powershell
+& './build/windows-vs2026/Release/disdorktion_render.exe' --experiment './examples/experiments/output-section-wide.json' --output-dir './renders/output-wide-001'
+& './build/windows-vs2026/Release/disdorktion_output_measurements.exe' './renders/output-measurements-001'
+uv run --no-project --python 3.12 scripts/validate_output_measurements.py './renders/output-measurements-001' --repeat './renders/output-measurements-repeat'
+```
+
+The repeat path requires a second measurement run into a new destination.
+Measurements include complex magnitude/phase, independent cascade response,
+control/bypass stability, inter-stage headroom and zero algorithmic latency.
+See the [design](okf/methods/output_section.md) and
+[qualification note](okf/notes/output_section_validation.md) for listening and
+CPU evidence status.
+
 ## Middle section candidate
 
 Select **Middle section (candidate)** for fixed 4x FIR processing of tanh then

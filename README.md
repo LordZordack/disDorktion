@@ -22,6 +22,16 @@ The section adds zero samples of latency. See the [design](docs/okf/methods/inpu
 [qualification status](docs/okf/notes/input_section_validation.md), and
 [audition guide](docs/AUDITION_HARNESS.md).
 
+### Output section
+
+Select **Output section** in the audition app for native-rate high-pass then
+low-pass filtering. Both stages have independent cutoff, response and bypass
+controls; common bypass retains those choices. Version-10 records reproduce
+the section in live audition and offline renders. Equal and crossed cutoffs are
+allowed. The section adds zero samples of latency; filter phase and tails remain.
+See the [design](docs/okf/methods/output_section.md) and
+[qualification status](docs/okf/notes/output_section_validation.md).
+
 ### Middle section candidate
 
 Select **Middle section (candidate)** in the audition app for tanh followed by
@@ -95,8 +105,8 @@ transitions take 10 ms. Version-7 experiment records preserve settings; both
 modules report zero added latency. See the [high-pass design](docs/okf/methods/high_pass_filter.md),
 [low-pass design](docs/okf/methods/low_pass_filter.md), and their
 [high-pass](docs/okf/notes/high_pass_validation.md) /
-[low-pass](docs/okf/notes/low_pass_validation.md) evidence. These targets prepare
-the output filters for later section integration.
+[low-pass](docs/okf/notes/low_pass_validation.md) evidence. The assembled Output
+section reuses these filters in order.
 
 **Design Ethos**
 
