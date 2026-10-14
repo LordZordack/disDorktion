@@ -2,7 +2,7 @@
 type: Note
 title: "Low-Pass Module Validation"
 description: "Numerical, realtime and diagnostic CPU evidence for selectable output filtering; human listening and reference CPU qualification remain pending."
-timestamp: 2026-10-12T12:58:10Z
+timestamp: 2026-10-14T03:46:45Z
 tags: ["filter", "validation", "realtime", "low-pass"]
 ---
 
@@ -56,4 +56,11 @@ Each response has a five-second 20 Hz–20 kHz logarithmic sweep, 48 kHz stereo,
 
 CPU diagnostics ran on Windows 11, GenuineIntel, 22 logical CPUs, Release, with no simultaneous builds/tests. Each module has 144 cases: four rates, six capacities, mono/stereo, and settled/endpoint-mode-automation/full-bypass scenarios. Each case warms up 256 callbacks and retains 1000 timings; all three banks run in every scenario. The corrected tool passed the <5% p99 budget. Affinity, power and thermal conditions were not qualified, so this is **not reference-hardware release qualification**. Follow the performance procedure (`docs/PERFORMANCE.md`) for longer repeated qualification runs. IIR phase/group delay remains frequency-dependent despite zero added latency.
 
-GUI compilation and callback restoration checks passed; visual GUI inspection, VS2022/CI coverage, output-section/plugin integration, human listening and reference-hardware CPU qualification remain open. See the [project record](../projects/disdorktion.md).
+GUI compilation and callback restoration checks passed. The
+[output section](../methods/output_section.md) now composes HP then LP; its
+[qualification note](output_section_validation.md) records integration evidence
+and the independently audited 600-case combined 10% CPU qualification. That
+section result does not separately qualify this module's individual 5% share.
+Visual GUI inspection, VS2022/CI coverage, complete plugin integration, human
+listening and reference-hardware CPU qualification remain open. See the
+[project record](../projects/disdorktion.md).

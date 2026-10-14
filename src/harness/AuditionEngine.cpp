@@ -37,7 +37,7 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
         || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)
         || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec) || !inputTarget.prepare(spec)
-        || !middleTarget.prepare(spec)) return false;
+        || !middleTarget.prepare(spec) || !outputTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -65,6 +65,7 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     else if (id == "low-pass") selected = &lowPassTarget;
     else if (id == "input-section") selected = &inputTarget;
     else if (id == "middle-section") selected = &middleTarget;
+    else if (id == "output-section") selected = &outputTarget;
     else return false;
     reset();
     return true;
@@ -279,8 +280,38 @@ bool AuditionEngine::setMiddleThreshold(float value) noexcept
 void AuditionEngine::setMiddleTanhBypass(bool value) noexcept { middleTanhBypass.store(value, std::memory_order_relaxed); }
 void AuditionEngine::setMiddleFolderBypass(bool value) noexcept { middleFolderBypass.store(value, std::memory_order_relaxed); }
 void AuditionEngine::setInputCrusherBypass(bool value) noexcept { crusherBypass.store(value, std::memory_order_relaxed); }
+bool AuditionEngine::setOutputSettings(const OutputSettings& value, bool commonBypass) noexcept
+{
+    if (!isValidOutputSettings(value)) return false;
+    outputHighCutoff.store(value.highPass.cutoffHz, std::memory_order_relaxed);
+    outputLowCutoff.store(value.lowPass.cutoffHz, std::memory_order_relaxed);
+    outputHighResponse.store(static_cast<unsigned>(value.highPass.response), std::memory_order_relaxed);
+    outputLowResponse.store(static_cast<unsigned>(value.lowPass.response), std::memory_order_relaxed);
+    outputHighBypass.store(value.highPass.bypass, std::memory_order_relaxed);
+    outputLowBypass.store(value.lowPass.bypass, std::memory_order_relaxed);
+    outputBypass.store(commonBypass, std::memory_order_relaxed);
+    outputTarget.setBypass(commonBypass);
+    return outputTarget.setParameters(value);
+}
+bool AuditionEngine::setOutputCutoffHz(bool highPass, float value) noexcept
+{
+    if (!isValidCutoffSettings({value,false,FilterResponse::butterworth})) return false;
+    (highPass ? outputHighCutoff : outputLowCutoff).store(value,std::memory_order_relaxed);
+    return true;
+}
+bool AuditionEngine::setOutputResponse(bool highPass, FilterResponse value) noexcept
+{
+    if (static_cast<unsigned>(value)>=filterResponseIds.size()) return false;
+    (highPass ? outputHighResponse : outputLowResponse).store(static_cast<unsigned>(value),std::memory_order_relaxed);
+    return true;
+}
+void AuditionEngine::setOutputStageBypass(bool highPass, bool value) noexcept
+{
+    (highPass ? outputHighBypass : outputLowBypass).store(value,std::memory_order_relaxed);
+}
 void AuditionEngine::setBypass(bool value) noexcept
 {
+    if (selected == &outputTarget) { outputBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &middleTarget) { middleBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &inputTarget) { inputBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &highPassTarget) { highBypass.store(value,std::memory_order_relaxed); return; }
@@ -291,6 +322,15 @@ void AuditionEngine::setBypass(bool value) noexcept
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if (selected == &outputTarget)
+    {
+        outputTarget.setBypass(outputBypass.load(std::memory_order_relaxed));
+        return outputTarget.setParameters({
+            {outputHighCutoff.load(std::memory_order_relaxed),outputHighBypass.load(std::memory_order_relaxed),
+             static_cast<FilterResponse>(outputHighResponse.load(std::memory_order_relaxed))},
+            {outputLowCutoff.load(std::memory_order_relaxed),outputLowBypass.load(std::memory_order_relaxed),
+             static_cast<FilterResponse>(outputLowResponse.load(std::memory_order_relaxed))}});
+    }
     if (selected == &middleTarget)
     {
         middleTarget.setBypass(middleBypass.load(std::memory_order_relaxed));

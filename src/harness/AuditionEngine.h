@@ -4,6 +4,7 @@
 #include "WaveFolderTarget.h"
 #include "CutoffFilterTarget.h"
 #include "MiddleSectionTarget.h"
+#include "OutputSectionTarget.h"
 #include <atomic>
 
 namespace disdorktion::harness
@@ -52,6 +53,10 @@ public:
     bool setGainDb(float db) noexcept;
     bool setInputSettings(const InputSettings&, bool commonBypass = false) noexcept;
     bool setMiddleSettings(const MiddleSettings&, bool commonBypass = false) noexcept;
+    bool setOutputSettings(const OutputSettings&, bool commonBypass = false) noexcept;
+    bool setOutputCutoffHz(bool highPass, float value) noexcept;
+    bool setOutputResponse(bool highPass, FilterResponse value) noexcept;
+    void setOutputStageBypass(bool highPass, bool value) noexcept;
     bool setMiddleTanhDriveDb(float) noexcept;
     bool setMiddleTanhOutputDb(float) noexcept;
     bool setMiddleFolderDriveDb(float) noexcept;
@@ -84,6 +89,7 @@ private:
     BitCrusherTarget crusherTarget;
     InputSectionTarget inputTarget;
     MiddleSectionTarget middleTarget;
+    OutputSectionTarget outputTarget;
     TanhSaturationTarget saturationTarget;
     WaveFolderTarget folderTarget;
     CutoffFilterTarget<true> highPassTarget;
@@ -109,6 +115,9 @@ private:
     std::atomic<float> middleTanhDrive {0.f}, middleTanhOutput {0.f};
     std::atomic<float> middleFolderDrive {0.f}, middleFolderOutput {0.f}, middleThreshold {1.f};
     std::atomic<bool> middleTanhBypass {false}, middleFolderBypass {false}, middleBypass {false};
+    std::atomic<float> outputHighCutoff {20.f}, outputLowCutoff {20000.f};
+    std::atomic<unsigned> outputHighResponse {0}, outputLowResponse {0};
+    std::atomic<bool> outputHighBypass {false}, outputLowBypass {false}, outputBypass {false};
     std::atomic<float> postGainPeak {0.0f};
     std::atomic<bool> bypass {false}, muted {true};
     std::atomic<float> inputPeak {0.0f}, inputRms {0.0f}, outputPeak {0.0f}, outputRms {0.0f};

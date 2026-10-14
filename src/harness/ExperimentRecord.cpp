@@ -32,9 +32,14 @@ bool ExperimentRecord::validate(juce::String& error) const
         || ((version == 3 || version == 4) && targetId == "bit-crusher")
         || (version == 5 && targetId == "tanh-saturation") || (version == 6 && targetId == "wave-folder")
         || (version == 7 && (targetId == "high-pass" || targetId == "low-pass"))
-        || (version == 8 && targetId == "input-section") || (version == 9 && targetId == "middle-section")))
+        || (version == 8 && targetId == "input-section") || (version == 9 && targetId == "middle-section")
+        || (version == 10 && targetId == "output-section")))
         return fail(error, "Unsupported experiment version or target");
     if (!isValidProcessSpec({ sampleRate, blockSize, channels })) return fail(error, "Invalid process specification");
+    if (!isValidOutputSettings(output)) return fail(error, "Invalid output section settings");
+    if (version != 10 && (output.highPass.cutoffHz != 20.f || output.lowPass.cutoffHz != 20000.f
+        || output.highPass.bypass || output.lowPass.bypass || output.highPass.response != FilterResponse::butterworth
+        || output.lowPass.response != FilterResponse::butterworth)) return fail(error, "Foreign output section settings");
     if (middleQuality != "4x-fir-adaa-v1") return fail(error, "Unsupported middle section quality");
     if (!isValidTanhSaturationSettings(middle.tanh) || !isValidWaveFolderSettings(middle.folder))
         return fail(error, "Invalid middle section settings");
@@ -62,7 +67,7 @@ bool ExperimentRecord::validate(juce::String& error) const
     if (version >= 5 && (!std::isfinite(driveDb) || driveDb < -24 || driveDb > 36
         || !std::isfinite(outputDb) || outputDb < -60 || outputDb > 12))
         return fail(error, "Invalid tanh saturation settings");
-    if ((version < 5 || version == 8 || version == 9) && (driveDb != 0.0f || outputDb != 0.0f))
+    if ((version < 5 || version == 8 || version == 9 || version == 10) && (driveDb != 0.0f || outputDb != 0.0f))
         return fail(error, "Foreign tanh saturation settings");
     if (version == 6 && (!std::isfinite(threshold) || threshold < 0.05f || threshold > 1.0f))
         return fail(error, "Invalid wave folder threshold");
@@ -106,6 +111,16 @@ juce::var ExperimentRecord::toJson() const
     put("version", version); put("targetId", targetId);
     if (version == 1) put("gain", gain);
     else if (version == 2) { put("gainDb", gainDb); put("mute", mute); }
+    else if (version == 10)
+    {
+        put("hpCutoffHz", output.highPass.cutoffHz); put("lpCutoffHz", output.lowPass.cutoffHz);
+        put("hpBypass", output.highPass.bypass); put("lpBypass", output.lowPass.bypass);
+        const auto responseId=[](FilterResponse r) {
+            const auto i=static_cast<unsigned>(r);
+            return juce::String(i<filterResponseIds.size() ? filterResponseIds[i].data() : "invalid");
+        };
+        put("hpResponse", responseId(output.highPass.response)); put("lpResponse", responseId(output.lowPass.response));
+    }
     else if (version == 9)
     {
         put("middleQuality", middleQuality);
@@ -159,7 +174,7 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto get = [o](const char* key) { return o->getProperty(key); };
     for (auto key : {"targetId", "filePath", "fileHash", "sourceConversion", "midiDevice", "buildIdentity", "observations"})
         if (!get(key).isString()) return fail(error, juce::String("Missing or invalid string: ") + key);
-    if (!integer(get("version"), 1, 9)) return fail(error, "Unsupported or missing version");
+    if (!integer(get("version"), 1, 10)) return fail(error, "Unsupported or missing version");
     const auto version = static_cast<int>(get("version"));
     if ((version == 1 && get("targetId").toString() != "reference-gain")
         || (version == 2 && get("targetId").toString() != "gain")
@@ -168,7 +183,8 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
         || (version == 6 && get("targetId").toString() != "wave-folder")
         || (version == 7 && get("targetId").toString() != "high-pass" && get("targetId").toString() != "low-pass")
         || (version == 8 && get("targetId").toString() != "input-section")
-        || (version == 9 && get("targetId").toString() != "middle-section"))
+        || (version == 9 && get("targetId").toString() != "middle-section")
+        || (version == 10 && get("targetId").toString() != "output-section"))
         return fail(error, "Unsupported target for version");
     if ((version != 1 && o->hasProperty("gain"))
         || (version != 2 && version != 8 && (o->hasProperty("gainDb") || o->hasProperty("mute")))
@@ -178,9 +194,28 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
         return fail(error, "Mixed target schemas");
     if (version != 8 && (o->hasProperty("gainBypass") || o->hasProperty("crusherBypass")))
         return fail(error, "Mixed target schemas");
-    if ((version < 5 || version == 7 || version == 8 || version == 9) && (o->hasProperty("driveDb") || o->hasProperty("outputDb")))
+    if ((version < 5 || version == 7 || version == 8 || version == 9 || version == 10) && (o->hasProperty("driveDb") || o->hasProperty("outputDb")))
         return fail(error, "Mixed target schemas");
     if (version != 6 && o->hasProperty("threshold")) return fail(error, "Mixed target schemas");
+    OutputSettings outputSettings;
+    for (auto key : {"hpCutoffHz","hpResponse","hpBypass","lpCutoffHz","lpResponse","lpBypass"})
+        if (version != 10 && o->hasProperty(key)) return fail(error, "Mixed target schemas");
+    if (version == 10)
+    {
+        for (bool high : {true,false})
+        {
+            const auto cutoff=get(high ? "hpCutoffHz" : "lpCutoffHz");
+            const auto mode=get(high ? "hpResponse" : "lpResponse");
+            const auto stageBypass=get(high ? "hpBypass" : "lpBypass");
+            if (!number(cutoff) || !std::isfinite(static_cast<double>(cutoff))
+                || static_cast<double>(cutoff)<20. || static_cast<double>(cutoff)>20000.
+                || !mode.isString() || !stageBypass.isBool()) return fail(error, "Missing or invalid output setting");
+            unsigned index=0;
+            while (index<filterResponseIds.size() && mode.toString()!=juce::String(filterResponseIds[index].data())) ++index;
+            if (index==filterResponseIds.size()) return fail(error,"Unsupported output filter response");
+            (high ? outputSettings.highPass : outputSettings.lowPass)={static_cast<float>(cutoff),static_cast<bool>(stageBypass),static_cast<FilterResponse>(index)};
+        }
+    }
     for (const auto key : {"middleQuality", "tanhDriveDb", "tanhOutputDb", "tanhBypass", "folderDriveDb", "folderOutputDb", "folderThreshold", "folderBypass"})
         if (version != 9 && o->hasProperty(key)) return fail(error, "Mixed target schemas");
     if (version == 9)
@@ -275,6 +310,7 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
         || !integer(sg("seed"), 0, std::numeric_limits<std::uint32_t>::max())) return fail(error, "Invalid source count or seed");
     ExperimentRecord candidate;
     candidate.version = version; candidate.targetId = get("targetId").toString();
+    candidate.output = outputSettings;
     if (version == 1) candidate.gain = static_cast<float>(gainValue);
     else if (version == 2) { candidate.gainDb = static_cast<float>(gainValue); candidate.mute = static_cast<bool>(get("mute")); }
     else if (version == 9)
@@ -294,6 +330,7 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
         candidate.jitterSeed = static_cast<std::uint32_t>(static_cast<juce::int64>(get("jitterSeed")));
     }
     else if (version == 7) { candidate.cutoffHz=static_cast<float>(get("cutoffHz"));candidate.response=filterMode; }
+    else if (version == 10) { /* Output settings were validated before common fields. */ }
     else if (version >= 5) { candidate.driveDb = static_cast<float>(get("driveDb")); candidate.outputDb = static_cast<float>(get("outputDb"));
                             if (version == 6) candidate.threshold = static_cast<float>(get("threshold")); }
     else { candidate.bitDepth = static_cast<unsigned>(static_cast<int>(get("bitDepth")));

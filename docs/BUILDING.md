@@ -1,5 +1,12 @@
 # Building
 
+The output section uses the shared `DisDorktionAudition` and
+`disdorktion_render` targets. Its numerical/listening fixtures use
+`disdorktion_output_measurements`; its isolated CPU collector is
+`disdorktion_output_benchmark`. Use Release for CPU measurements. Both tools
+also build under DSP-only presets. See
+[output qualification](okf/notes/output_section_validation.md).
+
 ## Requirements and pinned dependencies
 
 - CMake 4.2 or newer. CI pins the official CMake 4.2.8 Windows x64 archive; its SHA-256 is `d33720a4e03114ae7c964c184e88f68a640be419f973bf4fb685f0900d1864ee` (also recorded in [`cmake/tools-lock.json`](../cmake/tools-lock.json)).

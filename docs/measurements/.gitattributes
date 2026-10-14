@@ -1,0 +1,12 @@
+# Preserve exact issue 12 evidence bytes referenced by SHA256 manifests/audits.
+output_section_cpu_issue12_diagnostic.csv -text whitespace=cr-at-eol
+output_section_cpu_issue12_mono_diagnostic.csv -text whitespace=cr-at-eol
+output_section_cpu_issue12_reference.csv -text whitespace=cr-at-eol
+output_section_cpu_issue12_diagnostic_audit_verified.json -text whitespace=cr-at-eol
+output_section_cpu_issue12_mono_diagnostic_audit_verified.json -text whitespace=cr-at-eol
+output_section_cpu_issue12_reference_audit.json -text whitespace=cr-at-eol
+output_section_issue12_retry1/*.csv -text whitespace=cr-at-eol
+output_section_issue12_retry1/*.json -text whitespace=cr-at-eol
+output_section_issue12_repeat/*.csv -text whitespace=cr-at-eol
+output_section_issue12_repeat/*.json -text whitespace=cr-at-eol
+output_section_examples_issue12/*/result.json -text whitespace=cr-at-eol

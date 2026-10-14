@@ -124,6 +124,8 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
             {record.bitDepth, record.captureRateHz, record.crusherBypass, record.mix, record.crush, record.shape, record.jitter, record.jitterSeed}}, record.bypass);
     else if (record.version == 9)
         settingsReady = engine.setMiddleSettings(record.middle, record.bypass);
+    else if (record.version == 10)
+        settingsReady = engine.setOutputSettings(record.output, record.bypass);
     if (!engine.selectTarget(record.targetId.toStdString())
         || !settingsReady
         || !engine.prepare({record.sampleRate, record.blockSize, record.channels}))

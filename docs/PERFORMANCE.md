@@ -1,5 +1,73 @@
 # Performance procedure and proposed budgets
 
+## Output section budget (S3)
+
+Issue #12 allocates **10% of the incoming callback deadline** to native-rate
+high-pass -> low-pass DSP, including parameter application, section dispatch
+and the inter-stage peak scan. This combines the existing 5% filter shares.
+Shared source generation, GUI transport, monitoring and meters remain outside
+the isolated timing. The future complete wet-chain ceiling remains 25%.
+Controls update once per callback; both filters advance their internal 10 ms
+ramps per sample and retain three warm banks even during bypass. Use the
+existing two-second warmup, adaptive sampling and three-run pinned AC procedure.
+Record diagnostic and reference qualification separately; mono diagnostics
+supplement the established stereo reference matrix.
+
+`disdorktion_output_benchmark` has 20 scenarios over 48/96 kHz and capacities
+32/64/127/256/1024: wide, narrow, crossed, nine fixed response pairs,
+simultaneous automation, dynamic stage bypass, four fixed bypass states,
+retained common bypass, and oversized callbacks. Automation updates both
+cutoffs and response selections once per callback. Qualification requires at
+least 100 timed observations for each of 101 cutoff residues and 36 response /
+stage-bypass combinations; dynamic bypass and common bypass require coverage
+of all four and eight respective states. The raw sidecar retains actual controls.
+Source/executable SHA256 identities accompany every summary row.
+
+```powershell
+& './build/windows-vs2026/Release/disdorktion_output_benchmark.exe' --diagnostic --quick --channels 2 --conditions 'Record actual diagnostic conditions; no competing builds/tests' --output output_section_diagnostic.csv
+& './build/windows-vs2026/Release/disdorktion_output_benchmark.exe' --diagnostic --quick --channels 1 --conditions 'Record actual mono diagnostic conditions; no competing builds/tests' --output output_section_mono_diagnostic.csv
+& './build/windows-vs2026/Release/disdorktion_output_benchmark.exe' --runs 3 --conditions 'Record actual AC/power/thermal conditions; no competing builds/tests' --output output_section_reference.csv
+```
+
+All destinations must be new. Quick, mono and filtered runs are unqualified
+and deliberately return exit 1 even when their separate `processing_ok` and
+`raw_p99_within_budget` flags pass. Reference qualification uses three unfiltered
+stereo Release runs, observed performance-core affinity, before/after AC checks,
+full adaptive timing windows and coverage. The 600-case reference matrix takes
+at least 2 hours 20 minutes and can generate several GB of raw observations.
+Do not describe quick CPU results as a reference-hardware acceptance verdict.
+
+Issue-12 stereo and mono quick diagnostics completed all 200 cases each.
+Independent raw audits recomputed 12,405,637 stereo and 16,344,051 mono timings;
+all diagnostic CPU/stability gates passed, with worst p99 deadline shares
+1.67626943% and 0.66% respectively. Capacity-1024 automation cutoff coverage was
+below the reference minimum of 100 observations per setting. These results
+remain unqualified. See [output qualification](okf/notes/output_section_validation.md).
+
+```powershell
+uv run --no-project --python 3.12 scripts/validate_output_cpu.py './docs/measurements/output_section_cpu_issue12_diagnostic.csv' --executable './build/windows-vs2026/Release/disdorktion_output_benchmark.exe' --channels 2 --output NEW_AUDIT_JSON
+```
+
+Issue-12 reference qualification completed **600/600 cases** across three
+pinned AC stereo Release runs. Independent reference-mode auditing recomputed
+**89,408,001 raw timings** and verified environment, provenance, exact schedules
+and control coverage. Worst p99 was **0.87% of incoming deadline** at
+96 kHz / capacity 32 / high-pass bypass, 2900 ns (strict 10% limit).
+Thermal and ambient conditions were unmeasured; normal OS background services
+were uncontrolled. See the
+[reference CSV](measurements/output_section_cpu_issue12_reference.csv),
+[audit](measurements/output_section_cpu_issue12_reference_audit.json) and
+[artifact scope](measurements/README-output-section-issue12.md).
+
+```powershell
+uv run --no-project --python 3.12 scripts/validate_output_cpu.py NEW_REFERENCE_CSV --executable './build/windows-vs2026/Release/disdorktion_output_benchmark.exe' --reference --runs 3 --channels 2 --output NEW_REFERENCE_AUDIT_JSON
+uv run --no-project --python 3.12 python tests/test_output_cpu_validator.py -v
+```
+
+For mono, select its summary CSV and `--channels 1`. The auditor recomputes
+raw statistics and control coverage, verifies the exact event schedule and
+source/executable hashes, and records its own unchanged source identity.
+
 ## Input section budget (S1)
 
 Before implementation, issue #10 allocated **6% of the incoming block deadline**

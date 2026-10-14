@@ -47,6 +47,10 @@ private:
     juce::ComboBox filterResponse;
     juce::Slider filterCutoff;
     juce::Label filterCutoffLabel, filterResponseLabel, filterInfo;
+    juce::Slider outputLowCutoff;
+    juce::ComboBox outputLowResponse;
+    juce::Label outputLowCutoffLabel, outputLowResponseLabel;
+    juce::ToggleButton outputHighBypass{"Bypass high-pass"}, outputLowBypass{"Bypass low-pass"};
     juce::Slider gain, monitor, captureRateHz, crusherMix, crusherCrush, crusherShape, crusherJitter;
     juce::Slider tanhDrive, tanhOutput, folderThreshold;
     juce::Label tanhDriveLabel, tanhOutputLabel, folderThresholdLabel;

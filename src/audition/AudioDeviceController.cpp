@@ -30,6 +30,8 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
              settings.crush, settings.shape, settings.jitter, settings.jitterSeed}}, settings.bypass);
     else if (settings.version == 9)
         processor.setMiddleSettings(settings.middle, settings.bypass);
+    else if (settings.version == 10)
+        processor.setOutputSettings(settings.output, settings.bypass);
     processor.setMonitorDb(settings.monitorDb);
     processor.setMuted(settings.muted);
     playing.store(false);

@@ -2,7 +2,7 @@
 type: Project
 title: "DisDorktion audio distortion plugin"
 description: "Project record for the modular Windows VST3 distortion plugin and its standalone audition application."
-timestamp: 2026-10-04T00:00:00Z
+timestamp: 2026-10-14T03:46:45Z
 tags: ["audio", "distortion", "JUCE", "project"]
 ---
 
@@ -42,8 +42,17 @@ Chebyshev I and Chebyshev II responses with smoothed cutoff/mode/bypass and
 version-7 experiment records. Their numerical and diagnostic CPU evidence,
 plus pending listening and reference-hardware qualification, are recorded in
 [high-pass validation](../notes/high_pass_validation.md) and
-[low-pass validation](../notes/low_pass_validation.md). Output-section and
-finished-plugin integration remain later milestones.
+[low-pass validation](../notes/low_pass_validation.md). The assembled
+[output section](../methods/output_section.md) reuses these modules at native
+rate with independent controls, retained common bypass, zero added latency and
+version-10 shared records. Its
+[qualification note](../notes/output_section_validation.md) records passing
+221-test Debug/Release and 187-test DSP-only suites, repeated independent
+numerical evidence, and 600 qualified pinned AC CPU cases with an independent
+audit of 89,408,001 raw timings (worst p99 0.87% of deadline, strict 10% limit).
+The user's functional confidence is recorded separately from structured
+listening, visual inspection and individual filter acceptance gates.
+Finished-plugin chain integration remains a later milestone.
 
 The [wave-folder design](../methods/wave_folding.md) is implemented with smoothed
 controls, version-6 experiment records and native-rate measurement tools. Its
@@ -54,7 +63,7 @@ The [tanh saturation method](../methods/tanh_saturation.md) passed its automated
 
 The [reusable gain design](../methods/gain.md) is implemented in the shared harness and independent plugin input/output stages. Debug and Release checks verify correctness; [gain validation](../notes/gain_validation.md) records fixtures and battery diagnostics. Human listening and manual host checks remain pending. The bit crusher's verified legacy sine and transient renders were user-auditioned as “Sounds as intended”; musical-category listening remains pending. Its three-run AC CPU baseline passed for the legacy version. Expressive CPU qualification passed; expressive WAV listening remains open.
 
-Describe unimplemented designs as **proposed behavior**. The reference gain foundation's unit correctness is verified in the [foundation validation note](../notes/foundation_validation.md). Other production distortion modules remain unqualified. CPU performance is qualified for the bit crusher's legacy algorithm only; see its [validation note](../notes/bit_crusher_validation.md). Use **measured behavior** only for results supported by a documented test or listening evaluation; include the test conditions and link its note. Record whether evidence accepts, rejects, or revises the proposal.
+Describe unimplemented designs as **proposed behavior**. The reference gain foundation's unit correctness is verified in the [foundation validation note](../notes/foundation_validation.md). Other production distortion modules remain unqualified. CPU qualification is specific to each measured implementation and budget; see the linked validation notes for legacy, expressive and assembled-section evidence. Use **measured behavior** only for results supported by a documented test or listening evaluation; include the test conditions and link its note. Record whether evidence accepts, rejects, or revises the proposal.
 
 ## Open research questions
 
