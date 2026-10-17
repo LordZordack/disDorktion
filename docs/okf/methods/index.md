@@ -2,13 +2,14 @@
 type: "Index"
 title: "Methods"
 description: "Index of methods research documents."
-timestamp: "2026-10-14T03:54:07Z"
+timestamp: "2026-10-17T18:36:41Z"
 ---
 
 # Methods
 
 - [Audition and measurement harness](./audition_measurement.md) — A reproducible source and record workflow for shared DSP audition and exact pre-monitor offline rendering.
 - [Bit crushing](./bit_crushing.md) — Signed PCM amplitude quantization and sample holding for bit-crushing effects.
+- [Full chain integration candidate](./full_chain.md) — Shared section routing, latency aligned dry reference, global mixing and final gain.
 - [Reusable input and output gain](./gain.md) — Reviewed production gain design, parameter semantics, transition rules, and acceptance limits for DisDorktion M1.
 - [Selectable Second-Order High-Pass Filter](./high_pass_filter.md) — Design for a zero-latency high-pass module with selectable Butterworth, Chebyshev I, and Chebyshev II responses and smoothed transitions.
 - [Reusable input section](./input_section.md) — Native-rate composition of production gain and expressive bit crushing, with section acceptance limits and independent bypass semantics.

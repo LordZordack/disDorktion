@@ -3,6 +3,7 @@
 #include "dsp/CutoffFilter.h"
 #include "dsp/MiddleSection.h"
 #include "dsp/OutputSection.h"
+#include "dsp/FullChainControls.h"
 #include <juce_core/juce_core.h>
 
 namespace disdorktion::harness
@@ -28,6 +29,7 @@ struct ExperimentRecord
     bool gainBypass = false, crusherBypass = false;
     MiddleSettings middle;
     OutputSettings output;
+    FullChainSettings fullChain;
     juce::String middleQuality = "4x-fir-adaa-v1";
     SourceSettings source;
     double sampleRate = 48000.0;

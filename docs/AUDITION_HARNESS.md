@@ -413,3 +413,31 @@ returns 0 and does not supply listening approval.
 To add an accepted module, supply its descriptor and adapter, extend the target registry and engine selection/storage, and add its controls to the interface and validated versioned record format. The registry alone does not make another module selectable. Extend offline restoration with the same adapter and validation. Target creation, replacement, prepare/reset, multi-field restoration, and destruction require processing to be detached. Only supported live scalar setters and meter reads may run concurrently with processing. Keep source/monitoring ownership in the harness and reuse production DSP.
 
 Add mathematical, block-partition, monitor-independence, record round-trip, exact-length, and callback allocation checks for the new target, and document listening/measurement evidence in the [OKF bundle](okf/index.md). See [harness validation](okf/notes/harness_validation.md) for current evidence and unperformed checks. Source inspection and C++ allocation instrumentation have narrower scope than complete realtime or audible qualification.
+
+## Full chain candidate (C1 / #13)
+
+Select **Full chain (candidate)**. The scrollable panel exposes every section
+control, independent effect bypass, global dry/wet, final gain/mute/bypass and
+uint32 jitter seed. Sources, monitoring, save/load, device changes and offline
+rendering use the existing application flow. Monitor starts muted; start at
+-18 dB and compare matched levels. Hot-path input/HP/wet diagnostics may show
+overload even when common bypass selects clean delayed dry.
+
+Global dry/wet has a linear 10 ms ramp; common chain bypass independently ramps
+the effective wet contribution to zero while keeping final gain active. Dry is
+captured before production input gain, then delayed by 92 samples. Individual
+stage bypasses preserve latency. Output filter phase can color intermediate
+mixes. See [full chain design](okf/methods/full_chain.md).
+
+Version-11 records use targetId `full-chain`, fixed middleQuality
+`4x-fir-adaa-v1`, nested `input`/`middle`/`output` section records (versions
+8/9/10 with their common bypass false), `globalMix`, `chainBypass`,
+`finalGainDb`, `finalMute`, and `finalBypass`, plus the existing source and
+monitor fields. Foreign target fields are rejected. Older records retain
+their original targets. The application creates the schema; save an experiment
+to use as an offline template.
+
+The full-chain offline policy is `fixed-duration-uncompensated`: requested
+frame count, leading latency retained and no tail flush. Result metadata records
+latency, quality and peak diagnostics. Listening observations must be entered
+by a listener; generated samples do not constitute listening acceptance.

@@ -1,0 +1,99 @@
+{
+  "topology": [
+    {
+      "class": 1,
+      "group": 0,
+      "mask": "0x3"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x4"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x8"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x10"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x20"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x40"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x80"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x100"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x200"
+    },
+    {
+      "class": 1,
+      "group": 0,
+      "mask": "0xc00"
+    },
+    {
+      "class": 1,
+      "group": 0,
+      "mask": "0x3000"
+    },
+    {
+      "class": 1,
+      "group": 0,
+      "mask": "0xc000"
+    },
+    {
+      "class": 1,
+      "group": 0,
+      "mask": "0x30000"
+    },
+    {
+      "class": 1,
+      "group": 0,
+      "mask": "0xc0000"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x100000"
+    },
+    {
+      "class": 0,
+      "group": 0,
+      "mask": "0x200000"
+    }
+  ],
+  "highest_class": 1,
+  "selected_mask": "0x1",
+  "observed_process_mask": "0x1",
+  "priority_class": 128,
+  "power_before": {
+    "ac": 1,
+    "battery_percent": 100
+  },
+  "power_after": {
+    "ac": 1,
+    "battery_percent": 100
+  },
+  "diagnostic_exit": 1,
+  "reference_qualified": false,
+  "limitation": "Affinity set immediately after spawn; 20ms warmup follows; no suspended launch"
+}

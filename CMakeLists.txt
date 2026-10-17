@@ -24,6 +24,7 @@ add_library(disdorktion_dsp STATIC
     src/dsp/ReferenceGain.cpp
     src/dsp/Gain.cpp
     src/dsp/InputSection.cpp
+    src/dsp/FullChain.cpp
     src/dsp/OutputSection.cpp
     src/dsp/BitCrusher.cpp
     src/dsp/TanhSaturation.cpp
@@ -55,6 +56,7 @@ if(BUILD_TESTING)
         tests/ReferenceGainTests.cpp
         tests/GainTests.cpp
         tests/InputSectionTests.cpp
+        tests/FullChainTests.cpp
         tests/OutputSectionTests.cpp
         tests/OutputSectionQualificationTests.cpp
         tests/OutputBenchmarkTests.cpp
@@ -74,6 +76,7 @@ if(BUILD_TESTING)
         tests/RealtimeSafetyTests.cpp
         tests/GainRealtimeTests.cpp
         tests/InputSectionRealtimeTests.cpp
+        tests/FullChainRealtimeTests.cpp
         tests/OutputSectionRealtimeTests.cpp
         tests/BitCrusherRealtimeTests.cpp
         tests/TanhSaturationRealtimeTests.cpp
@@ -88,6 +91,7 @@ if(BUILD_TESTING)
     if(DISDORKTION_BUILD_PLUGIN)
         add_executable(disdorktion_adapter_tests
             tests/PluginAdapterTests.cpp
+            tests/FullChainPluginTests.cpp
             tests/AllocationTracking.cpp
             src/plugin/PluginProcessor.cpp
         )
@@ -194,6 +198,12 @@ target_compile_definitions(disdorktion_harness PUBLIC
     JUCE_MODULE_AVAILABLE_juce_cryptography=1)
 
 add_executable(disdorktion_render tools/RenderMain.cpp)
+add_executable(disdorktion_full_chain_measurements tools/FullChainMeasureMain.cpp)
+target_link_libraries(disdorktion_full_chain_measurements PRIVATE disdorktion_dsp juce::juce_cryptography)
+target_compile_definitions(disdorktion_full_chain_measurements PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+add_executable(disdorktion_full_chain_benchmark benchmarks/FullChainBenchmark.cpp)
+target_link_libraries(disdorktion_full_chain_benchmark PRIVATE disdorktion_dsp juce::juce_cryptography)
+target_compile_definitions(disdorktion_full_chain_benchmark PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(disdorktion_render PRIVATE disdorktion_harness)
 add_executable(disdorktion_gain_transitions tools/GainTransitionMain.cpp)
 target_link_libraries(disdorktion_gain_transitions PRIVATE disdorktion_harness)
@@ -223,6 +233,7 @@ target_compile_definitions(disdorktion_wave_folder_measurements PRIVATE DISDORKT
 
 if(BUILD_TESTING)
     add_executable(disdorktion_harness_tests
+        tests/FullChainHarnessTests.cpp
         tests/MiddleSectionHarnessTests.cpp
         tests/OutputSectionHarnessTests.cpp
         tests/InputSectionHarnessTests.cpp
@@ -237,6 +248,7 @@ if(BUILD_TESTING)
     target_compile_definitions(disdorktion_harness_tests PRIVATE DISDORKTION_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     catch_discover_tests(disdorktion_harness_tests TEST_PREFIX "harness::" PROPERTIES TIMEOUT 30)
     add_executable(disdorktion_harness_realtime_tests
+        tests/FullChainHarnessRealtimeTests.cpp
         tests/MiddleSectionHarnessRealtimeTests.cpp
         tests/OutputSectionHarnessRealtimeTests.cpp
         tests/InputSectionHarnessRealtimeTests.cpp

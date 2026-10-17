@@ -44,6 +44,52 @@ MainComponent::MainComponent()
     target.addItem("Input section", 8);
     target.addItem("Middle section (candidate)", 9);
     target.addItem("Output section", 10);
+    target.addItem("Full chain (candidate)", 11);
+    fullViewport.setViewedComponent(&fullPanel,false);
+    addChildComponent(fullViewport);
+    for(std::size_t i=0;i<fullChainControls.size();++i)
+    {
+        const auto& c=fullChainControls[i];
+        auto publish=[this,i](float value)
+        {
+            if(record.version!=11) return;
+            if(disdorktion::setFullChainControl(record.fullChain,fullChainControls[i].id,value))
+                audio.engine().setFullChainControl(fullChainControls[i].id,value);
+        };
+        auto& label=fullLabels[i];label.setText(c.name,juce::dontSendNotification);fullPanel.addAndMakeVisible(label);
+        if(c.discrete && c.maximum==1.f)
+        {
+            auto& toggle=fullToggles[i];fullPanel.addAndMakeVisible(toggle);
+            toggle.onClick=[this,i,publish] {publish(fullToggles[i].getToggleState()?1.f:0.f);};
+        }
+        else if(c.discrete)
+        {
+            auto& choice=fullChoices[i];fullPanel.addAndMakeVisible(choice);
+            if(std::string_view(c.id)=="bitDepth")
+                for(auto depth:bitCrusherDepths) choice.addItem(juce::String(depth),static_cast<int>(depth)+1);
+            else
+            {
+                choice.addItem("Butterworth",1);choice.addItem("Chebyshev I (1 dB)",2);choice.addItem("Chebyshev II (40 dB)",3);
+            }
+            choice.onChange=[this,i,publish] {publish(static_cast<float>(fullChoices[i].getSelectedId()-1));};
+        }
+        else
+        {
+            auto& slider=fullSliders[i];fullPanel.addAndMakeVisible(slider);
+            slider.setSliderStyle(juce::Slider::LinearHorizontal);slider.setTextBoxStyle(juce::Slider::TextBoxRight,false,100,26);
+            slider.setRange(c.minimum,c.maximum,0);slider.setValue(c.defaultValue,juce::dontSendNotification);
+            if(c.maximum>=20000.f) slider.setSkewFactorFromMidPoint(std::string_view(c.id)=="captureRateHz"?48000.:1000.);
+            slider.onValueChange=[this,i,publish] {publish(static_cast<float>(fullSliders[i].getValue()));};
+        }
+    }
+    fullSeedLabel.setText("Jitter seed (uint32)",juce::dontSendNotification);
+    fullPanel.addAndMakeVisible(fullSeedLabel);fullPanel.addAndMakeVisible(fullSeed);
+    fullSeed.setInputRestrictions(10,"0123456789");fullSeed.setText("1",false);
+    fullSeed.onTextChange=[this] {
+        if(record.version!=11) return;
+        std::uint32_t seedValue=0;
+        if(readCrusherSeed(seedValue)){record.fullChain.input.crusher.jitterSeed=seedValue;audio.engine().setFullChainJitterSeed(seedValue);}
+    };
     target.setSelectedId(1);
     for (const auto* name : {"Impulse", "Sine", "Two-tone", "Logarithmic sweep", "Seeded white noise", "Audio file loop", "Keyboard / MIDI sine"})
         source.addItem(name, source.getNumItems() + 1);
@@ -145,9 +191,9 @@ MainComponent::MainComponent()
     target.onChange = [this] {
         auto next = snapshot();
         const auto selected = target.getSelectedId();
-        next.version = selected == 10 ? 10 : selected == 9 ? 9 : selected == 8 ? 8 : selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
+        next.version = selected == 11 ? 11 : selected == 10 ? 10 : selected == 9 ? 9 : selected == 8 ? 8 : selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
         next.targetId = selected == 1 ? "reference-gain" : selected == 2 ? "gain" : selected == 3 ? "bit-crusher"
-            : selected == 4 ? "tanh-saturation" : selected == 5 ? "wave-folder" : selected == 6 ? "high-pass" : selected == 7 ? "low-pass" : selected == 8 ? "input-section" : selected == 9 ? "middle-section" : "output-section";
+            : selected == 4 ? "tanh-saturation" : selected == 5 ? "wave-folder" : selected == 6 ? "high-pass" : selected == 7 ? "low-pass" : selected == 8 ? "input-section" : selected == 9 ? "middle-section" : selected==10 ? "output-section" : "full-chain";
         next.gain = 1.0f; next.gainDb = 0.0f; next.mute = false; next.bypass = false;
         next.gainBypass = false; next.crusherBypass = false;
         next.bitDepth = 64; next.captureRateHz = 384000.0f;
@@ -158,6 +204,7 @@ MainComponent::MainComponent()
         next.response = FilterResponse::butterworth;
         next.middle = {};
         next.output = {};
+        next.fullChain = {};
         next.middleQuality = "4x-fir-adaa-v1";
         configureRecord(next);
     };
@@ -228,7 +275,7 @@ MainComponent::MainComponent()
     load.onClick = [this] {
         chooseFile(false, "*.wav;*.aif;*.aiff", [this](const auto& file) {
             std::uint32_t parsedSeed = 0;
-            if ((record.version == 3 || record.version == 4 || record.version == 8) && !readCrusherSeed(parsedSeed))
+            if ((record.version == 3 || record.version == 4 || record.version == 8 || record.version == 11) && !readCrusherSeed(parsedSeed))
             { status("Jitter seed must be an unsigned 32-bit integer."); return; }
             auto next = snapshot(); next.source.kind = SourceKind::file; next.filePath = file.getFullPathName();
             next.fileHash.clear(); loadAudio(file, next, false);
@@ -346,6 +393,16 @@ void MainComponent::resized()
         outputLowResponseLabel.setBounds(lowModeRow.removeFromLeft(170)); outputLowResponse.setBounds(lowModeRow.removeFromLeft(310).reduced(2));
     }
     monitorLabel.setBounds(bounds.removeFromTop(24));
+    fullViewport.setBounds(gain.getBounds().getUnion(jitterSeed.getBounds()).withWidth(getWidth()-44));
+    fullPanel.setSize(std::max(300,fullViewport.getWidth()-18),static_cast<int>(fullChainControls.size()+1)*34);
+    for(std::size_t i=0;i<fullChainControls.size();++i)
+    {
+        auto controlRow=juce::Rectangle<int>(0,static_cast<int>(i)*34,fullPanel.getWidth(),32);
+        fullLabels[i].setBounds(controlRow.removeFromLeft(220));
+        fullSliders[i].setBounds(controlRow);fullChoices[i].setBounds(controlRow);fullToggles[i].setBounds(controlRow);
+    }
+    auto seedRow=juce::Rectangle<int>(0,static_cast<int>(fullChainControls.size())*34,fullPanel.getWidth(),32);
+    fullSeedLabel.setBounds(seedRow.removeFromLeft(220));fullSeed.setBounds(seedRow);
     row = bounds.removeFromTop(38); muted.setBounds(row.removeFromRight(180)); monitor.setBounds(row);
     meterLabel.setBounds(bounds.removeFromTop(40));
     keyboard.setBounds(bounds.removeFromTop(72)); bounds.removeFromTop(10);
@@ -408,7 +465,7 @@ ExperimentRecord MainComponent::snapshot() const
         result.gainBypass = gainBypass.getToggleState();
         result.crusherBypass = crusherBypass.getToggleState();
     }
-    result.bypass = bypass.getToggleState();
+    result.bypass = result.version==11 ? false : bypass.getToggleState();
     result.monitorDb = static_cast<float>(monitor.getValue()); result.muted = muted.getToggleState();
     result.observations = observations.getText();
     if (audio.sampleRate() > 0) result.sampleRate = audio.sampleRate();
@@ -423,7 +480,7 @@ ExperimentRecord MainComponent::snapshot() const
 bool MainComponent::readCrusherSeed(std::uint32_t& result) const
 {
     double value = 0;
-    if (!number(jitterSeed, value) || value < 0 || value > 4294967295.0 || std::floor(value) != value)
+    if (!number(record.version==11 ? fullSeed : jitterSeed, value) || value < 0 || value > 4294967295.0 || std::floor(value) != value)
         return false;
     result = static_cast<std::uint32_t>(value);
     return true;
@@ -444,7 +501,7 @@ void MainComponent::updateCaptureRateMapping()
 bool MainComponent::readSourceControls(ExperimentRecord& next)
 {
     std::uint32_t parsedSeed = 0;
-    if ((next.version == 3 || next.version == 4 || next.version == 8) && !readCrusherSeed(parsedSeed))
+    if ((next.version == 3 || next.version == 4 || next.version == 8 || next.version == 11) && !readCrusherSeed(parsedSeed))
     { status("Jitter seed must be an unsigned 32-bit integer."); return false; }
     double sourceFrames = 0, renderFrames = 0, seedValue = 0;
     if (!number(frequency, next.source.frequency) || !number(frequency2, next.source.frequency2)
@@ -478,7 +535,7 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     const auto filtering = record.version == 7 || outputSection;
     const auto middle = record.version == 9;
     const auto driven = saturation || folder || middle;
-    target.setSelectedId(outputSection ? 10 : middle ? 9 : section ? 8 : filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
+    target.setSelectedId(record.version==11 ? 11 : outputSection ? 10 : middle ? 9 : section ? 8 : filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
     gain.setRange(production ? -60.0 : 0.0, production ? 24.0 : 4.0, 0.0);
     gainLabel.setText(outputSection ? "Output section: high-pass then low-pass | independent responses and bypasses"
         : middle ? "Middle candidate: tanh then ADAA folder | 4x FIR | 92 samples | sound acceptance pending"
@@ -556,6 +613,24 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     renderDuration.setText(juce::String(static_cast<juce::int64>(record.renderDurationSamples)), false);
     seed.setText(juce::String(static_cast<juce::int64>(record.source.seed)), false);
     observations.setText(record.observations, false);
+    fullViewport.setVisible(record.version==11);
+    bypass.setVisible(record.version!=11);
+    if(record.version==11)
+    {
+        for(juce::Component* control:std::initializer_list<juce::Component*>{&gain,&moduleMuted,&bypass,&bitDepth,&captureRateHz,
+            &bitDepthLabel,&captureRateLabel,&effectiveRateLabel,&fullRateLabel,&crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed,
+            &crusherMixLabel,&crusherCrushLabel,&crusherShapeLabel,&crusherJitterLabel,&jitterSeedLabel}) control->setVisible(false);
+        gainLabel.setText("Full chain | 4x FIR ADAA | aligned pre-input dry | final gain | scroll for all controls",juce::dontSendNotification);
+        gainLabel.setEnabled(true);
+        for(std::size_t i=0;i<fullChainControls.size();++i)
+        {
+            const auto value=getFullChainControl(record.fullChain,fullChainControls[i].id);
+            fullSliders[i].setValue(value,juce::dontSendNotification);
+            fullChoices[i].setSelectedId(static_cast<int>(value)+1,juce::dontSendNotification);
+            fullToggles[i].setToggleState(value!=0.f,juce::dontSendNotification);
+        }
+        fullSeed.setText(juce::String(static_cast<juce::int64>(record.fullChain.input.crusher.jitterSeed)),false);
+    }
     // Range changes may update the slider value. Publish the restored controls
     // after refreshing the widgets, while processing is still detached.
     audio.configure(record);
@@ -608,6 +683,7 @@ void MainComponent::beginJob(std::function<void()> operation)
 
 void MainComponent::setWorkerControlsEnabled(bool enabled)
 {
+    fullViewport.setEnabled(enabled);
     for (juce::Component* component : std::initializer_list<juce::Component*>{
         &target,&source,&apply,&load,&save,&restore,&render,&frequency,&frequency2,
         &amplitude,&phase,&duration,&renderDuration,&seed,&gain,&bitDepth,&captureRateHz,
@@ -673,7 +749,7 @@ void MainComponent::loadAudio(const juce::File& file, ExperimentRecord next, boo
 void MainComponent::saveExperiment()
 {
     std::uint32_t parsedSeed = 0;
-    if ((record.version == 3 || record.version == 4 || record.version == 8) && !readCrusherSeed(parsedSeed))
+    if ((record.version == 3 || record.version == 4 || record.version == 8 || record.version == 11) && !readCrusherSeed(parsedSeed))
     { status("Jitter seed must be an unsigned 32-bit integer."); return; }
     auto next = snapshot();
     juce::String error;
@@ -700,7 +776,7 @@ void MainComponent::loadExperiment()
 void MainComponent::renderExperiment()
 {
     std::uint32_t parsedSeed = 0;
-    if ((record.version == 3 || record.version == 4 || record.version == 8) && !readCrusherSeed(parsedSeed))
+    if ((record.version == 3 || record.version == 4 || record.version == 8 || record.version == 11) && !readCrusherSeed(parsedSeed))
     { status("Jitter seed must be an unsigned 32-bit integer."); return; }
     auto next = snapshot();
     juce::String error;
@@ -774,7 +850,8 @@ void MainComponent::timerCallback()
     applicationHadFocus = appFocused;
     meterLabel.setText("Input peak " + juce::String(meter.inputPeak, 4) + "   RMS " + juce::String(meter.inputRms, 4)
         + "       Output peak " + juce::String(meter.outputPeak, 4) + "   RMS " + juce::String(meter.outputRms, 4)
-        + (record.version == 8 ? "   Post-gain " + juce::String(meter.postGainPeak, 4) : juce::String())
+        + (record.version == 8 || record.version==11 ? "   Post-gain " + juce::String(meter.postGainPeak, 4) : juce::String())
+        + (record.version==11 ? " HP " + juce::String(meter.postHighPassPeak,3) + " Wet " + juce::String(meter.wetPeak,3) : juce::String())
         + (now < overloadVisibleUntil ? "   OVERLOAD" : ""), juce::dontSendNotification);
     deviceLabel.setText(juce::String(audio.sampleRate(), 0) + " Hz   " + juce::String(audio.channelCount())
         + " channels   " + juce::String(audio.blockSize()) + " frames   " + (audio.isReady() ? "Ready" : "Stopped / source unavailable"), juce::dontSendNotification);

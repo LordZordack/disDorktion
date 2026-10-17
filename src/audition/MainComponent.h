@@ -41,6 +41,14 @@ private:
     juce::AudioDeviceManager devices;
     AudioDeviceController audio;
     harness::ExperimentRecord record;
+    juce::Component fullPanel;
+    juce::Viewport fullViewport;
+    std::array<juce::Slider,fullChainControls.size()> fullSliders;
+    std::array<juce::Label,fullChainControls.size()> fullLabels;
+    std::array<juce::ComboBox,fullChainControls.size()> fullChoices;
+    std::array<juce::ToggleButton,fullChainControls.size()> fullToggles;
+    juce::TextEditor fullSeed;
+    juce::Label fullSeedLabel;
     juce::MidiKeyboardState keyboardState;
     juce::MidiKeyboardComponent keyboard{keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard};
     juce::ComboBox target, source, bitDepth;

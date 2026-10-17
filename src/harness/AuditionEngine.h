@@ -5,6 +5,7 @@
 #include "CutoffFilterTarget.h"
 #include "MiddleSectionTarget.h"
 #include "OutputSectionTarget.h"
+#include "FullChainTarget.h"
 #include <atomic>
 
 namespace disdorktion::harness
@@ -17,11 +18,20 @@ struct MeterSnapshot
     float outputRms = 0.0f;
     bool overloaded = false;
     float postGainPeak = 0.0f;
+    float postHighPassPeak = 0.0f, wetPeak = 0.0f;
 };
 
 class AuditionEngine
 {
 public:
+    AuditionEngine() noexcept
+    {
+        for (std::size_t i=0;i<fullControls.size();++i)
+            fullControls[i].store(fullChainControls[i].defaultValue,std::memory_order_relaxed);
+    }
+    bool setFullChainSettings(const FullChainSettings&) noexcept;
+    bool setFullChainControl(std::string_view,float) noexcept;
+    void setFullChainJitterSeed(std::uint32_t value) noexcept { fullSeed.store(value,std::memory_order_relaxed); }
     // prepare/reset/selectTarget and bulk settings setters require a detached
     // callback. Scalar live setters and meter polling may run concurrently with
     // process(); independent scalar loads do not promise a whole-state snapshot.
@@ -90,6 +100,10 @@ private:
     InputSectionTarget inputTarget;
     MiddleSectionTarget middleTarget;
     OutputSectionTarget outputTarget;
+    FullChainTarget fullTarget;
+    std::array<std::atomic<float>,fullChainControls.size()> fullControls;
+    std::atomic<std::uint32_t> fullSeed {1};
+    std::atomic<float> postHighPassPeak {0.f}, wetPeak {0.f};
     TanhSaturationTarget saturationTarget;
     WaveFolderTarget folderTarget;
     CutoffFilterTarget<true> highPassTarget;

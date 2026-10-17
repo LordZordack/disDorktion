@@ -126,6 +126,8 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
         settingsReady = engine.setMiddleSettings(record.middle, record.bypass);
     else if (record.version == 10)
         settingsReady = engine.setOutputSettings(record.output, record.bypass);
+    else if (record.version == 11)
+        settingsReady = engine.setFullChainSettings(record.fullChain);
     if (!engine.selectTarget(record.targetId.toStdString())
         || !settingsReady
         || !engine.prepare({record.sampleRate, record.blockSize, record.channels}))
@@ -145,6 +147,7 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     if (!sourceWriter || !renderedWriter) { result.message = "Cannot create float WAV writers"; return result; }
     juce::AudioBuffer<float> audio(static_cast<int>(record.channels), static_cast<int>(record.blockSize));
     Accumulator input, output;
+    double postHighPassPeak=0.,wetPeak=0.;
     const juce::ScopedNoDenormals noDenormals;
     for (std::uint64_t offset = 0; offset < record.renderDurationSamples;)
     {
@@ -157,6 +160,8 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
         { result.message = "Source WAV write failed"; return result; }
         if (!engine.process(block, false)) { result.message = "Target processing failed"; return result; }
         result.postGainPeak = std::max(result.postGainPeak, static_cast<double>(engine.meters().postGainPeak));
+        postHighPassPeak=std::max(postHighPassPeak,static_cast<double>(engine.meters().postHighPassPeak));
+        wetPeak=std::max(wetPeak,static_cast<double>(engine.meters().wetPeak));
         output.add(audio, frames);
         if (!renderedWriter->writeFromAudioSampleBuffer(audio, 0, frames))
         { result.message = "Rendered WAV write failed"; return result; }
@@ -169,16 +174,21 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     result.inputPeak = input.peak; result.outputPeak = output.peak;
     const auto values = static_cast<double>(result.samples) * record.channels;
     result.inputRms = std::sqrt(input.squares / values); result.outputRms = std::sqrt(output.squares / values);
-    result.overloaded = output.peak > 1.0 || result.postGainPeak > 1.0;
+    result.overloaded = output.peak > 1.0 || result.postGainPeak > 1.0 || postHighPassPeak>1. || wetPeak>1.;
     auto* object = new juce::DynamicObject;
     juce::var json(object);
     object->setProperty("version", 1); object->setProperty("samples", static_cast<juce::int64>(result.samples));
     object->setProperty("inputPeak", result.inputPeak); object->setProperty("inputRms", result.inputRms);
     object->setProperty("outputPeak", result.outputPeak); object->setProperty("outputRms", result.outputRms);
-    if (record.version == 8) object->setProperty("postGainPeak", result.postGainPeak);
+    if (record.version == 8 || record.version == 11) object->setProperty("postGainPeak", result.postGainPeak);
+    if (record.version == 11)
+    {
+        object->setProperty("postHighPassPeak",postHighPassPeak);
+        object->setProperty("wetPeak",wetPeak);
+    }
     object->setProperty("overloaded", result.overloaded); object->setProperty("latencySamples", static_cast<int>(result.latencySamples));
     object->setProperty("experiment", record.toJson());
-    if (record.version == 9)
+    if (record.version == 9 || record.version == 11)
     {
         object->setProperty("renderPolicy", "fixed-duration-uncompensated");
         object->setProperty("tailFlushed", false);
