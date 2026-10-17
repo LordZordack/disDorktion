@@ -37,7 +37,7 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
         || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)
         || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec) || !inputTarget.prepare(spec)
-        || !middleTarget.prepare(spec) || !outputTarget.prepare(spec)) return false;
+        || !middleTarget.prepare(spec) || !outputTarget.prepare(spec) || !fullTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -66,11 +66,28 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     else if (id == "input-section") selected = &inputTarget;
     else if (id == "middle-section") selected = &middleTarget;
     else if (id == "output-section") selected = &outputTarget;
+    else if (id == "full-chain") selected = &fullTarget;
     else return false;
     reset();
     return true;
 }
 
+bool AuditionEngine::setFullChainSettings(const FullChainSettings& settings) noexcept
+{
+    if (!isValidFullChainSettings(settings)) return false;
+    for (std::size_t i=0;i<fullControls.size();++i)
+        fullControls[i].store(getFullChainControl(settings,fullChainControls[i].id),std::memory_order_relaxed);
+    fullSeed.store(settings.input.crusher.jitterSeed,std::memory_order_relaxed);
+    return fullTarget.setParameters(settings);
+}
+bool AuditionEngine::setFullChainControl(std::string_view id,float value) noexcept
+{
+    FullChainSettings probe;
+    if (!disdorktion::setFullChainControl(probe,id,value)) return false;
+    for (std::size_t i=0;i<fullControls.size();++i)
+        if (id==fullChainControls[i].id) { fullControls[i].store(value,std::memory_order_relaxed);return true; }
+    return false;
+}
 bool AuditionEngine::setParameters(const GainParameters& parameters) noexcept
 {
     if (!validGain(parameters.gain)) return false;
@@ -311,6 +328,7 @@ void AuditionEngine::setOutputStageBypass(bool highPass, bool value) noexcept
 }
 void AuditionEngine::setBypass(bool value) noexcept
 {
+    if (selected == &fullTarget) { (void)setFullChainControl("chainBypass",value?1.f:0.f);return; }
     if (selected == &outputTarget) { outputBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &middleTarget) { middleBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &inputTarget) { inputBypass.store(value, std::memory_order_relaxed); return; }
@@ -322,6 +340,14 @@ void AuditionEngine::setBypass(bool value) noexcept
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if (selected == &fullTarget)
+    {
+        FullChainSettings settings;
+        for (std::size_t i=0;i<fullControls.size();++i)
+            if (!disdorktion::setFullChainControl(settings,fullChainControls[i].id,fullControls[i].load(std::memory_order_relaxed))) return false;
+        settings.input.crusher.jitterSeed=fullSeed.load(std::memory_order_relaxed);
+        return fullTarget.setParameters(settings);
+    }
     if (selected == &outputTarget)
     {
         outputTarget.setBypass(outputBypass.load(std::memory_order_relaxed));
@@ -411,9 +437,12 @@ bool AuditionEngine::process(juce::dsp::AudioBlock<float> block, bool applyMonit
     const auto after = measure(block);
     if (block.getNumSamples() != 0)
     {
-        const auto interstage = selected == &inputTarget ? inputTarget.getPostGainPeak() : 0.0f;
+        const auto peaks = selected == &fullTarget ? fullTarget.getPeaks() : FullChainPeaks {};
+        const auto interstage = selected == &inputTarget ? inputTarget.getPostGainPeak() : peaks.postInputGain;
+        postHighPassPeak.store(peaks.postHighPass,std::memory_order_relaxed);
+        wetPeak.store(peaks.wet,std::memory_order_relaxed);
         postGainPeak.store(interstage, std::memory_order_relaxed);
-        if (interstage > 1.0f) overload.store(true, std::memory_order_relaxed);
+        if (interstage > 1.0f || peaks.postHighPass > 1.f || peaks.wet > 1.f) overload.store(true, std::memory_order_relaxed);
     }
     outputPeak.store(after.peak, std::memory_order_relaxed);
     outputRms.store(after.rms, std::memory_order_relaxed);
@@ -436,11 +465,13 @@ MeterSnapshot AuditionEngine::meters() const noexcept
     // Scalar readings may span adjacent callbacks; no retry loop blocks processing.
     return {inputPeak.load(std::memory_order_relaxed), inputRms.load(std::memory_order_relaxed),
             outputPeak.load(std::memory_order_relaxed), outputRms.load(std::memory_order_relaxed),
-            overload.load(std::memory_order_relaxed), postGainPeak.load(std::memory_order_relaxed)};
+            overload.load(std::memory_order_relaxed), postGainPeak.load(std::memory_order_relaxed),
+            postHighPassPeak.load(std::memory_order_relaxed),wetPeak.load(std::memory_order_relaxed)};
 }
 bool AuditionEngine::consumeOverload() noexcept { return overload.exchange(false, std::memory_order_relaxed); }
 void AuditionEngine::clearMeters() noexcept
 {
+    postHighPassPeak.store(0.f,std::memory_order_relaxed);wetPeak.store(0.f,std::memory_order_relaxed);
     inputPeak.store(0.0f, std::memory_order_relaxed); inputRms.store(0.0f, std::memory_order_relaxed);
     outputPeak.store(0.0f, std::memory_order_relaxed); outputRms.store(0.0f, std::memory_order_relaxed);
     overload.store(false, std::memory_order_relaxed);

@@ -11,6 +11,17 @@
 - [Proposed performance budgets and benchmark procedure](docs/PERFORMANCE.md)
 - [Production gain design and acceptance limits](docs/okf/methods/gain.md)
 
+### Full chain candidate
+
+Select **Full chain** in the audition app for input gain/crushing, fixed 4x
+FIR/ADAA tanh/folding, output filters, global dry/wet and final gain. Dry is
+captured before input drive and aligned by 92 samples. Chain bypass preserves
+that delay and final gain; each effect also has independent bypass. Version-11
+experiments reproduce the chain. New plugin instances use the same processor;
+old plugin states retain their gain-only behavior. See the
+[design](docs/okf/methods/full_chain.md) and
+[qualification status](docs/okf/notes/full_chain_validation.md).
+
 ### Input section
 
 Select **Input section** in the shared audition app to process production gain

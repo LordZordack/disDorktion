@@ -65,3 +65,13 @@ explicit drive, threshold, output trim and bypass. They use generated sources;
 the settings make no human listening acceptance claim. Lower thresholds also
 lower the wet output ceiling. See the
 [wave-folder design](../../docs/okf/methods/wave_folding.md).
+
+`full-chain-gentle.json`, `full-chain-destructive.json` and
+`full-chain-phase-blend.json` use version 11 and target `full-chain`.
+They include every section, global mix, final gain and fixed quality identity.
+The render lasts 145024 frames including 1024 explicit silent source-tail frames,
+with 92 samples of untrimmed processing latency. Monitoring starts muted at -18 dB.
+The phase-blend example bypasses middle nonlinearities and narrows the output
+filters at 50% mix to expose phase-sensitive blending. Compare endpoints and
+bypasses at matched monitor levels, then record human observations. These
+examples do not establish listening acceptance.

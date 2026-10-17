@@ -1,0 +1,234 @@
+{
+  "issue": 13,
+  "repeat_manifests_identical": true,
+  "all_capture_hashes_verified": true,
+  "numerical_audit": {
+    "cases": 272,
+    "errors": {
+      "dry": 0.0,
+      "blend": 2.384185791015625e-07,
+      "ordered": 0.0,
+      "bypass": 0.0,
+      "partition": 0.0,
+      "drive_independence": 0.0,
+      "final_gain": 2.0538209888343317e-07,
+      "source": 1.1913104502880856e-07
+    },
+    "peak_all_captures": 3.999999761581421,
+    "independent_wet_latency": [
+      {
+        "rate": 48000.0,
+        "channels": 1,
+        "channel": 0,
+        "reported_samples": 92,
+        "signed_centroid_samples": 91.99993019580693,
+        "dc_group_delay_samples": 91.99993019580823
+      },
+      {
+        "rate": 48000.0,
+        "channels": 2,
+        "channel": 0,
+        "reported_samples": 92,
+        "signed_centroid_samples": 91.99993019580693,
+        "dc_group_delay_samples": 91.99993019580823
+      },
+      {
+        "rate": 48000.0,
+        "channels": 2,
+        "channel": 1,
+        "reported_samples": 92,
+        "signed_centroid_samples": 91.99993012636239,
+        "dc_group_delay_samples": 91.99993012636358
+      },
+      {
+        "rate": 96000.0,
+        "channels": 1,
+        "channel": 0,
+        "reported_samples": 92,
+        "signed_centroid_samples": 91.99993019580693,
+        "dc_group_delay_samples": 91.99993019580823
+      },
+      {
+        "rate": 96000.0,
+        "channels": 2,
+        "channel": 0,
+        "reported_samples": 92,
+        "signed_centroid_samples": 91.99993019580693,
+        "dc_group_delay_samples": 91.99993019580823
+      },
+      {
+        "rate": 96000.0,
+        "channels": 2,
+        "channel": 1,
+        "reported_samples": 92,
+        "signed_centroid_samples": 91.99993012636239,
+        "dc_group_delay_samples": 91.99993012636358
+      }
+    ],
+    "human_listening": "pending",
+    "reference_cpu_qualified": false,
+    "validator_sha256": "04165b7f1a8c5b94a6327d49c571fdd322a733dc50c856f33eaa96f77b67a577",
+    "input_manifest_sha256": "581b9854a536cfe464a0eb5f465bffe5bf97a8a2ae52f04c635c8ebfa90b5f67",
+    "passed": true
+  },
+  "tests": {
+    "Debug": {
+      "tests": 239,
+      "failures": 0
+    },
+    "Release": {
+      "tests": 239,
+      "failures": 0
+    },
+    "DSP-only Release": {
+      "tests": 197,
+      "failures": 0
+    }
+  },
+  "examples": {
+    "gentle": {
+      "samples": 145024,
+      "latencySamples": 92,
+      "outputPeak": 0.244125455617905,
+      "postGainPeak": 0.353134393692017,
+      "postHighPassPeak": 0.487029731273651,
+      "wetPeak": 0.487094342708588,
+      "overloaded": false
+    },
+    "destructive": {
+      "samples": 145024,
+      "latencySamples": 92,
+      "outputPeak": 0.086705848574638,
+      "postGainPeak": 0.498815566301346,
+      "postHighPassPeak": 0.336281001567841,
+      "wetPeak": 0.345182210206985,
+      "overloaded": false
+    },
+    "phase-blend": {
+      "samples": 145024,
+      "latencySamples": 92,
+      "outputPeak": 0.125068545341492,
+      "postGainPeak": 0.25,
+      "postHighPassPeak": 0.253072738647461,
+      "wetPeak": 0.249089986085892,
+      "overloaded": false
+    }
+  },
+  "human_listening": "pending",
+  "actual_daw_compensation": "pending",
+  "reference_cpu_qualified": false,
+  "cpu_diagnostic": {
+    "cases": 120,
+    "raw_timings": 120000,
+    "worst_p99_deadline_fraction": 0.061500000000000006,
+    "reference_cpu_qualified": false,
+    "validator_sha256": "04165b7f1a8c5b94a6327d49c571fdd322a733dc50c856f33eaa96f77b67a577",
+    "input_manifest_sha256": "148204da2a6f190e295f38ef0cc608b8b77467ec08ce7c77c9d4344aabc92226",
+    "passed": true
+  },
+  "cpu_environment": {
+    "topology": [
+      {
+        "class": 1,
+        "group": 0,
+        "mask": "0x3"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x4"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x8"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x10"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x20"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x40"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x80"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x100"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x200"
+      },
+      {
+        "class": 1,
+        "group": 0,
+        "mask": "0xc00"
+      },
+      {
+        "class": 1,
+        "group": 0,
+        "mask": "0x3000"
+      },
+      {
+        "class": 1,
+        "group": 0,
+        "mask": "0xc000"
+      },
+      {
+        "class": 1,
+        "group": 0,
+        "mask": "0x30000"
+      },
+      {
+        "class": 1,
+        "group": 0,
+        "mask": "0xc0000"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x100000"
+      },
+      {
+        "class": 0,
+        "group": 0,
+        "mask": "0x200000"
+      }
+    ],
+    "highest_class": 1,
+    "selected_mask": "0x1",
+    "observed_process_mask": "0x1",
+    "priority_class": 128,
+    "power_before": {
+      "ac": 1,
+      "battery_percent": 100
+    },
+    "power_after": {
+      "ac": 1,
+      "battery_percent": 100
+    },
+    "diagnostic_exit": 1,
+    "reference_qualified": false,
+    "limitation": "Affinity set immediately after spawn; 20ms warmup follows; no suspended launch"
+  },
+  "publication_verification": {
+    "Debug": "238/239 initial; timed-out qualification case passed by exact name in isolation",
+    "Release": "239/239",
+    "validator_tests": "7/7",
+    "source_change": "Removed one blank line at EOF; measurement/CPU manifests refreshed"
+  }
+}

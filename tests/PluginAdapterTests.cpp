@@ -8,6 +8,13 @@ using disdorktion::PluginProcessor;
 namespace
 {
 void restore(PluginProcessor& processor, const juce::XmlElement& xml);
+// Gain-only expectations explicitly exercise the persisted compatibility mode.
+void useLegacyGainPath(PluginProcessor& processor)
+{
+    juce::XmlElement xml("DisDorktionState");
+    xml.setAttribute("version", "1"); xml.setAttribute("gain", "1"); xml.setAttribute("bypass", "0");
+    restore(processor, xml);
+}
 void fill(juce::AudioBuffer<float>& audio, float value)
 {
     for (int c = 0; c < audio.getNumChannels(); ++c)
@@ -18,7 +25,7 @@ TEST_CASE("Adapter appends production host controls after unchanged legacy contr
 {
     PluginProcessor processor;
     const auto& controls = processor.getParameters();
-    REQUIRE(controls.size() == 8);
+    REQUIRE(controls.size() == static_cast<int>(disdorktion::fullChainControls.size() + 2));
     const char* ids[] = {"referenceGain", "referenceBypass", "inputGainDb", "inputMute",
                          "inputBypass", "outputGainDb", "outputMute", "outputBypass"};
     for (int i = 0; i < 8; ++i)
@@ -39,7 +46,7 @@ namespace
 {
 juce::RangedAudioParameter& hostControl(PluginProcessor& processor, int index)
 {
-    REQUIRE(processor.getParameters().size() == 8);
+    REQUIRE(processor.getParameters().size() >= 8);
     auto* parameter = dynamic_cast<juce::RangedAudioParameter*>(processor.getParameters()[index]);
     REQUIRE(parameter != nullptr);
     return *parameter;
@@ -73,7 +80,7 @@ TEST_CASE("Adapter production endpoints mute and bypass are independent at eithe
             for (const bool muted : {false, true})
                 for (const bool bypassed : {false, true})
                 {
-                    PluginProcessor processor;
+                    PluginProcessor processor; useLegacyGainPath(processor);
                     setHostControl(processor, position, db);
                     setHostControl(processor, position + 1, muted ? 1.0f : 0.0f);
                     setHostControl(processor, position + 2, bypassed ? 1.0f : 0.0f);
@@ -94,7 +101,7 @@ TEST_CASE("Adapter production endpoints mute and bypass are independent at eithe
 
 TEST_CASE("Adapter production pair follows independent opposite ramps and reset snapshots", "[adapter][production]")
 {
-    PluginProcessor processor, separate;
+    PluginProcessor processor, separate; useLegacyGainPath(processor); useLegacyGainPath(separate);
     processor.prepareToPlay(48000.0, 32); separate.prepareToPlay(48000.0, 32);
     setHostControl(processor, 2, 24.0f); setHostControl(processor, 5, -60.0f);
     juce::AudioBuffer<float> audio(2, 480), other(2, 480); juce::MidiBuffer midi;
@@ -134,7 +141,7 @@ TEST_CASE("Adapter legacy imports preserve tiny linear values and reset all prod
             fill(audio, 0.25f); processor.processBlock(audio, midi);
             REQUIRE(audio.getSample(0, 0) == (bypass ? 0.25f : 0.25f * value));
             auto saved = savedControls(processor); REQUIRE(saved != nullptr);
-            REQUIRE(saved->getStringAttribute("version") == "2");
+            REQUIRE(saved->getStringAttribute("version") == "3"); REQUIRE(saved->getStringAttribute("mode") == "legacyGain");
             REQUIRE(static_cast<float>(saved->getDoubleAttribute("gain")) == value);
         }
 }
@@ -149,7 +156,10 @@ TEST_CASE("Adapter v2 restores synchronized host values raw DSP controls and rou
     REQUIRE(hostControl(processor, 2).convertFrom0to1(hostControl(processor, 2).getValue()) == 24.0f);
     REQUIRE(hostControl(processor, 5).convertFrom0to1(hostControl(processor, 5).getValue()) == -60.0f);
     auto saved = savedControls(processor); REQUIRE(saved != nullptr);
-    REQUIRE(saved->isEquivalentTo(&xml, true));
+    REQUIRE(saved->getStringAttribute("version") == "3");
+    REQUIRE(saved->getStringAttribute("mode") == "legacyGain");
+    for (const auto* id : {"gain", "bypass", "inputGainDb", "inputMute", "inputBypass", "outputGainDb", "outputMute", "outputBypass"})
+        REQUIRE(saved->getDoubleAttribute(id) == xml.getDoubleAttribute(id));
     PluginProcessor restored; restore(restored, *saved); restored.prepareToPlay(48000.0, 32);
     juce::AudioBuffer<float> audio(2, 1); juce::MidiBuffer midi;
     fill(audio, 0.25f); restored.processBlock(audio, midi);
@@ -226,7 +236,7 @@ TEST_CASE("Adapter restores notify parameter attachments and fractional float st
 
 TEST_CASE("Adapter production callbacks and resets allocate no storage", "[adapter][production][realtime]")
 {
-    PluginProcessor processor; processor.prepareToPlay(48000.0, 32);
+    PluginProcessor processor; useLegacyGainPath(processor); processor.prepareToPlay(48000.0, 32);
     juce::AudioBuffer<float> audio(2, 2051), wrong(1, 7), empty(2, 0); juce::MidiBuffer midi;
     processor.processBlock(audio, midi); // Warm up external callback helpers before measuring.
     for (const bool mute : {false, true})
@@ -262,7 +272,7 @@ void restore(PluginProcessor& processor, const juce::XmlElement& xml)
 
 TEST_CASE("Adapter processes active channels and silences surplus storage", "[adapter]")
 {
-    PluginProcessor processor;
+    PluginProcessor processor; useLegacyGainPath(processor);
     REQUIRE(processor.setBusesLayout(layout(juce::AudioChannelSet::mono(), juce::AudioChannelSet::mono())));
     processor.prepareToPlay(48000.0, 32);
     juce::AudioBuffer<float> audio(2, 127); juce::MidiBuffer midi;
@@ -290,7 +300,7 @@ TEST_CASE("Adapter reset snapshots restored controls before processing resumes",
 
 TEST_CASE("Adapter decodes fractional host boolean controls", "[adapter]")
 {
-    PluginProcessor processor;
+    PluginProcessor processor; useLegacyGainPath(processor);
     auto* gain = dynamic_cast<juce::RangedAudioParameter*>(processor.getParameters()[0]);
     auto* bypass = dynamic_cast<juce::RangedAudioParameter*>(processor.getParameters()[1]);
     REQUIRE(gain != nullptr); REQUIRE(bypass != nullptr);
@@ -317,7 +327,7 @@ TEST_CASE("Adapter admits matching mono stereo and rejects other layouts", "[ada
 
 TEST_CASE("Adapter lifecycle invalid buffers and failed reprepare produce silence", "[adapter]")
 {
-    PluginProcessor processor;
+    PluginProcessor processor; useLegacyGainPath(processor);
     juce::MidiBuffer midi;
     juce::AudioBuffer<float> audio(2, 2051);
     fill(audio, 0.25f); processor.processBlock(audio, midi);
@@ -351,7 +361,7 @@ TEST_CASE("Adapter lifecycle invalid buffers and failed reprepare produce silenc
 
 TEST_CASE("Adapter controls state roundtrip and invalid state retain valid values", "[adapter]")
 {
-    PluginProcessor processor;
+    PluginProcessor processor; useLegacyGainPath(processor);
     auto* gain = dynamic_cast<juce::RangedAudioParameter*>(processor.getParameters()[0]);
     auto* bypass = dynamic_cast<juce::RangedAudioParameter*>(processor.getParameters()[1]);
     REQUIRE(gain != nullptr); REQUIRE(bypass != nullptr);

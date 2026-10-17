@@ -1,0 +1,9 @@
+{
+  "cases": 120,
+  "raw_timings": 120000,
+  "worst_p99_deadline_fraction": 0.061500000000000006,
+  "reference_cpu_qualified": false,
+  "validator_sha256": "04165b7f1a8c5b94a6327d49c571fdd322a733dc50c856f33eaa96f77b67a577",
+  "input_manifest_sha256": "148204da2a6f190e295f38ef0cc608b8b77467ec08ce7c77c9d4344aabc92226",
+  "passed": true
+}

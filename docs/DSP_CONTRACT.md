@@ -185,10 +185,31 @@ drive and trim explicitly. Native-rate aliasing is measured for Q1; the module
 does not own the future shared oversampling boundary. See the
 [design and acceptance limits](okf/methods/tanh_saturation.md).
 
-## Plugin adapter policy (both gain implementations)
+## Plugin adapter policy
 
 The adapter marks host configuration ready only after successful preparation. Invalid host preparation disables processing even if the module retained an earlier valid configuration. On unprepared or rejected audio processing, clear every output sample with `buffer.clear()` and return without logging, allocation, or host/UI notifications. Clear output-only channels before processing valid input. Rejected parameter updates retain valid controls and do not cause silence.
 
-After successful `prepareToPlay`, synchronize zero module latency with `setLatencySamples(0)`. Do not notify latency changes from `processBlock`.
+After successful `prepareToPlay`, report the active processing mode's latency:
+92 samples for the full chain and zero for restored legacy gain sessions.
+State restoration after preparation also updates host latency when mode changes.
+Do not notify latency changes from `processBlock`.
 
 Host lifecycle and reset calls are serialized with processing: prepare before playback, release after playback stops, and reset on the processing thread or while stopped. An atomic ready flag alone would not make concurrent changes to DSP state safe. Valid host buffers may contain surplus channel storage; process a non-owning view of the active output channels and clear surplus channels. Too few channels reject the block. Adapter reset snapshots valid host controls before snapping the module to their targets. State restoration updates host parameters; a subsequent callback ramps to them, or reset/preparation snaps to them. Persistence may allocate and notify the host and must run outside the module realtime path.
+
+## Full chain integration
+
+`FullChain` accepts the standard host domain, bounds internal scratch/chunks
+at 1024 frames, and validates complete typed settings before publication.
+Replacement preparation preserves valid state on rejected specifications.
+It composes unchanged input, fixed 4x FIR/ADAA middle and output sections,
+then mixes delayed pre-input-gain dry and applies production final Gain.
+Report actual middle latency (currently 92 host samples) across all effect
+and common bypass states. Reset clears histories and snaps retained targets.
+
+Mix [0,1] defaults to 1. Mix and common bypass have independent 10 ms linear ramps;
+effective wet weight is mix*(1-bypass). Exact endpoints avoid residual wet
+contribution. Keep wet processing warm at dry/common bypass. Post-input,
+post-HP, pre-mix-wet and final peaks describe headroom without a limiter.
+Output filter phase remains in the wet branch. See the
+[full-chain method](okf/methods/full_chain.md) for adapter state migration and
+host bypass semantics.

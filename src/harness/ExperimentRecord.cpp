@@ -28,6 +28,20 @@ ExperimentRecord::ExperimentRecord() : buildIdentity(DISDORKTION_BUILD_ID) {}
 bool ExperimentRecord::validate(juce::String& error) const
 {
     error.clear();
+    if (version == 11)
+    {
+        if (targetId != "full-chain" || !isValidFullChainSettings(fullChain)
+            || middleQuality != "4x-fir-adaa-v1") return fail(error,"Invalid full chain settings or quality");
+        auto common=*this;common.version=1;common.targetId="reference-gain";common.fullChain={};
+        if (gain != 1.f || gainDb != 0.f || bypass || mute || bitDepth!=64 || captureRateHz!=384000.f)
+            return fail(error,"Foreign full chain settings");
+        return common.validate(error);
+    }
+    const FullChainSettings defaultChain;
+    for (const auto& c:fullChainControls)
+        if (getFullChainControl(fullChain,c.id)!=getFullChainControl(defaultChain,c.id))
+            return fail(error,"Foreign full chain settings");
+    if (fullChain.input.crusher.jitterSeed!=1) return fail(error,"Foreign full chain seed");
     if (!((version == 1 && targetId == "reference-gain") || (version == 2 && targetId == "gain")
         || ((version == 3 || version == 4) && targetId == "bit-crusher")
         || (version == 5 && targetId == "tanh-saturation") || (version == 6 && targetId == "wave-folder")
@@ -105,6 +119,26 @@ bool ExperimentRecord::validate(juce::String& error) const
 
 juce::var ExperimentRecord::toJson() const
 {
+    if (version == 11)
+    {
+        auto common=*this;common.version=1;common.targetId="reference-gain";common.fullChain={};
+        auto result=common.toJson();auto* root=result.getDynamicObject();
+        root->removeProperty("gain");root->removeProperty("bypass");
+        root->setProperty("version",11);root->setProperty("targetId","full-chain");
+        ExperimentRecord input=common,middleRecord=common,outputRecord=common;
+        input.version=8;input.targetId="input-section";
+        input.gainDb=fullChain.input.gain.gainDb;input.mute=fullChain.input.gain.mute;input.gainBypass=fullChain.input.gain.bypass;
+        const auto& crusher=fullChain.input.crusher;
+        input.bitDepth=crusher.bitDepth;input.captureRateHz=crusher.captureRateHz;input.crusherBypass=crusher.bypass;
+        input.mix=crusher.mix;input.crush=crusher.crush;input.shape=crusher.shape;input.jitter=crusher.jitter;input.jitterSeed=crusher.jitterSeed;
+        middleRecord.version=9;middleRecord.targetId="middle-section";middleRecord.middle=fullChain.middle;
+        outputRecord.version=10;outputRecord.targetId="output-section";outputRecord.output=fullChain.output;
+        root->setProperty("input",input.toJson());root->setProperty("middle",middleRecord.toJson());root->setProperty("output",outputRecord.toJson());
+        root->setProperty("globalMix",fullChain.mix);root->setProperty("chainBypass",fullChain.bypass);
+        root->setProperty("finalGainDb",fullChain.finalGain.gainDb);root->setProperty("finalMute",fullChain.finalGain.mute);
+        root->setProperty("finalBypass",fullChain.finalGain.bypass);root->setProperty("middleQuality",middleQuality);
+        return result;
+    }
     auto* object = new juce::DynamicObject;
     juce::var result(object);
     auto put = [object](const char* key, const juce::var& value) { object->setProperty(key, value); };
@@ -172,6 +206,49 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto* o = value.getDynamicObject();
     if (o == nullptr) return fail(error, "Experiment must be a JSON object");
     auto get = [o](const char* key) { return o->getProperty(key); };
+    if (integer(get("version"),11,11))
+    {
+        if (get("targetId").toString()!="full-chain" || !get("middleQuality").isString()
+            || get("middleQuality").toString()!="4x-fir-adaa-v1") return fail(error,"Unsupported full chain target or quality");
+        const auto allowedCommon=ExperimentRecord{}.toJson();
+        for (const auto& property:o->getProperties())
+        {
+            const auto key=property.name.toString();
+            const bool full=key=="input" || key=="middle" || key=="output" || key=="globalMix" || key=="chainBypass"
+                || key=="finalGainDb" || key=="finalMute" || key=="finalBypass" || key=="middleQuality";
+            if (!full && (key=="gain" || key=="bypass" || !allowedCommon.getDynamicObject()->hasProperty(property.name)))
+                return fail(error,"Mixed full chain schemas");
+        }
+        for (auto key:{"chainBypass","finalMute","finalBypass"})
+            if (!get(key).isBool()) return fail(error,"Missing full chain boolean");
+        for (auto key:{"globalMix","finalGainDb"})
+            if (!number(get(key)) || !std::isfinite(static_cast<double>(get(key)))) return fail(error,"Missing full chain number");
+        if (static_cast<double>(get("globalMix"))<0. || static_cast<double>(get("globalMix"))>1.
+            || static_cast<double>(get("finalGainDb"))< -60. || static_cast<double>(get("finalGainDb"))>24.)
+            return fail(error,"Full chain number out of range");
+        ExperimentRecord input,middleRecord,outputRecord;
+        if (!fromJson(get("input"),input,error) || input.version!=8 || input.bypass
+            || !fromJson(get("middle"),middleRecord,error) || middleRecord.version!=9 || middleRecord.bypass
+            || !fromJson(get("output"),outputRecord,error) || outputRecord.version!=10 || outputRecord.bypass)
+            return fail(error,"Invalid nested full chain section");
+        juce::var common(o->clone().release());
+        auto* base=common.getDynamicObject();
+        for(auto key:{"input","middle","output","globalMix","chainBypass","finalGainDb","finalMute","finalBypass","middleQuality"})
+            base->removeProperty(key);
+        base->setProperty("version",1);base->setProperty("targetId","reference-gain");base->setProperty("gain",1.f);base->setProperty("bypass",false);
+        ExperimentRecord candidate;
+        if (!fromJson(common,candidate,error)) return false;
+        candidate.version=11;candidate.targetId="full-chain";
+        candidate.fullChain.input={{input.gainDb,input.mute,input.gainBypass},
+            {input.bitDepth,input.captureRateHz,input.crusherBypass,input.mix,input.crush,input.shape,input.jitter,input.jitterSeed}};
+        candidate.fullChain.middle=middleRecord.middle;candidate.fullChain.output=outputRecord.output;
+        candidate.fullChain.mix=static_cast<float>(get("globalMix"));candidate.fullChain.bypass=static_cast<bool>(get("chainBypass"));
+        candidate.fullChain.finalGain={static_cast<float>(get("finalGainDb")),static_cast<bool>(get("finalMute")),static_cast<bool>(get("finalBypass"))};
+        if (!candidate.validate(error)) return false;
+        destination=std::move(candidate);return true;
+    }
+    for(auto key:{"input","middle","output","globalMix","chainBypass","finalGainDb","finalMute","finalBypass"})
+        if(o->hasProperty(key)) return fail(error,"Mixed full chain schemas");
     for (auto key : {"targetId", "filePath", "fileHash", "sourceConversion", "midiDevice", "buildIdentity", "observations"})
         if (!get(key).isString()) return fail(error, juce::String("Missing or invalid string: ") + key);
     if (!integer(get("version"), 1, 10)) return fail(error, "Unsupported or missing version");

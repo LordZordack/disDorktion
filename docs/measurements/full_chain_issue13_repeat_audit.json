@@ -1,0 +1,503 @@
+{
+  "cases": 272,
+  "errors": {
+    "dry": 0.0,
+    "blend": 2.384185791015625e-07,
+    "ordered": 0.0,
+    "bypass": 0.0,
+    "partition": 0.0,
+    "drive_independence": 0.0,
+    "final_gain": 2.0538209888343317e-07,
+    "source": 1.1913104502880856e-07
+  },
+  "peak_all_captures": 3.999999761581421,
+  "complex_blends": [
+    {
+      "case": 0,
+      "frequency": 40.0,
+      "mix": 0.25,
+      "real": 0.6827517533166928,
+      "imaginary": -0.3746671908313518,
+      "phase_radians": -0.5018910783622209,
+      "magnitude": 0.778797445130937
+    },
+    {
+      "case": 0,
+      "frequency": 40.0,
+      "mix": 0.5,
+      "real": 0.4792999274021688,
+      "imaginary": -0.28603834654284094,
+      "phase_radians": -0.5380511599764021,
+      "magnitude": 0.558163377606133
+    },
+    {
+      "case": 0,
+      "frequency": 40.0,
+      "mix": 0.75,
+      "real": 0.27584808941249117,
+      "imaginary": -0.19740949603362093,
+      "phase_radians": -0.6211494307284084,
+      "magnitude": 0.3392088995836783
+    },
+    {
+      "case": 0,
+      "frequency": 1000.0,
+      "mix": 0.25,
+      "real": 0.3683686589957468,
+      "imaginary": 0.2767198242932978,
+      "phase_radians": 0.6442709011091952,
+      "magnitude": 0.4607269582814081
+    },
+    {
+      "case": 0,
+      "frequency": 1000.0,
+      "mix": 0.5,
+      "real": -0.12928808579294152,
+      "imaginary": 0.05343964858659272,
+      "phase_radians": 2.749641342027606,
+      "magnitude": 0.1398971235196118
+    },
+    {
+      "case": 0,
+      "frequency": 1000.0,
+      "mix": 0.75,
+      "real": -0.6269448418179152,
+      "imaginary": -0.16984053164468468,
+      "phase_radians": -2.877040416748945,
+      "magnitude": 0.6495426397638879
+    },
+    {
+      "case": 0,
+      "frequency": 8000.0,
+      "mix": 0.25,
+      "real": -0.4608898162348721,
+      "imaginary": -0.8051247746431353,
+      "phase_radians": -2.0907084903114947,
+      "magnitude": 0.9277097204692714
+    },
+    {
+      "case": 0,
+      "frequency": 8000.0,
+      "mix": 0.5,
+      "real": -0.42177963246975736,
+      "imaginary": -0.7442241455018279,
+      "phase_radians": -2.0863988482292353,
+      "magnitude": 0.8554341804687545
+    },
+    {
+      "case": 0,
+      "frequency": 8000.0,
+      "mix": 0.75,
+      "real": -0.38266944672757847,
+      "imaginary": -0.6833235288354923,
+      "phase_radians": -2.081293862626547,
+      "magnitude": 0.7831774706405829
+    },
+    {
+      "case": 0,
+      "frequency": 19200.0,
+      "mix": 0.25,
+      "real": 0.23007609435431783,
+      "imaginary": 0.7111652012368491,
+      "phase_radians": 1.2579037099834054,
+      "magnitude": 0.747456321562394
+    },
+    {
+      "case": 0,
+      "frequency": 19200.0,
+      "mix": 0.5,
+      "real": 0.15113519433369715,
+      "imaginary": 0.47127388617854893,
+      "phase_radians": 1.2604630371852923,
+      "magnitude": 0.4949150662084519
+    },
+    {
+      "case": 0,
+      "frequency": 19200.0,
+      "mix": 0.75,
+      "real": 0.07219429163634367,
+      "imaginary": 0.23138255307437028,
+      "phase_radians": 1.2683554796075605,
+      "magnitude": 0.24238378991196424
+    },
+    {
+      "case": 68,
+      "frequency": 40.0,
+      "mix": 0.25,
+      "real": 0.6827517533166928,
+      "imaginary": -0.3746671908313518,
+      "phase_radians": -0.5018910783622209,
+      "magnitude": 0.778797445130937
+    },
+    {
+      "case": 68,
+      "frequency": 40.0,
+      "mix": 0.5,
+      "real": 0.4792999274021688,
+      "imaginary": -0.28603834654284094,
+      "phase_radians": -0.5380511599764021,
+      "magnitude": 0.558163377606133
+    },
+    {
+      "case": 68,
+      "frequency": 40.0,
+      "mix": 0.75,
+      "real": 0.27584808941249117,
+      "imaginary": -0.19740949603362093,
+      "phase_radians": -0.6211494307284084,
+      "magnitude": 0.3392088995836783
+    },
+    {
+      "case": 68,
+      "frequency": 1000.0,
+      "mix": 0.25,
+      "real": 0.3683686589957468,
+      "imaginary": 0.2767198242932978,
+      "phase_radians": 0.6442709011091952,
+      "magnitude": 0.4607269582814081
+    },
+    {
+      "case": 68,
+      "frequency": 1000.0,
+      "mix": 0.5,
+      "real": -0.12928808579294152,
+      "imaginary": 0.05343964858659272,
+      "phase_radians": 2.749641342027606,
+      "magnitude": 0.1398971235196118
+    },
+    {
+      "case": 68,
+      "frequency": 1000.0,
+      "mix": 0.75,
+      "real": -0.6269448418179152,
+      "imaginary": -0.16984053164468468,
+      "phase_radians": -2.877040416748945,
+      "magnitude": 0.6495426397638879
+    },
+    {
+      "case": 68,
+      "frequency": 8000.0,
+      "mix": 0.25,
+      "real": -0.4608898162348721,
+      "imaginary": -0.8051247746431353,
+      "phase_radians": -2.0907084903114947,
+      "magnitude": 0.9277097204692714
+    },
+    {
+      "case": 68,
+      "frequency": 8000.0,
+      "mix": 0.5,
+      "real": -0.42177963246975736,
+      "imaginary": -0.7442241455018279,
+      "phase_radians": -2.0863988482292353,
+      "magnitude": 0.8554341804687545
+    },
+    {
+      "case": 68,
+      "frequency": 8000.0,
+      "mix": 0.75,
+      "real": -0.38266944672757847,
+      "imaginary": -0.6833235288354923,
+      "phase_radians": -2.081293862626547,
+      "magnitude": 0.7831774706405829
+    },
+    {
+      "case": 68,
+      "frequency": 19200.0,
+      "mix": 0.25,
+      "real": 0.23007609435431783,
+      "imaginary": 0.7111652012368491,
+      "phase_radians": 1.2579037099834054,
+      "magnitude": 0.747456321562394
+    },
+    {
+      "case": 68,
+      "frequency": 19200.0,
+      "mix": 0.5,
+      "real": 0.15113519433369715,
+      "imaginary": 0.47127388617854893,
+      "phase_radians": 1.2604630371852923,
+      "magnitude": 0.4949150662084519
+    },
+    {
+      "case": 68,
+      "frequency": 19200.0,
+      "mix": 0.75,
+      "real": 0.07219429163634367,
+      "imaginary": 0.23138255307437028,
+      "phase_radians": 1.2683554796075605,
+      "magnitude": 0.24238378991196424
+    },
+    {
+      "case": 136,
+      "frequency": 40.0,
+      "mix": 0.25,
+      "real": 0.7838456897502892,
+      "imaginary": -0.23003603935538025,
+      "phase_radians": -0.28545624674563663,
+      "magnitude": 0.8169030816090834
+    },
+    {
+      "case": 136,
+      "frequency": 40.0,
+      "mix": 0.5,
+      "real": 0.5965571574750446,
+      "imaginary": -0.22153863534988052,
+      "phase_radians": -0.3555773473043602,
+      "magnitude": 0.6363645253212913
+    },
+    {
+      "case": 136,
+      "frequency": 40.0,
+      "mix": 0.75,
+      "real": 0.4092686122133629,
+      "imaginary": -0.2130412272183459,
+      "phase_radians": -0.47994530647685213,
+      "magnitude": 0.4613971840375176
+    },
+    {
+      "case": 136,
+      "frequency": 1000.0,
+      "mix": 0.25,
+      "real": 0.046826534341794096,
+      "imaginary": 0.17408831818693055,
+      "phase_radians": 1.3080340457397523,
+      "magnitude": 0.18027608506847823
+    },
+    {
+      "case": 136,
+      "frequency": 1000.0,
+      "mix": 0.5,
+      "real": -0.8722727000318155,
+      "imaginary": 0.08935760669815476,
+      "phase_radians": 3.039506488512428,
+      "magnitude": 0.8768377530054323
+    },
+    {
+      "case": 136,
+      "frequency": 1000.0,
+      "mix": 0.75,
+      "real": -1.7913719412437876,
+      "imaginary": 0.004626879295148503,
+      "phase_radians": 3.1390097901990606,
+      "magnitude": 1.7913779165456818
+    },
+    {
+      "case": 136,
+      "frequency": 8000.0,
+      "mix": 0.25,
+      "real": -0.4514974190980889,
+      "imaginary": 0.9130219348460618,
+      "phase_radians": 2.030041367150567,
+      "magnitude": 1.018557299793331
+    },
+    {
+      "case": 136,
+      "frequency": 8000.0,
+      "mix": 0.5,
+      "real": -0.40299486799849416,
+      "imaginary": 0.9600185175268263,
+      "phase_radians": 1.968235782217805,
+      "magnitude": 1.0411726166335384
+    },
+    {
+      "case": 136,
+      "frequency": 8000.0,
+      "mix": 0.75,
+      "real": -0.35449231089253874,
+      "imaginary": 1.0070150463812384,
+      "phase_radians": 1.9092721056277684,
+      "magnitude": 1.0675879833157265
+    },
+    {
+      "case": 136,
+      "frequency": 38400.0,
+      "mix": 0.25,
+      "real": 0.23136253108099286,
+      "imaginary": 0.7141437368355953,
+      "phase_radians": 1.2574945546254659,
+      "magnitude": 0.7506862844422505
+    },
+    {
+      "case": 136,
+      "frequency": 38400.0,
+      "mix": 0.5,
+      "real": 0.15370808620589718,
+      "imaginary": 0.4772310140634139,
+      "phase_radians": 1.2592048425824713,
+      "magnitude": 0.5013737294165639
+    },
+    {
+      "case": 136,
+      "frequency": 38400.0,
+      "mix": 0.75,
+      "real": 0.07605364650030476,
+      "imaginary": 0.24031825455743314,
+      "phase_radians": 1.264298274294454,
+      "magnitude": 0.2520655085875982
+    },
+    {
+      "case": 204,
+      "frequency": 40.0,
+      "mix": 0.25,
+      "real": 0.7838456897502892,
+      "imaginary": -0.23003603935538025,
+      "phase_radians": -0.28545624674563663,
+      "magnitude": 0.8169030816090834
+    },
+    {
+      "case": 204,
+      "frequency": 40.0,
+      "mix": 0.5,
+      "real": 0.5965571574750446,
+      "imaginary": -0.22153863534988052,
+      "phase_radians": -0.3555773473043602,
+      "magnitude": 0.6363645253212913
+    },
+    {
+      "case": 204,
+      "frequency": 40.0,
+      "mix": 0.75,
+      "real": 0.4092686122133629,
+      "imaginary": -0.2130412272183459,
+      "phase_radians": -0.47994530647685213,
+      "magnitude": 0.4613971840375176
+    },
+    {
+      "case": 204,
+      "frequency": 1000.0,
+      "mix": 0.25,
+      "real": 0.046826534341794096,
+      "imaginary": 0.17408831818693055,
+      "phase_radians": 1.3080340457397523,
+      "magnitude": 0.18027608506847823
+    },
+    {
+      "case": 204,
+      "frequency": 1000.0,
+      "mix": 0.5,
+      "real": -0.8722727000318155,
+      "imaginary": 0.08935760669815476,
+      "phase_radians": 3.039506488512428,
+      "magnitude": 0.8768377530054323
+    },
+    {
+      "case": 204,
+      "frequency": 1000.0,
+      "mix": 0.75,
+      "real": -1.7913719412437876,
+      "imaginary": 0.004626879295148503,
+      "phase_radians": 3.1390097901990606,
+      "magnitude": 1.7913779165456818
+    },
+    {
+      "case": 204,
+      "frequency": 8000.0,
+      "mix": 0.25,
+      "real": -0.4514974190980889,
+      "imaginary": 0.9130219348460618,
+      "phase_radians": 2.030041367150567,
+      "magnitude": 1.018557299793331
+    },
+    {
+      "case": 204,
+      "frequency": 8000.0,
+      "mix": 0.5,
+      "real": -0.40299486799849416,
+      "imaginary": 0.9600185175268263,
+      "phase_radians": 1.968235782217805,
+      "magnitude": 1.0411726166335384
+    },
+    {
+      "case": 204,
+      "frequency": 8000.0,
+      "mix": 0.75,
+      "real": -0.35449231089253874,
+      "imaginary": 1.0070150463812384,
+      "phase_radians": 1.9092721056277684,
+      "magnitude": 1.0675879833157265
+    },
+    {
+      "case": 204,
+      "frequency": 38400.0,
+      "mix": 0.25,
+      "real": 0.23136253108099286,
+      "imaginary": 0.7141437368355953,
+      "phase_radians": 1.2574945546254659,
+      "magnitude": 0.7506862844422505
+    },
+    {
+      "case": 204,
+      "frequency": 38400.0,
+      "mix": 0.5,
+      "real": 0.15370808620589718,
+      "imaginary": 0.4772310140634139,
+      "phase_radians": 1.2592048425824713,
+      "magnitude": 0.5013737294165639
+    },
+    {
+      "case": 204,
+      "frequency": 38400.0,
+      "mix": 0.75,
+      "real": 0.07605364650030476,
+      "imaginary": 0.24031825455743314,
+      "phase_radians": 1.264298274294454,
+      "magnitude": 0.2520655085875982
+    }
+  ],
+  "independent_wet_latency": [
+    {
+      "rate": 48000.0,
+      "channels": 1,
+      "channel": 0,
+      "reported_samples": 92,
+      "signed_centroid_samples": 91.99993019580693,
+      "dc_group_delay_samples": 91.99993019580823
+    },
+    {
+      "rate": 48000.0,
+      "channels": 2,
+      "channel": 0,
+      "reported_samples": 92,
+      "signed_centroid_samples": 91.99993019580693,
+      "dc_group_delay_samples": 91.99993019580823
+    },
+    {
+      "rate": 48000.0,
+      "channels": 2,
+      "channel": 1,
+      "reported_samples": 92,
+      "signed_centroid_samples": 91.99993012636239,
+      "dc_group_delay_samples": 91.99993012636358
+    },
+    {
+      "rate": 96000.0,
+      "channels": 1,
+      "channel": 0,
+      "reported_samples": 92,
+      "signed_centroid_samples": 91.99993019580693,
+      "dc_group_delay_samples": 91.99993019580823
+    },
+    {
+      "rate": 96000.0,
+      "channels": 2,
+      "channel": 0,
+      "reported_samples": 92,
+      "signed_centroid_samples": 91.99993019580693,
+      "dc_group_delay_samples": 91.99993019580823
+    },
+    {
+      "rate": 96000.0,
+      "channels": 2,
+      "channel": 1,
+      "reported_samples": 92,
+      "signed_centroid_samples": 91.99993012636239,
+      "dc_group_delay_samples": 91.99993012636358
+    }
+  ],
+  "human_listening": "pending",
+  "reference_cpu_qualified": false,
+  "validator_sha256": "04165b7f1a8c5b94a6327d49c571fdd322a733dc50c856f33eaa96f77b67a577",
+  "input_manifest_sha256": "581b9854a536cfe464a0eb5f465bffe5bf97a8a2ae52f04c635c8ebfa90b5f67",
+  "passed": true
+}

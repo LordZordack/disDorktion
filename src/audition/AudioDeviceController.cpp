@@ -32,6 +32,8 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
         processor.setMiddleSettings(settings.middle, settings.bypass);
     else if (settings.version == 10)
         processor.setOutputSettings(settings.output, settings.bypass);
+    else if (settings.version == 11)
+        processor.setFullChainSettings(settings.fullChain);
     processor.setMonitorDb(settings.monitorDb);
     processor.setMuted(settings.muted);
     playing.store(false);

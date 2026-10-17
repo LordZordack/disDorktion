@@ -354,3 +354,26 @@ runs; worst p99 was 1.01867% of incoming deadline (5% limit). See
 and ambient conditions were unavailable/unconfirmed. The isolated result does
 not qualify the complete wet chain. The separate unpinned diagnostic and human
 listening remain distinct gates.
+
+## Full chain diagnostics (C1 / #13)
+
+The full-chain ceiling remains 25% of the incoming callback deadline at the
+reference 48/96 kHz matrix and capacities 32/64/127/256/1024. The new
+`disdorktion_full_chain_benchmark` measures controls, unchanged section DSP,
+dry ring, mix, final gain and peak scans. Mono/stereo, neutral/extreme,
+automation/common bypass, oversized blocks and burst tails are covered.
+ScopedNoDenormals surrounds processing. Other supported sample rates are
+functional coverage and do not establish reference timing qualification.
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_full_chain_benchmark.exe --diagnostic --quick --conditions 'Record actual conditions; no competing jobs' --output NEW_CPU_DIRECTORY
+& 'C:/Users/jonas/AppData/Roaming/uv/python/cpython-3.12-windows-x86_64-none/python.exe' scripts/validate_full_chain_measurements.py NEW_CPU_DIRECTORY --executable ./build/windows-vs2026/Release/disdorktion_full_chain_benchmark.exe --output NEW_AUDIT_JSON
+```
+
+This executable provides diagnostics under the existing performance procedure.
+It returns 1 even if every diagnostic gate passes;
+check its explicit flags and independent raw audit. Quick mode warms each case
+for 20 ms and keeps 1000 timings; default warms for 2 seconds and keeps 10000.
+Neither timer overhead nor outliers are removed. Raw schedules and source /
+executable hashes identify the actual run. Reference qualification, actual DAW
+callback timing and human listening remain separate acceptance evidence.

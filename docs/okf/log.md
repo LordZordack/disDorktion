@@ -104,3 +104,11 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-14T03:47:09Z: Issue 12 PR qualification: 600 pinned AC stereo CPU cases independently audited across 89408001 raw timings, worst p99 0.87 percent of deadline; fresh graph review completed; retained manual and individual filter gates; compact evidence prepared for publication
 
 - 2026-10-14T03:54:07Z: Preserve issue 12 compact qualification artifact bytes with scoped Git attributes; verified staged CSV/JSON hashes match the independently audited original evidence
+
+- 2026-10-17T12:21:38Z: Added full chain integration design and qualification workflow for issue 13
+
+- 2026-10-17T12:33:57Z: Recorded full chain review fixes, host tail and repeatable listening examples
+
+- 2026-10-17T12:43:55Z: Recorded full chain repeat measurements and passing controlled CPU diagnostic; retained manual and reference gates
+
+- 2026-10-17T18:36:41Z: Verified issue 13 publication snapshot, fresh graph coverage and refreshed exact-source evidence
