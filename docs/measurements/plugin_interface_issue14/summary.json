@@ -1,0 +1,453 @@
+{
+  "status": "pass",
+  "row_count": 160,
+  "csv_sha256": "19b0e5048b848b6a2449d1daf1011e506476f06e114299348e8f1ab212d85073",
+  "maximum_peak": 0.7842270731925964,
+  "maximum_sample_delta": 0.4079327187500894,
+  "maximum_absolute_settled_rms_offset_db": 1.628324014339477,
+  "limits": {
+    "peak": 1.0,
+    "absolute_settled_rms_offset_db": 3.0,
+    "mono_stereo_absolute_difference": 1e-06
+  },
+  "conditions": {
+    "rates": [
+      48000,
+      96000
+    ],
+    "channels": [
+      1,
+      2
+    ],
+    "block_size": 127,
+    "warm_seconds": 0.1,
+    "measurement_seconds": 0.25,
+    "sine_peak": 0.25,
+    "two_tone_component_peak": 0.125,
+    "transient_peak": 0.5
+  },
+  "limitations": "Checks aggregate fixture data, coverage and level bounds; does not independently recompute samples or establish listening/DAW acceptance.",
+  "settled_offsets": [
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.026854199097215037
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.029344774994288992
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.025047456061380875
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "crunch",
+      "relative_rms_db": -0.37447700490081415
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "crunch",
+      "relative_rms_db": -0.1962051495684397
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "crunch",
+      "relative_rms_db": -0.44776658566060756
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "folded",
+      "relative_rms_db": -0.49524397425922934
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "folded",
+      "relative_rms_db": 1.3288298510407017
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "folded",
+      "relative_rms_db": 1.494386942967083
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "digital-destruction",
+      "relative_rms_db": -0.6552362581355846
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "digital-destruction",
+      "relative_rms_db": 0.5823829279214298
+    },
+    {
+      "rate": 48000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "digital-destruction",
+      "relative_rms_db": 1.342584832195802
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.026854199097253728
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.029344774994307377
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.02504745606133252
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "crunch",
+      "relative_rms_db": -0.37447700490085545
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "crunch",
+      "relative_rms_db": -0.1962051495684683
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "crunch",
+      "relative_rms_db": -0.44776658566057
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "folded",
+      "relative_rms_db": -0.4952439742592345
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "folded",
+      "relative_rms_db": 1.3288298510407068
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "folded",
+      "relative_rms_db": 1.4943869429669516
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "digital-destruction",
+      "relative_rms_db": -0.6552362581356096
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "digital-destruction",
+      "relative_rms_db": 0.5823829279214352
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "digital-destruction",
+      "relative_rms_db": 1.3425848321956466
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.027712704993687762
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.032359735898163246
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.0007657809909923086
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "crunch",
+      "relative_rms_db": -0.37705317129220894
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "crunch",
+      "relative_rms_db": -0.20280807399046064
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "crunch",
+      "relative_rms_db": -0.29070757877083636
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "folded",
+      "relative_rms_db": -0.5030881293381348
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "folded",
+      "relative_rms_db": 1.2983506813345769
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "folded",
+      "relative_rms_db": 1.4093430254203647
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "sine997",
+      "preset": "digital-destruction",
+      "relative_rms_db": -0.5482625587584844
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "two-tone997-1499",
+      "preset": "digital-destruction",
+      "relative_rms_db": 0.7324504202779096
+    },
+    {
+      "rate": 96000,
+      "channels": 1,
+      "fixture": "repeated-transient",
+      "preset": "digital-destruction",
+      "relative_rms_db": 1.628324014339477
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "initialize",
+      "relative_rms_db": 0.0
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.027712704993655836
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.03235973589829779
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "subtle-warmth",
+      "relative_rms_db": -0.0007657809910106324
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "crunch",
+      "relative_rms_db": -0.37705317129209814
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "crunch",
+      "relative_rms_db": -0.20280807399049322
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "crunch",
+      "relative_rms_db": -0.29070757877088726
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "folded",
+      "relative_rms_db": -0.5030881293380961
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "folded",
+      "relative_rms_db": 1.2983506813345536
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "folded",
+      "relative_rms_db": 1.4093430254204484
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "sine997",
+      "preset": "digital-destruction",
+      "relative_rms_db": -0.5482625587584331
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "two-tone997-1499",
+      "preset": "digital-destruction",
+      "relative_rms_db": 0.7324504202779042
+    },
+    {
+      "rate": 96000,
+      "channels": 2,
+      "fixture": "repeated-transient",
+      "preset": "digital-destruction",
+      "relative_rms_db": 1.6283240143392868
+    }
+  ],
+  "executable_sha256": "fac7d95b7be9607bd16338ec296b1cc0d7dce4a20082c827eeeff534e9580e0b"
+}

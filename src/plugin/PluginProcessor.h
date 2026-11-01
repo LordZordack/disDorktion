@@ -8,6 +8,11 @@
 
 namespace disdorktion
 {
+struct PluginMeters
+{
+    float inputPeak = 0, outputPeak = 0;
+    bool inputOverload = false, outputOverload = false;
+};
 class PluginProcessor final : public juce::AudioProcessor
 {
 public:
@@ -32,11 +37,22 @@ public:
     void changeProgramName(int, const juce::String&) override {}
     void getStateInformation(juce::MemoryBlock& destination) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
+    juce::AudioProcessorValueTreeState& parameterState() noexcept { return parameters; }
+    // Presets/Initialize are message-thread operations, serialized with host
+    // lifecycle operations. Audio consumes requested mode at its next boundary.
+    bool loadFactoryPreset(int index);
+    int matchingFactoryPreset() const;
+    bool isLegacyMode() const noexcept { return requestedLegacyMode.load(std::memory_order_acquire); }
+    PluginMeters readMeters() noexcept;
+    void clearMeterOverloads() noexcept { clearOverloads.store(true, std::memory_order_relaxed); }
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout makeParameters();
     bool applyControls() noexcept;
     void render(juce::AudioBuffer<float>&, bool hostBypassed) noexcept;
     void publishControl(const char*, float);
+    void updateProcessingMode() noexcept;
+    void resetMeters() noexcept;
+    void accumulateMeters(float input, float output) noexcept;
     juce::AudioProcessorValueTreeState parameters;
     std::atomic<float>* gainControl = nullptr;
     std::atomic<float>* bypassControl = nullptr;
@@ -51,6 +67,11 @@ private:
     // ReferenceGain is a compatibility trim BEFORE the full-chain dry capture.
     // Restored v1/v2 states explicitly select the original gain-only path.
     bool legacyMode = false;
+    std::atomic<bool> requestedLegacyMode {false};
+    std::atomic<int> fullLatency {0};
+    std::atomic<double> fullTailSeconds {3.0};
+    std::atomic<float> inputMeter {0}, outputMeter {0};
+    std::atomic<bool> inputClip {false}, outputClip {false}, clearOverloads {false};
     // Publish host metadata independently: hosts may query tails concurrently.
     std::atomic<double> tailSeconds {3.0};
     double preparedSampleRate = 0.0;

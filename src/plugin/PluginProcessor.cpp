@@ -1,4 +1,5 @@
 #include "PluginProcessor.h"
+#include "PluginEditor.h"
 #include <charconv>
 #include <limits>
 #include <string_view>
@@ -108,6 +109,8 @@ PluginProcessor::PluginProcessor()
 void PluginProcessor::prepareToPlay(double sampleRate, int maximumBlockSize)
 {
     hostReady = false;
+    resetMeters();
+    legacyMode = requestedLegacyMode.load(std::memory_order_acquire);
     const auto channels = getTotalNumInputChannels();
     if (maximumBlockSize <= 0 || getTotalNumOutputChannels() != channels) return;
     const juce::dsp::ProcessSpec spec {sampleRate, static_cast<juce::uint32>(maximumBlockSize), static_cast<juce::uint32>(channels)};
@@ -118,15 +121,19 @@ void PluginProcessor::prepareToPlay(double sampleRate, int maximumBlockSize)
     bypassDelay.setSize(channels, static_cast<int>(chain.getLatencySamples()));
     bypassScratch.setSize(channels, static_cast<int>(chunkCapacity));
     bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
+    fullLatency.store(static_cast<int>(chain.getLatencySamples()), std::memory_order_relaxed);
+    fullTailSeconds.store(3.0 + chain.getLatencySamples() / sampleRate, std::memory_order_relaxed);
     setLatencySamples(legacyMode ? 0 : static_cast<int>(chain.getLatencySamples()));
     preparedSampleRate = sampleRate;
     tailSeconds.store(legacyMode ? 0.0 : 3.0 + chain.getLatencySamples() / sampleRate, std::memory_order_relaxed);
     hostReady = true;
 }
-void PluginProcessor::releaseResources() { hostReady = false; }
+void PluginProcessor::releaseResources() { hostReady = false; resetMeters(); }
 void PluginProcessor::reset()
 {
     applyControls(); gain.reset(); inputGain.reset(); outputGain.reset(); chain.reset();
+    updateProcessingMode();
+    resetMeters();
     bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
 }
 bool PluginProcessor::isBusesLayoutSupported(const BusesLayout& layout) const
@@ -157,11 +164,18 @@ void PluginProcessor::processBlockBypassed(juce::AudioBuffer<float>& buffer, juc
 void PluginProcessor::render(juce::AudioBuffer<float>& buffer, bool hostBypassed) noexcept
 {
     juce::ScopedNoDenormals noDenormals;
+    if (clearOverloads.exchange(false, std::memory_order_relaxed))
+    {
+        inputClip.store(false, std::memory_order_relaxed);
+        outputClip.store(false, std::memory_order_relaxed);
+    }
     const auto inputs = getTotalNumInputChannels();
     const auto outputs = getTotalNumOutputChannels();
     for (int c = inputs; c < buffer.getNumChannels(); ++c) buffer.clear(c, 0, buffer.getNumSamples());
     if (!hostReady || inputs != outputs || buffer.getNumChannels() < outputs) { buffer.clear(); return; }
     applyControls();
+    updateProcessingMode();
+    float inputPeak = 0, outputPeak = 0;
     auto active = juce::dsp::AudioBlock<float>(buffer).getSubsetChannelBlock(0, static_cast<std::size_t>(outputs));
     const auto delay = legacyMode ? 0 : static_cast<std::size_t>(bypassDelay.getNumSamples());
     for (std::size_t offset = 0; offset < active.getNumSamples();)
@@ -175,6 +189,7 @@ void PluginProcessor::render(juce::AudioBuffer<float>& buffer, bool hostBypassed
             for (int c = 0; c < outputs; ++c)
             {
                 const auto original = block.getSample(static_cast<std::size_t>(c), n);
+                inputPeak = std::max(inputPeak, std::abs(original));
                 float dry = original;
                 if (delay != 0)
                 {
@@ -192,15 +207,19 @@ void PluginProcessor::render(juce::AudioBuffer<float>& buffer, bool hostBypassed
         if (hostBypassed)
             for (int c = 0; c < outputs; ++c)
                 juce::FloatVectorOperations::copy(block.getChannelPointer(static_cast<std::size_t>(c)), bypassScratch.getReadPointer(c), static_cast<int>(count));
+        for (std::size_t c = 0; c < block.getNumChannels(); ++c)
+            for (std::size_t n = 0; n < count; ++n)
+                outputPeak = std::max(outputPeak, std::abs(block.getSample(c, n)));
         offset += count;
     }
+    accumulateMeters(inputPeak, outputPeak);
 }
-juce::AudioProcessorEditor* PluginProcessor::createEditor() { return new juce::GenericAudioProcessorEditor(*this); }
+juce::AudioProcessorEditor* PluginProcessor::createEditor() { return new PluginEditor(*this); }
 void PluginProcessor::getStateInformation(juce::MemoryBlock& destination)
 {
     const juce::ScopedLock lock(getCallbackLock());
     juce::XmlElement state("DisDorktionState");
-    state.setAttribute("version", "3"); state.setAttribute("mode", legacyMode ? "legacyGain" : "fullChain");
+    state.setAttribute("version", "3"); state.setAttribute("mode", isLegacyMode() ? "legacyGain" : "fullChain");
     attribute(state, "gain", gainControl->load(std::memory_order_relaxed));
     attribute(state, "bypass", bypassControl->load(std::memory_order_relaxed));
     for (std::size_t i = 0; i < fullChainControls.size(); ++i)
@@ -237,28 +256,22 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
                 control.discrete && control.minimum == 0 && control.maximum == 1,control.discrete,values[i])) return;
         if (!setFullChainControl(settings, control.id, values[i])) return;
     }
-    // Parsing/validation finishes before any publication. State restoration is
-    // a serialized lifecycle operation; JUCE wrappers take this same callback
-    // lock around rendering. Persistence never runs from an audio callback.
-    const juce::ScopedLock lock(getCallbackLock());
+    // Parsing/validation finishes before publication. Notify listeners outside
+    // the callback lock; attachments may synchronously call host/UI listeners.
+    // Restore is a host-serialized lifecycle operation, never an audio callback.
     publishControl("referenceGain",trim); publishControl("referenceBypass",bypass);
     for (std::size_t i = 0; i < fullChainControls.size(); ++i) publishControl(fullChainControls[i].id,values[i]);
     const bool nextLegacy = version != "3" || mode == "legacyGain";
-    if (legacyMode != nextLegacy)
     {
-        // The inactive path has not advanced while the other mode ran. Apply
-        // the restored targets before clearing its histories, so returning
-        // to it cannot replay old FIR/delay samples or old gain envelopes.
-        // ReferenceGain runs in both modes; retain its active legacy ramp.
+        const juce::ScopedLock lock(getCallbackLock());
+        requestedLegacyMode.store(nextLegacy, std::memory_order_release);
         applyControls();
-        chain.reset(); inputGain.reset(); outputGain.reset();
-        bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
+        updateProcessingMode();
     }
-    legacyMode = nextLegacy;
     // Conservative filter decay allowance plus the fixed FIR/delay latency.
-    tailSeconds.store(legacyMode ? 0.0 : 3.0 + (hostReady ? chain.getLatencySamples() / preparedSampleRate : 0.0),
+    tailSeconds.store(nextLegacy ? 0.0 : fullTailSeconds.load(std::memory_order_relaxed),
                       std::memory_order_relaxed);
-    if (hostReady) setLatencySamples(legacyMode ? 0 : static_cast<int>(chain.getLatencySamples()));
+    setLatencySamples(nextLegacy ? 0 : fullLatency.load(std::memory_order_relaxed));
 }
 }
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new disdorktion::PluginProcessor(); }

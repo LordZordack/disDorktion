@@ -92,14 +92,20 @@ if(BUILD_TESTING)
         add_executable(disdorktion_adapter_tests
             tests/PluginAdapterTests.cpp
             tests/FullChainPluginTests.cpp
+            tests/PluginPresetTests.cpp
+            tests/PluginPresetMeasurementTests.cpp
+            tests/PluginEditorTests.cpp
             tests/AllocationTracking.cpp
             src/plugin/PluginProcessor.cpp
+            src/plugin/PluginPresentation.cpp
+            src/plugin/PluginEditor.cpp
         )
         target_include_directories(disdorktion_adapter_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
         target_link_libraries(disdorktion_adapter_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain juce::juce_audio_processors)
         target_compile_definitions(disdorktion_adapter_tests PRIVATE
             JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
-        catch_discover_tests(disdorktion_adapter_tests TEST_PREFIX "adapter::" PROPERTIES TIMEOUT 30)
+        # Includes the complete deterministic preset/transition measurement grid.
+        catch_discover_tests(disdorktion_adapter_tests TEST_PREFIX "adapter::" PROPERTIES TIMEOUT 300)
     endif()
 endif()
 
@@ -117,7 +123,8 @@ if(DISDORKTION_BUILD_PLUGIN)
         IS_MIDI_EFFECT FALSE
         COPY_PLUGIN_AFTER_BUILD FALSE
     )
-    target_sources(DisDorktion PRIVATE src/plugin/PluginProcessor.cpp)
+    target_sources(DisDorktion PRIVATE src/plugin/PluginProcessor.cpp
+        src/plugin/PluginPresentation.cpp src/plugin/PluginEditor.cpp)
     target_include_directories(DisDorktion PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
     target_link_libraries(DisDorktion PRIVATE disdorktion_dsp juce::juce_audio_utils)
     target_compile_definitions(DisDorktion PRIVATE
