@@ -112,3 +112,9 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-17T12:43:55Z: Recorded full chain repeat measurements and passing controlled CPU diagnostic; retained manual and reference gates
 
 - 2026-10-17T18:36:41Z: Verified issue 13 publication snapshot, fresh graph coverage and refreshed exact-source evidence
+
+- 2026-10-17T19:26:48Z: Documented issue 14 plugin interface, preset, meter and state contracts; verification evidence in progress.
+
+- 2026-10-17T19:42:09Z: Recorded issue 14 local verification: full Debug/Release 255 tests each, headless 197, preset fixture grid and inspected editor renders; host/listening gates remain open.
+
+- 2026-10-17T19:50:36Z: Replaced plugin sliders with compact rotary controls; editor default 820x560, minimum 740x520, with unchanged host mappings.

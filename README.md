@@ -11,6 +11,18 @@
 - [Proposed performance budgets and benchmark procedure](docs/PERFORMANCE.md)
 - [Production gain design and acceptance limits](docs/okf/methods/gain.md)
 
+### Plugin interface and presets
+
+The plugin editor exposes Input, Middle and Output sections, global dry/wet,
+final gain, compatibility trim, raw-input/final-output meters and five factory
+settings from Initialize through Digital Destruction. The existing 30 host
+parameters and version-1/2/3 state compatibility are retained. Preset recall
+preserves output mute; Initialize restores defaults. See the
+[interface and state guide](docs/PLUGIN_INTERFACE.md),
+[interface design](docs/okf/methods/plugin_interface.md) and
+[validation status](docs/okf/notes/plugin_interface_validation.md) for bypass,
+latency, preset transition behavior and pending host/listening checks.
+
 ### Full chain candidate
 
 Select **Full chain** in the audition app for input gain/crushing, fixed 4x
