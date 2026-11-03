@@ -6,6 +6,7 @@
 #include "dsp/FullChainControls.h"
 #include "dsp/ResonantComb.h"
 #include "dsp/FrequencyDispersion.h"
+#include "dsp/Tone.h"
 #include <juce_core/juce_core.h>
 
 namespace disdorktion::harness
@@ -34,6 +35,7 @@ struct ExperimentRecord
     FullChainSettings fullChain;
     ResonantCombSettings comb;
     FrequencyDispersionSettings dispersion;
+    ToneSettings tone;
     juce::String middleQuality = "4x-fir-adaa-v1";
     SourceSettings source;
     double sampleRate = 48000.0;

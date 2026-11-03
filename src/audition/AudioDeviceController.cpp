@@ -38,6 +38,8 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
         processor.setResonantCombSettings(settings.comb);
     else if (settings.version == 13)
         processor.setFrequencyDispersionSettings(settings.dispersion);
+    else if (settings.version == 14)
+        processor.setToneSettings(settings.tone);
     processor.setMonitorDb(settings.monitorDb);
     processor.setMuted(settings.muted);
     playing.store(false);

@@ -1,5 +1,15 @@
 # DSP module contract
 
+The isolated `Tone` uses `ToneSettings { toneDb, bypass }`: -6 to +6 dB,
+default zero, bypass false. Its reciprocal shelf has a fixed 1 kHz unity pivot,
+DC gain -toneDb and Nyquist gain +toneDb. Tone ramps linearly in dB over 10 ms;
+bypass ramps linearly over 10 ms. Identical targets preserve ramp progress.
+Neutral and settled bypass return exact input while the bounded one-pole state
+stays warm. Reset clears state and snaps to retained targets. Mono/stereo,
+transactional validation and oversized-block handling follow the contract below.
+Nominal input is [-1,1], supported finite input [-16,16]. Reported latency is zero;
+phase/group delay remain frequency dependent. See the [tone design](okf/methods/tone.md).
+
 The isolated `FrequencyDispersion` uses `FrequencyDispersionSettings` with requested
 frequencyHz 20–20000 (default 500), mix 0–1 (default 1), bypass false. It follows
 transactional host preparation/settings, chunking and independent mono/stereo

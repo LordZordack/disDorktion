@@ -2,7 +2,7 @@
 type: "Index"
 title: "Notes"
 description: "Index of notes research documents."
-timestamp: "2026-11-03T18:56:00Z"
+timestamp: "2026-11-03T19:48:33Z"
 ---
 
 # Notes
@@ -22,4 +22,5 @@ timestamp: "2026-11-03T18:56:00Z"
 - [Plugin interface qualification](./plugin_interface_validation.md) — Evidence scope and outstanding checks for production controls, presets, meters and host state.
 - [Resonant comb validation](./resonant_comb_validation.md) — Issue 17 verification record, measurement provenance, and explicit remaining listening and CPU gates.
 - [Tanh saturation validation](./tanh_saturation_validation.md) — Numerical, realtime, spectral, performance and listening evidence for the native-rate tanh module.
+- [Tone Module Qualification](./tone_validation.md) — Tone implementation evidence and explicit remaining listening and reference-performance gates.
 - [Wave folder validation](./wave_folder_validation.md) — Evidence and outstanding acceptance gates for the isolated native-rate wave folder.
