@@ -2,10 +2,11 @@
 type: "Index"
 title: "Papers"
 description: "Index of papers research documents."
-timestamp: "2026-11-03T02:32:02Z"
+timestamp: "2026-11-03T18:56:00Z"
 ---
 
 # Papers
 
 - [Reducing the Aliasing of Nonlinear Waveshaping Using Continuous-Time Convolution](./continuous_time_waveshaping.md) — Source for an antiderivative quotient and its linear-response delay, informing Q1's separate triangle-folder evaluation.
+- [Spectral Delay Filters with Feedback and Time-Varying Coefficients](./spectral_delay_filters.md) — Focused source review motivating issue 18 dispersion and deferred feedback alternatives.
 - [Virtual Analog Buchla 259 Wavefolder](./virtual_analog_buchla_259_wavefolder.md) — Circuit-model and aliasing research context for DisDorktion's independently designed triangle folder.

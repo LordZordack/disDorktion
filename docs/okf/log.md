@@ -130,3 +130,9 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-11-01T22:29:42Z: Completed comb three-run AC performance-core CPU qualification and independent 34826506-timing audit; human listening and GUI gates remain open
 
 - 2026-11-03T02:32:02Z: Prepared issue 17 publication with compact measurement evidence and explicit pending listening/GUI gates
+
+- 2026-11-03T16:44:52Z: Recorded approved frequency dispersion design, source review and validation ledger for issue 18
+
+- 2026-11-03T18:42:07Z: Recorded frequency dispersion implementation, independent validation and failed CPU qualification evidence
+
+- 2026-11-03T18:56:00Z: Prepared draft issue 18 review; user deferred integrated sound experiments; CPU acceptance remains failed

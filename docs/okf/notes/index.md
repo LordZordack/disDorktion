@@ -2,13 +2,14 @@
 type: "Index"
 title: "Notes"
 description: "Index of notes research documents."
-timestamp: "2026-11-03T02:32:02Z"
+timestamp: "2026-11-03T18:56:00Z"
 ---
 
 # Notes
 
 - [Bit crusher validation](./bit_crusher_validation.md) — Acceptance criteria and evidence status for the bit crusher implementation.
 - [JUCE foundation validation](./foundation_validation.md) — Observed builds, correctness checks and performance measurements for the reference gain foundation.
+- [Frequency dispersion validation](./frequency_dispersion_validation.md) — Issue 18 verification ledger, with automated and human acceptance kept explicit.
 - [Full chain qualification](./full_chain_validation.md) — Repeatable integration checks and remaining listening, performance and host acceptance gates.
 - [Reusable gain validation](./gain_validation.md) — Observed correctness, integration, transition fixtures and battery diagnostics for the reusable input/output gain module.
 - [Audition harness validation](./harness_validation.md) — Issue #3 validation evidence and remaining manual device and listening checks, distinguished from tool implementation.

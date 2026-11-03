@@ -1,5 +1,18 @@
 # DSP module contract
 
+The isolated `FrequencyDispersion` uses `FrequencyDispersionSettings` with requested
+frequencyHz 20–20000 (default 500), mix 0–1 (default 1), bypass false. It follows
+transactional host preparation/settings, chunking and independent mono/stereo
+history. Its 32 normalized lattice sections use double state with coefficients
+bounded to ±0.99; nominal input [-1,1] and finite envelope [-16,16] are supported.
+Coefficient ramps take 100 ms; mix/bypass take 10 ms. Bypassed histories stay warm.
+Requested frequency is capped at 0.45 Fs and by the coefficient bound; the effective
+frequency getter exposes the result. Reported compensating latency is zero;
+frequency-dependent group delay is the effect. The tail getter bounds a static
+unit impulse below -120 dB, not arbitrary driven state or ongoing automation.
+See the [dispersion design](okf/methods/frequency_dispersion.md). X5 integration
+remains separate; the harness target is `frequency-dispersion`, record version 13.
+
 The isolated `ResonantComb` follows the shared module interface below, including
 transactional preparation/settings, prepare-only allocation, mono/stereo and
 chunking. Its finite input envelope is float maximum/128, latency is zero, and

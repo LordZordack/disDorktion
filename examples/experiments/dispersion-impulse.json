@@ -1,0 +1,30 @@
+{
+  "version": 13,
+  "targetId": "frequency-dispersion",
+  "bypass": false,
+  "sampleRate": 48000,
+  "channels": 2,
+  "blockSize": 256,
+  "renderDurationSamples": 96000,
+  "filePath": "",
+  "fileHash": "",
+  "sourceConversion": "linear;mono-duplicate;stereo-average",
+  "originalSampleRate": 0,
+  "originalChannels": 0,
+  "monitorDb": -18,
+  "muted": true,
+  "midiDevice": "",
+  "buildIdentity": "example",
+  "observations": "Isolated dispersion at 500 Hz, fully wet. Render includes trailing silence. Generated fixture; human listening acceptance pending.",
+  "source": {
+    "kind": "impulse",
+    "frequency": 440,
+    "frequency2": 880,
+    "amplitude": 0.1,
+    "phase": 0,
+    "durationSamples": 1,
+    "seed": 1
+  },
+  "dispersionFrequencyHz": 500,
+  "dispersionMix": 1
+}
