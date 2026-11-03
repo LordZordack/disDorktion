@@ -67,6 +67,14 @@ Describe unimplemented designs as **proposed behavior**. The reference gain foun
 
 ## Open research questions
 
+The isolated [frequency dispersion module](../methods/frequency_dispersion.md)
+now provides a 32-stage normalized allpass cascade, harness controls and version-13
+records. [Validation](../notes/frequency_dispersion_validation.md) records passing
+functional/spectral checks and failed CPU budget captures. On 2026-11-03 the user
+chose to defer further sound experiments and stronger nonlinear variants to the
+integrated plugin. This deferral does not qualify the failed CPU gate; production
+integration remains X5 and publication is for draft review.
+
 Q1 now has a [tested evaluation boundary](../methods/middle_oversampling.md) and
 [native/FIR comparison evidence](../notes/middle_oversampling_validation.md).
 Its 4x fractional-delay correction passes the measured phase/blend targets;

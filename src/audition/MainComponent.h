@@ -41,6 +41,11 @@ private:
     juce::AudioDeviceManager devices;
     AudioDeviceController audio;
     harness::ExperimentRecord record;
+    juce::Component dispersionPanel;
+    juce::Viewport dispersionViewport;
+    std::array<juce::Slider,2> dispersionSliders;
+    std::array<juce::Label,3> dispersionLabels;
+    juce::ToggleButton dispersionBypass;
     juce::Component combPanel;
     juce::Viewport combViewport;
     std::array<juce::Slider,5> combSliders;

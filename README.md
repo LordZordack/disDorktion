@@ -177,7 +177,7 @@ Middle Stage: Processing the signal
 Output Stage: Outputting the signal
 - Resonant Comb Filter: Mixes the input with a delayed version of itself, creating a series of evenly spaced resonances and notches. This colors the sound in a hollow, metallic, or phasey way that highlights specific frequencies.
 
-- Frequency Warping: Uses an all-pass filter in a feedback network to introduce frequency-dependent time delays. This creates non-linear phase distortion that bends and stretches the harmonic structure without changing the fundamental pitches themselves.
+- Frequency dispersion (X3): An isolated 32-stage all-pass cascade reshapes transients through frequency-dependent phase and delay. Static settings retain spectral-line frequencies; dry/wet blending colors magnitude and automation can create sidebands. The audition harness exposes requested frequency (20–20000 Hz), mix and bypass. Effective frequency is limited by sample rate and a coefficient safety bound. Outer feedback and true frequency remapping are separate alternatives; production-chain integration belongs to X5. See the [design](docs/okf/methods/frequency_dispersion.md) and [validation status](docs/okf/notes/frequency_dispersion_validation.md).
 
 - Low pass
 - High pass

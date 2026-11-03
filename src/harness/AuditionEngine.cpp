@@ -37,7 +37,7 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
         || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)
         || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec) || !inputTarget.prepare(spec)
-        || !middleTarget.prepare(spec) || !outputTarget.prepare(spec) || !fullTarget.prepare(spec) || !combTarget.prepare(spec)) return false;
+        || !middleTarget.prepare(spec) || !outputTarget.prepare(spec) || !fullTarget.prepare(spec) || !combTarget.prepare(spec) || !dispersionTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -66,6 +66,7 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     else if (id == "input-section") selected = &inputTarget;
     else if (id == "middle-section") selected = &middleTarget;
     else if (id == "output-section") selected = &outputTarget;
+    else if (id == "frequency-dispersion") selected = &dispersionTarget;
     else if (id == "resonant-comb") selected = &combTarget;
     else if (id == "full-chain") selected = &fullTarget;
     else return false;
@@ -73,6 +74,21 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     return true;
 }
 
+bool AuditionEngine::setFrequencyDispersionSettings(const FrequencyDispersionSettings& settings) noexcept
+{
+    if(!isValidFrequencyDispersionSettings(settings))return false;
+    for(std::size_t i=0;i<dispersionControls.size();++i)
+        dispersionControls[i].store(getFrequencyDispersionControl(settings,frequencyDispersionControls[i].id),std::memory_order_relaxed);
+    return dispersionTarget.setParameters(settings);
+}
+bool AuditionEngine::setFrequencyDispersionControl(std::string_view id,float value) noexcept
+{
+    FrequencyDispersionSettings probe;
+    if(!harness::setFrequencyDispersionControl(probe,id,value))return false;
+    for(std::size_t i=0;i<dispersionControls.size();++i)
+        if(id==frequencyDispersionControls[i].id){dispersionControls[i].store(value,std::memory_order_relaxed);return true;}
+    return false;
+}
 bool AuditionEngine::setResonantCombSettings(const ResonantCombSettings& settings) noexcept
 {
     if(!isValidResonantCombSettings(settings)) return false;
@@ -344,6 +360,7 @@ void AuditionEngine::setOutputStageBypass(bool highPass, bool value) noexcept
 }
 void AuditionEngine::setBypass(bool value) noexcept
 {
+    if (selected == &dispersionTarget) { (void)setFrequencyDispersionControl("bypass",value?1.f:0.f);return; }
     if (selected == &combTarget) { (void)setResonantCombControl("bypass",value?1.f:0.f);return; }
     if (selected == &fullTarget) { (void)setFullChainControl("chainBypass",value?1.f:0.f);return; }
     if (selected == &outputTarget) { outputBypass.store(value, std::memory_order_relaxed); return; }
@@ -357,6 +374,13 @@ void AuditionEngine::setBypass(bool value) noexcept
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if(selected==&dispersionTarget)
+    {
+        FrequencyDispersionSettings settings;
+        for(std::size_t i=0;i<dispersionControls.size();++i)
+            if(!harness::setFrequencyDispersionControl(settings,frequencyDispersionControls[i].id,dispersionControls[i].load(std::memory_order_relaxed)))return false;
+        return dispersionTarget.setParameters(settings);
+    }
     if(selected==&combTarget)
     {
         ResonantCombSettings settings;

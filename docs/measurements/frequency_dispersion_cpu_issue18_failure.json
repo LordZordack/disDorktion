@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "kind": "frequency-dispersion-aborted-cpu-investigation",
+  "date": "2026-11-03",
+  "source_directory": "frequency_dispersion_cpu_issue18",
+  "source_files": ["timings.csv", "summary.csv"],
+  "reference_qualified": false,
+  "coverage": "Aborted during the second of three required runs. No final collector result.json exists. Buffered summary.csv ends in a partial row; raw timings contain cases through 85, whose final-case completeness is not established. The original partial files are preserved.",
+  "failed_case": {
+    "case": 41,
+    "run": 0,
+    "sample_rate_hz": 192000,
+    "frames": 256,
+    "scenario": "automation",
+    "observations": 138986,
+    "p50_ns": 34200,
+    "p95_ns": 55800,
+    "p99_ns": 85800,
+    "p999_ns": 893000,
+    "maximum_ns": 28481300,
+    "callback_deadline_ns": 1333333.3333333333,
+    "p99_deadline_fraction": 0.06435,
+    "required_p99_deadline_fraction_exclusive": 0.05,
+    "first_observation_quarter_p99_ns": 236000,
+    "last_observation_quarter_p99_ns": 37400,
+    "last_quarter_p99_deadline_fraction": 0.02805,
+    "control_residue_analysis": "All 101 automation residues were present. For residues sampled every tenth index, median times were 34100-34200 ns, and p99 values ranged from 72700 to 103700 ns. This does not identify an endpoint-specific hotspot."
+  },
+  "adjacent_cases": [
+    {"case": 40, "scenario": "static", "observations": 143810, "p50_ns": 31300, "p99_ns": 48200, "p999_ns": 205900, "maximum_ns": 40231800, "first_observation_quarter_p99_ns": 44400, "last_observation_quarter_p99_ns": 45400},
+    {"case": 42, "scenario": "bypass", "observations": 148795, "p50_ns": 15100, "p99_ns": 37900, "p999_ns": 80700, "maximum_ns": 1803800, "first_observation_quarter_p99_ns": 37400, "last_observation_quarter_p99_ns": 19000},
+    {"case": 43, "scenario": "quiet-decay", "observations": 148465, "p50_ns": 15900, "p99_ns": 37000, "p999_ns": 73600, "maximum_ns": 3098000, "first_observation_quarter_p99_ns": 34600, "last_observation_quarter_p99_ns": 33500}
+  ],
+  "analysis_method": "Raw CSV scanned sequentially by case. Quantiles use sorted duration at ceil(p*count)-1, matching the collector. First/last quarters use observation order, not exact wall-time intervals: the original raw format does not retain wall-clock timestamps. No outliers were removed or timer overhead subtracted.",
+  "diagnostic_reproduction": {
+    "directory": "frequency_dispersion_cpu_issue18_repro_quick",
+    "collector_mode": "--quick",
+    "reference_qualified": false,
+    "failed_case_reproduction_p99_ns": 21500,
+    "failed_case_reproduction_p99_deadline_fraction": 0.016125,
+    "adjacent_static_p99_ns": 21700,
+    "all_48_rows_under_5_percent": true,
+    "worst_p99_deadline_fraction": 0.0228,
+    "limitation": "Short diagnostic windows do not replace the required three full pinned AC Release runs. Exit code 1 is expected for diagnostic mode."
+  },
+  "interpretation": "The original case genuinely failed its declared p99 gate. Temporal concentration of the tail, long events in adjacent static processing, broad rather than endpoint-specific residue costs, and the passing short reproduction are consistent with system/performance-state variability. Scheduler, background activity, thermal state or another specific cause has not been established. No DSP defect or safe optimization follows from these observations alone.",
+  "next_action": "Preserve the failure; repeat the unchanged complete three-run qualification without concurrent graph, build, test or benchmark work. A passing repeat would be new evidence and would not erase the failed run. Do not weaken thresholds or discard selected observations."
+}

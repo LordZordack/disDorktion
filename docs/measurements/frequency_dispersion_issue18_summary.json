@@ -1,0 +1,53 @@
+{
+  "issue": 18,
+  "status": "draft; CPU acceptance failed; further sound experiments deferred to integration",
+  "capture": "frequency_dispersion_issue18_verified",
+  "capture_manifest_sha256": "a973a7a729c3d9f0e5db73f46e8196fc67e3d7c5ed97afc6ad1465f9d0d389b1",
+  "provenance": {
+    "executable_sha256": "1619cdda8cf6397c1a428e8882155062d426976d6e78e25a7ed81873581e2e36",
+    "dsp_sha256": "88aa79be90936fbe4f2b3883bac6007b3d96d7c152ebad5adbf0759be1822115",
+    "collector_sha256": "c79db4e8703099cb88a20a19f198ab1a9593beb75fa8b3987fb67fa86f27fb92",
+    "juce": "JUCE v8.0.14",
+    "release": true
+  },
+  "static_cases": 42,
+  "collector_passed": true,
+  "maxima": {
+    "complex_error_max": 5.906059178462572e-08,
+    "wet_magnitude_error_db_max": 4.964231251912085e-07,
+    "group_delay_error_samples_max": 0.000170508432348,
+    "peak_after_one_second": 2.683630539907066e-18,
+    "tail_bound_seconds": 0.78
+  },
+  "independent_validator": {
+    "passed": true,
+    "automation_error_max": 1.4898814404418204e-08
+  },
+  "cpu_qualified": false,
+  "cpu_failures": [
+    {
+      "capture": "initial",
+      "rate": 192000,
+      "frames": 256,
+      "scenario": "automation",
+      "p99_fraction": 0.06435
+    },
+    {
+      "capture": "repeat",
+      "rate": 96000,
+      "frames": 256,
+      "scenario": "static",
+      "p99_fraction": 0.074475
+    },
+    {
+      "capture": "repeat",
+      "rate": 96000,
+      "frames": 256,
+      "scenario": "bypass",
+      "p99_fraction": 0.066
+    }
+  ],
+  "cpu_limit_fraction_exclusive": 0.05,
+  "listening": "User reports subtle isolated effect; further experiments deferred to integrated plugin; full listening matrix unqualified.",
+  "raw_artifacts": "Retained locally; large CSV, WAV and f32 files excluded from commit. Reproduce with the committed collectors in a fresh output directory."
+}

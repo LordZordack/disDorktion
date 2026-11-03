@@ -68,6 +68,7 @@ if(BUILD_TESTING)
         tests/AdaaWaveFolderTests.cpp
         tests/CutoffFilterTests.cpp
         tests/ResonantCombTests.cpp
+        tests/FrequencyDispersionTests.cpp
         tests/BenchmarkSamplingTests.cpp
     )
     target_link_libraries(disdorktion_dsp_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -85,6 +86,7 @@ if(BUILD_TESTING)
         tests/MiddleSectionRealtimeTests.cpp
         tests/CutoffFilterRealtimeTests.cpp
         tests/ResonantCombRealtimeTests.cpp
+        tests/FrequencyDispersionRealtimeTests.cpp
         tests/AllocationTracking.cpp
     )
     target_link_libraries(disdorktion_realtime_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -208,6 +210,18 @@ target_compile_definitions(disdorktion_harness PUBLIC
 
 add_executable(disdorktion_render tools/RenderMain.cpp)
 add_executable(disdorktion_comb_measurements tools/ResonantCombMeasureMain.cpp)
+add_executable(disdorktion_dispersion_measurements tools/FrequencyDispersionMeasureMain.cpp)
+add_executable(disdorktion_dispersion_benchmark tools/FrequencyDispersionBenchmarkMain.cpp)
+target_link_libraries(disdorktion_dispersion_benchmark PRIVATE disdorktion_dsp juce::juce_cryptography)
+target_compile_definitions(disdorktion_dispersion_benchmark PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(disdorktion_dispersion_measurements PRIVATE disdorktion_dsp juce::juce_cryptography juce::juce_audio_formats)
+target_compile_definitions(disdorktion_dispersion_measurements PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+if(WIN32)
+    target_link_libraries(disdorktion_dispersion_benchmark PRIVATE PowrProf)
+    target_compile_definitions(disdorktion_dispersion_benchmark PRIVATE DISDORKTION_WINDOWS_SDK_VERSION="${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+    target_link_libraries(disdorktion_dispersion_measurements PRIVATE PowrProf)
+    target_compile_definitions(disdorktion_dispersion_measurements PRIVATE DISDORKTION_WINDOWS_SDK_VERSION="${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+endif()
 add_executable(disdorktion_comb_benchmark benchmarks/ResonantCombBenchmark.cpp)
 foreach(comb_target disdorktion_comb_measurements disdorktion_comb_benchmark)
     target_link_libraries(${comb_target} PRIVATE disdorktion_dsp juce::juce_cryptography)
@@ -260,6 +274,7 @@ if(BUILD_TESTING)
         tests/HarnessEngineTests.cpp
         tests/CutoffHarnessTests.cpp
         tests/ResonantCombHarnessTests.cpp
+        tests/FrequencyDispersionHarnessTests.cpp
         tests/SignalSourceTests.cpp
         tests/SineVoiceTests.cpp
         tests/LoopSourceTests.cpp
@@ -275,6 +290,7 @@ if(BUILD_TESTING)
         tests/InputSectionHarnessRealtimeTests.cpp
         tests/CutoffHarnessRealtimeTests.cpp
         tests/ResonantCombHarnessRealtimeTests.cpp
+        tests/FrequencyDispersionHarnessRealtimeTests.cpp
         tests/HarnessRealtimeTests.cpp tests/AllocationTracking.cpp)
     target_link_libraries(disdorktion_harness_realtime_tests PRIVATE disdorktion_harness Catch2::Catch2WithMain)
     catch_discover_tests(disdorktion_harness_realtime_tests TEST_PREFIX "harness-rt::" PROPERTIES TIMEOUT 30)

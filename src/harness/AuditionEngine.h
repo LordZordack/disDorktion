@@ -7,6 +7,7 @@
 #include "OutputSectionTarget.h"
 #include "FullChainTarget.h"
 #include "ResonantCombTarget.h"
+#include "FrequencyDispersionTarget.h"
 #include <atomic>
 
 namespace disdorktion::harness
@@ -30,6 +31,8 @@ public:
         for (std::size_t i=0;i<fullControls.size();++i)
             fullControls[i].store(fullChainControls[i].defaultValue,std::memory_order_relaxed);
     }
+    bool setFrequencyDispersionSettings(const FrequencyDispersionSettings&) noexcept;
+    bool setFrequencyDispersionControl(std::string_view,float) noexcept;
     bool setResonantCombSettings(const ResonantCombSettings&) noexcept;
     bool setResonantCombControl(std::string_view,float) noexcept;
     bool setFullChainSettings(const FullChainSettings&) noexcept;
@@ -104,6 +107,8 @@ private:
     MiddleSectionTarget middleTarget;
     OutputSectionTarget outputTarget;
     FullChainTarget fullTarget;
+    FrequencyDispersionTarget dispersionTarget;
+    std::array<std::atomic<float>,3> dispersionControls {{500.f,1.f,0.f}};
     ResonantCombTarget combTarget;
     std::array<std::atomic<float>,7> combControls {{5.f,0.f,.7f,6000.f,.5f,1.f,0.f}};
     std::array<std::atomic<float>,fullChainControls.size()> fullControls;

@@ -28,6 +28,16 @@ ExperimentRecord::ExperimentRecord() : buildIdentity(DISDORKTION_BUILD_ID) {}
 bool ExperimentRecord::validate(juce::String& error) const
 {
     error.clear();
+    if(version==13)
+    {
+        if(targetId!="frequency-dispersion" || !isValidFrequencyDispersionSettings(dispersion) || bypass
+            || gain!=1.f || gainDb!=0.f || mute || bitDepth!=64 || captureRateHz!=384000.f)
+            return fail(error,"Invalid or foreign dispersion settings");
+        auto common=*this;common.version=1;common.targetId="reference-gain";common.dispersion={};
+        return common.validate(error);
+    }
+    if(dispersion.frequencyHz!=500.f || dispersion.mix!=1.f || dispersion.bypass)
+        return fail(error,"Foreign dispersion settings");
     if(version==12)
     {
         if(targetId!="resonant-comb" || !isValidResonantCombSettings(comb) || bypass
@@ -132,6 +142,14 @@ bool ExperimentRecord::validate(juce::String& error) const
 
 juce::var ExperimentRecord::toJson() const
 {
+    if(version==13)
+    {
+        auto common=*this;common.version=1;common.targetId="reference-gain";common.dispersion={};
+        auto result=common.toJson();auto* root=result.getDynamicObject();root->removeProperty("gain");
+        root->setProperty("version",13);root->setProperty("targetId","frequency-dispersion");
+        root->setProperty("dispersionFrequencyHz",dispersion.frequencyHz);root->setProperty("dispersionMix",dispersion.mix);
+        root->setProperty("bypass",dispersion.bypass);return result;
+    }
     if(version==12)
     {
         auto common=*this;common.version=1;common.targetId="reference-gain";common.comb={};
@@ -229,6 +247,32 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto* o = value.getDynamicObject();
     if (o == nullptr) return fail(error, "Experiment must be a JSON object");
     auto get = [o](const char* key) { return o->getProperty(key); };
+    if(integer(get("version"),13,13))
+    {
+        if(!get("targetId").isString() || get("targetId").toString()!="frequency-dispersion"
+            || !get("bypass").isBool())return fail(error,"Invalid dispersion target or bypass");
+        const auto allowedCommon=ExperimentRecord{}.toJson();
+        for(const auto& property:o->getProperties())
+        {
+            const auto key=property.name.toString();
+            const bool field=key=="dispersionFrequencyHz" || key=="dispersionMix";
+            if(!field && (key=="gain" || !allowedCommon.getDynamicObject()->hasProperty(property.name)))return fail(error,"Mixed dispersion schemas");
+        }
+        constexpr const char* keys[]{"dispersionFrequencyHz","dispersionMix"};
+        constexpr double lows[]{20.,0.},highs[]{20000.,1.};
+        for(unsigned i=0;i<2;++i)
+            if(!number(get(keys[i])) || !std::isfinite(static_cast<double>(get(keys[i])))
+                || static_cast<double>(get(keys[i]))<lows[i] || static_cast<double>(get(keys[i]))>highs[i])return fail(error,"Invalid dispersion number");
+        juce::var common(o->clone().release());auto* base=common.getDynamicObject();
+        for(auto key:keys)base->removeProperty(key);
+        base->setProperty("version",1);base->setProperty("targetId","reference-gain");base->setProperty("gain",1.f);base->setProperty("bypass",false);
+        ExperimentRecord candidate;if(!fromJson(common,candidate,error))return false;
+        candidate.version=13;candidate.targetId="frequency-dispersion";
+        candidate.dispersion={static_cast<float>(get(keys[0])),static_cast<float>(get(keys[1])),static_cast<bool>(get("bypass"))};
+        if(!candidate.validate(error))return false;destination=std::move(candidate);return true;
+    }
+    for(auto key:{"dispersionFrequencyHz","dispersionMix"})
+        if(o->hasProperty(key))return fail(error,"Mixed dispersion schemas");
     if(integer(get("version"),12,12))
     {
         if(!get("targetId").isString() || get("targetId").toString()!="resonant-comb"
