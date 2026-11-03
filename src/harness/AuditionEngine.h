@@ -8,6 +8,7 @@
 #include "FullChainTarget.h"
 #include "ResonantCombTarget.h"
 #include "FrequencyDispersionTarget.h"
+#include "ToneTarget.h"
 #include <atomic>
 
 namespace disdorktion::harness
@@ -32,6 +33,8 @@ public:
             fullControls[i].store(fullChainControls[i].defaultValue,std::memory_order_relaxed);
     }
     bool setFrequencyDispersionSettings(const FrequencyDispersionSettings&) noexcept;
+    bool setToneSettings(const ToneSettings&) noexcept;
+    bool setToneControl(std::string_view,float) noexcept;
     bool setFrequencyDispersionControl(std::string_view,float) noexcept;
     bool setResonantCombSettings(const ResonantCombSettings&) noexcept;
     bool setResonantCombControl(std::string_view,float) noexcept;
@@ -108,6 +111,8 @@ private:
     OutputSectionTarget outputTarget;
     FullChainTarget fullTarget;
     FrequencyDispersionTarget dispersionTarget;
+    ToneTarget toneTarget;
+    std::array<std::atomic<float>,2> toneControlValues {{0.f,0.f}};
     std::array<std::atomic<float>,3> dispersionControls {{500.f,1.f,0.f}};
     ResonantCombTarget combTarget;
     std::array<std::atomic<float>,7> combControls {{5.f,0.f,.7f,6000.f,.5f,1.f,0.f}};

@@ -2,7 +2,7 @@
 type: "Index"
 title: "Methods"
 description: "Index of methods research documents."
-timestamp: "2026-11-03T18:56:00Z"
+timestamp: "2026-11-03T19:48:33Z"
 ---
 
 # Methods
@@ -22,4 +22,5 @@ timestamp: "2026-11-03T18:56:00Z"
 - [Real-time DSP processing contract](./processing_contract.md) — Implemented module interface and callback behavior for DisDorktion's JUCE DSP foundation, including the reference gain processor.
 - [Resonant comb filtering](./resonant_comb.md) — Reviewed isolated feedforward and damped feedback comb design and acceptance limits for issue 17.
 - [Tanh saturation](./tanh_saturation.md) — Approved memoryless tanh saturation design, controls, transition behavior, and pre-implementation acceptance limits for DisDorktion.
+- [Reciprocal Tilt Tone Control](./tone.md) — An isolated dark/bright balance control with a fixed unity pivot and warm bounded state.
 - [Wave folding](./wave_folding.md) — Reviewed symmetric triangle wave-folder design, controls, transitions, and pre-implementation acceptance limits.

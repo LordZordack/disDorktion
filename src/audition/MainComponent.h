@@ -42,6 +42,10 @@ private:
     AudioDeviceController audio;
     harness::ExperimentRecord record;
     juce::Component dispersionPanel;
+    juce::Component tonePanel;
+    juce::Slider toneSlider;
+    juce::Label toneLabel;
+    juce::ToggleButton toneBypass;
     juce::Viewport dispersionViewport;
     std::array<juce::Slider,2> dispersionSliders;
     std::array<juce::Label,3> dispersionLabels;

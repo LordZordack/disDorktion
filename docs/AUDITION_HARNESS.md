@@ -1,5 +1,43 @@
 # Audition and measurement harness
 
+## Tone (issue #19)
+
+Select **Tone** for the isolated reciprocal tilt: -6 dB dark to +6 dB bright,
+zero neutral, fixed 1 kHz unity pivot. The label describes each shelf's limiting
+gain; the total low/high difference at +6 is 12 dB. Controls and bypass ramp over
+10 ms, with zero reported latency. Version-14 records preserve `toneDb` and
+`bypass`; older record versions retain their original targets and meanings.
+Monitoring level remains separate from rendering and measurement. Leave
+headroom when boosting. X5 owns later production-chain integration.
+
+Build `disdorktion_tone_measurements` and `disdorktion_tone_benchmark` in Release.
+Both tools require a fresh destination:
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_tone_measurements.exe ./renders/tone-response-001
+uv run --no-project --python 3.12 scripts/validate_tone_measurements.py ./renders/tone-response-001
+./build/windows-vs2026/Release/disdorktion_tone_benchmark.exe --quick --conditions 'Record actual conditions; diagnostic only' --output ./renders/tone-cpu-quick-001
+uv run --no-project --python 3.12 scripts/validate_tone_measurements.py ./renders/tone-cpu-quick-001 --cpu
+```
+
+Quick CPU capture deliberately exits 1 (unqualified); operation failure exits 2.
+Omit `--quick` for three reference runs; do not run other builds or tests during
+reference timing. See [qualification](okf/notes/tone_validation.md) for open gates.
+
+For musical comparisons, prepare matched files from your own PCM16/24/32 or
+float32 mono/stereo WAV:
+
+```powershell
+uv run --no-project --python 3.12 scripts/make_tone_listening.py --source C:/audio/guitar.wav --renderer build/windows-vs2026/Release/disdorktion_render.exe --output renders/tone-guitar-001
+```
+
+The script retains source hashes, exact version-14 records, raw renders,
+attenuation-only RMS-matched dry/dark/neutral/bright files and matching gains in
+`listening.json`. Matching excludes the first 10 ms and limits peaks to 0.95.
+The manifest always leaves human approval false. Repeat with bass, percussion
+and a full mix. Generated `tone-dark.json`, `tone-neutral.json` and
+`tone-bright.json` in `examples/experiments/` provide two-tone demonstrations.
+
 ## Resonant comb
 
 Select **Resonant comb** for the isolated shared-delay feedforward/damped-feedback

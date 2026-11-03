@@ -1,0 +1,29 @@
+{
+    "version":  14,
+    "targetId":  "tone",
+    "bypass":  false,
+    "sampleRate":  48000,
+    "channels":  2,
+    "blockSize":  256,
+    "renderDurationSamples":  96000,
+    "filePath":  "",
+    "fileHash":  "",
+    "sourceConversion":  "linear;mono-duplicate;stereo-average",
+    "originalSampleRate":  0,
+    "originalChannels":  0,
+    "monitorDb":  -18,
+    "muted":  true,
+    "midiDevice":  "",
+    "buildIdentity":  "example",
+    "observations":  "Generated two-tone tone demonstration: neutral. Human musical listening pending.",
+    "source":  {
+                   "kind":  "two-tone",
+                   "frequency":  220,
+                   "frequency2":  4000,
+                   "amplitude":  0.2,
+                   "phase":  0,
+                   "durationSamples":  96000,
+                   "seed":  1
+               },
+    "toneDb":  0
+}

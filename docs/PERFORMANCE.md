@@ -1,5 +1,17 @@
 # Performance procedure and proposed budgets
 
+## Tone budget (X4 / issue #19)
+
+Proposed isolated tone ceiling: p99 <2% of incoming callback deadline at
+48/96/192 kHz stereo, capacities 32/64/127/256/1024, including validated control
+application, smoothing, bypass and dispatch. This does not reallocate the chain
+budget. `disdorktion_tone_benchmark` retains raw timings, control residues,
+environment/power/affinity, hashes and summaries; the independent Python audit
+recomputes p99. Quick runs are diagnostic and deliberately exit 1. Reference
+acceptance requires three pinned AC Release runs with complete scenario/coverage
+review, no competing builds/tests, and actual environment conditions. See
+[tone qualification](okf/notes/tone_validation.md) for coverage and open gates.
+
 ## Resonant comb budget (X2)
 
 Issue #17 proposes an isolated comb p99 ceiling below 5% of the incoming

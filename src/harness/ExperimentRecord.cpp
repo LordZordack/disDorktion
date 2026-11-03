@@ -28,6 +28,15 @@ ExperimentRecord::ExperimentRecord() : buildIdentity(DISDORKTION_BUILD_ID) {}
 bool ExperimentRecord::validate(juce::String& error) const
 {
     error.clear();
+    if(version==14)
+    {
+        if(targetId!="tone" || !isValidToneSettings(tone) || bypass)
+            return fail(error,"Invalid tone settings");
+        auto common=*this;common.version=1;common.targetId="reference-gain";common.tone={};
+        if(gain!=1.f || gainDb!=0.f || mute)return fail(error,"Foreign tone settings");
+        return common.validate(error);
+    }
+    if(tone.toneDb!=0.f || tone.bypass)return fail(error,"Foreign tone settings");
     if(version==13)
     {
         if(targetId!="frequency-dispersion" || !isValidFrequencyDispersionSettings(dispersion) || bypass
@@ -142,6 +151,13 @@ bool ExperimentRecord::validate(juce::String& error) const
 
 juce::var ExperimentRecord::toJson() const
 {
+    if(version==14)
+    {
+        auto common=*this;common.version=1;common.targetId="reference-gain";common.tone={};
+        auto result=common.toJson();auto* root=result.getDynamicObject();root->removeProperty("gain");
+        root->setProperty("version",14);root->setProperty("targetId","tone");
+        root->setProperty("toneDb",tone.toneDb);root->setProperty("bypass",tone.bypass);return result;
+    }
     if(version==13)
     {
         auto common=*this;common.version=1;common.targetId="reference-gain";common.dispersion={};
@@ -247,6 +263,23 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto* o = value.getDynamicObject();
     if (o == nullptr) return fail(error, "Experiment must be a JSON object");
     auto get = [o](const char* key) { return o->getProperty(key); };
+    if(integer(get("version"),14,14))
+    {
+        if(!get("targetId").isString() || get("targetId").toString()!="tone" || !get("bypass").isBool()
+            || !number(get("toneDb")) || !std::isfinite(static_cast<double>(get("toneDb")))
+            || static_cast<double>(get("toneDb")) < -6. || static_cast<double>(get("toneDb")) > 6.)
+            return fail(error,"Invalid tone schema");
+        const auto allowed=ExperimentRecord{}.toJson();
+        for(const auto& p:o->getProperties())
+            if(p.name.toString()!="toneDb" && (p.name.toString()=="gain" || !allowed.getDynamicObject()->hasProperty(p.name)))
+                return fail(error,"Mixed tone schema");
+        juce::var common(o->clone().release());auto* base=common.getDynamicObject();base->removeProperty("toneDb");
+        base->setProperty("version",1);base->setProperty("targetId","reference-gain");base->setProperty("gain",1.f);base->setProperty("bypass",false);
+        ExperimentRecord candidate;if(!fromJson(common,candidate,error))return false;
+        candidate.version=14;candidate.targetId="tone";candidate.tone={static_cast<float>(get("toneDb")),static_cast<bool>(get("bypass"))};
+        if(!candidate.validate(error))return false;destination=std::move(candidate);return true;
+    }
+    if(o->hasProperty("toneDb"))return fail(error,"Mixed tone schema");
     if(integer(get("version"),13,13))
     {
         if(!get("targetId").isString() || get("targetId").toString()!="frequency-dispersion"

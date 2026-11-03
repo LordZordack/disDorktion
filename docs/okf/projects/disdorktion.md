@@ -10,6 +10,11 @@ tags: ["audio", "distortion", "JUCE", "project"]
 
 ## Project direction
 
+The isolated [tone module](../methods/tone.md) adds dark/bright spectral balance
+with a fixed 1 kHz pivot and neutral-centered ±6 dB control. Its
+[qualification record](../notes/tone_validation.md) separates automated evidence
+from pending human listening and reference CPU acceptance; X5 owns integration.
+
 The agreed first release is a mono and stereo Windows VST3 plugin with a standalone audition application. Its serial wet path is input gain, bit crusher, tanh saturation, wave folder, high-pass filter, and low-pass filter. A global dry/wet control follows the output filters, then final output gain. The dry signal is captured before input gain; final output gain affects both paths. See the [overarching project plan](https://github.com/LordZordack/DisDorktion/blob/main/docs/PROJECT_PLAN.md) for architecture, acceptance gates, tests, and release strategy.
 
 Carrier modulation and demodulation, resonant comb filtering, frequency warping, and a dedicated tone module are experimental extensions. Research may precede the first release; integration follows qualification.

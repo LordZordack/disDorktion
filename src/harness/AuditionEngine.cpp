@@ -37,7 +37,7 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
         || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)
         || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec) || !inputTarget.prepare(spec)
-        || !middleTarget.prepare(spec) || !outputTarget.prepare(spec) || !fullTarget.prepare(spec) || !combTarget.prepare(spec) || !dispersionTarget.prepare(spec)) return false;
+        || !middleTarget.prepare(spec) || !outputTarget.prepare(spec) || !fullTarget.prepare(spec) || !combTarget.prepare(spec) || !dispersionTarget.prepare(spec) || !toneTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -67,6 +67,7 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     else if (id == "middle-section") selected = &middleTarget;
     else if (id == "output-section") selected = &outputTarget;
     else if (id == "frequency-dispersion") selected = &dispersionTarget;
+    else if (id == "tone") selected = &toneTarget;
     else if (id == "resonant-comb") selected = &combTarget;
     else if (id == "full-chain") selected = &fullTarget;
     else return false;
@@ -80,6 +81,20 @@ bool AuditionEngine::setFrequencyDispersionSettings(const FrequencyDispersionSet
     for(std::size_t i=0;i<dispersionControls.size();++i)
         dispersionControls[i].store(getFrequencyDispersionControl(settings,frequencyDispersionControls[i].id),std::memory_order_relaxed);
     return dispersionTarget.setParameters(settings);
+}
+bool AuditionEngine::setToneSettings(const ToneSettings& settings) noexcept
+{
+    if(!isValidToneSettings(settings))return false;
+    toneControlValues[0].store(settings.toneDb,std::memory_order_relaxed);
+    toneControlValues[1].store(settings.bypass?1.f:0.f,std::memory_order_relaxed);
+    return toneTarget.setParameters(settings);
+}
+bool AuditionEngine::setToneControl(std::string_view id,float value) noexcept
+{
+    ToneSettings probe;if(!harness::setToneControl(probe,id,value))return false;
+    for(std::size_t i=0;i<toneControls.size();++i)
+        if(id==toneControls[i].id){toneControlValues[i].store(value,std::memory_order_relaxed);return true;}
+    return false;
 }
 bool AuditionEngine::setFrequencyDispersionControl(std::string_view id,float value) noexcept
 {
@@ -361,6 +376,7 @@ void AuditionEngine::setOutputStageBypass(bool highPass, bool value) noexcept
 void AuditionEngine::setBypass(bool value) noexcept
 {
     if (selected == &dispersionTarget) { (void)setFrequencyDispersionControl("bypass",value?1.f:0.f);return; }
+    if (selected == &toneTarget) { (void)setToneControl("bypass",value?1.f:0.f);return; }
     if (selected == &combTarget) { (void)setResonantCombControl("bypass",value?1.f:0.f);return; }
     if (selected == &fullTarget) { (void)setFullChainControl("chainBypass",value?1.f:0.f);return; }
     if (selected == &outputTarget) { outputBypass.store(value, std::memory_order_relaxed); return; }
@@ -374,6 +390,8 @@ void AuditionEngine::setBypass(bool value) noexcept
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if(selected==&toneTarget)
+        return toneTarget.setParameters({toneControlValues[0].load(std::memory_order_relaxed),toneControlValues[1].load(std::memory_order_relaxed)!=0.f});
     if(selected==&dispersionTarget)
     {
         FrequencyDispersionSettings settings;

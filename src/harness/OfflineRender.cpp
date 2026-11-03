@@ -129,6 +129,7 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     else if (record.version == 11)
         settingsReady = engine.setFullChainSettings(record.fullChain);
     if (record.version == 13) settingsReady = engine.setFrequencyDispersionSettings(record.dispersion);
+    if (record.version == 14) settingsReady = engine.setToneSettings(record.tone);
     if (record.version == 12) settingsReady = engine.setResonantCombSettings(record.comb);
     if (!engine.selectTarget(record.targetId.toStdString())
         || !settingsReady

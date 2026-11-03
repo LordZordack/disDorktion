@@ -69,6 +69,8 @@ if(BUILD_TESTING)
         tests/CutoffFilterTests.cpp
         tests/ResonantCombTests.cpp
         tests/FrequencyDispersionTests.cpp
+        tests/ToneTests.cpp
+        tests/ToneSignalTests.cpp
         tests/BenchmarkSamplingTests.cpp
     )
     target_link_libraries(disdorktion_dsp_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -87,6 +89,7 @@ if(BUILD_TESTING)
         tests/CutoffFilterRealtimeTests.cpp
         tests/ResonantCombRealtimeTests.cpp
         tests/FrequencyDispersionRealtimeTests.cpp
+        tests/ToneRealtimeTests.cpp
         tests/AllocationTracking.cpp
     )
     target_link_libraries(disdorktion_realtime_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -212,6 +215,16 @@ add_executable(disdorktion_render tools/RenderMain.cpp)
 add_executable(disdorktion_comb_measurements tools/ResonantCombMeasureMain.cpp)
 add_executable(disdorktion_dispersion_measurements tools/FrequencyDispersionMeasureMain.cpp)
 add_executable(disdorktion_dispersion_benchmark tools/FrequencyDispersionBenchmarkMain.cpp)
+add_executable(disdorktion_tone_measurements tools/ToneMeasureMain.cpp)
+add_executable(disdorktion_tone_benchmark tools/ToneBenchmarkMain.cpp)
+foreach(tone_target disdorktion_tone_measurements disdorktion_tone_benchmark)
+    target_link_libraries(${tone_target} PRIVATE disdorktion_dsp juce::juce_cryptography)
+    target_compile_definitions(${tone_target} PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+endforeach()
+if(WIN32)
+    target_link_libraries(disdorktion_tone_benchmark PRIVATE PowrProf)
+    target_compile_definitions(disdorktion_tone_benchmark PRIVATE DISDORKTION_WINDOWS_SDK_VERSION="${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+endif()
 target_link_libraries(disdorktion_dispersion_benchmark PRIVATE disdorktion_dsp juce::juce_cryptography)
 target_compile_definitions(disdorktion_dispersion_benchmark PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(disdorktion_dispersion_measurements PRIVATE disdorktion_dsp juce::juce_cryptography juce::juce_audio_formats)
@@ -275,6 +288,8 @@ if(BUILD_TESTING)
         tests/CutoffHarnessTests.cpp
         tests/ResonantCombHarnessTests.cpp
         tests/FrequencyDispersionHarnessTests.cpp
+        tests/ToneHarnessTests.cpp
+        tests/ToneQualificationTests.cpp
         tests/SignalSourceTests.cpp
         tests/SineVoiceTests.cpp
         tests/LoopSourceTests.cpp

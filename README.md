@@ -47,6 +47,14 @@ The section adds zero samples of latency. See the [design](docs/okf/methods/inpu
 
 ### Output section
 
+Select **Tone** in the audition app for a dark/bright balance control, -6 to
++6 dB around a fixed 1 kHz unity pivot. Zero is exact neutral; tone and bypass
+changes take 10 ms. The isolated module adds zero samples of compensating
+latency, and version-14 experiments retain its settings. Positive tone cuts lows
+and boosts highs, so leave headroom. Production-chain integration remains X5.
+See the [design](docs/okf/methods/tone.md) and
+[qualification status](docs/okf/notes/tone_validation.md).
+
 Issue #17 adds an isolated **Resonant comb** audition target with delay,
 feedforward, damped signed feedback, mix and bypass controls. Delay changes
 produce pitch glides; high feedback rings and can amplify peaks. It is available
