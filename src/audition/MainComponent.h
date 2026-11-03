@@ -41,6 +41,11 @@ private:
     juce::AudioDeviceManager devices;
     AudioDeviceController audio;
     harness::ExperimentRecord record;
+    juce::Component combPanel;
+    juce::Viewport combViewport;
+    std::array<juce::Slider,5> combSliders;
+    std::array<juce::Label,7> combLabels;
+    std::array<juce::ToggleButton,2> combToggles;
     juce::Component fullPanel;
     juce::Viewport fullViewport;
     std::array<juce::Slider,fullChainControls.size()> fullSliders;

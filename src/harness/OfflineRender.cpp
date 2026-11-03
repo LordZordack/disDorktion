@@ -128,6 +128,7 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
         settingsReady = engine.setOutputSettings(record.output, record.bypass);
     else if (record.version == 11)
         settingsReady = engine.setFullChainSettings(record.fullChain);
+    if (record.version == 12) settingsReady = engine.setResonantCombSettings(record.comb);
     if (!engine.selectTarget(record.targetId.toStdString())
         || !settingsReady
         || !engine.prepare({record.sampleRate, record.blockSize, record.channels}))
@@ -193,6 +194,11 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
         object->setProperty("renderPolicy", "fixed-duration-uncompensated");
         object->setProperty("tailFlushed", false);
         object->setProperty("middleQuality", record.middleQuality);
+    }
+    if(record.version==12)
+    {
+        object->setProperty("renderPolicy","fixed-duration-uncompensated");
+        object->setProperty("tailFlushed",false);
     }
     object->setProperty("rendererBuildIdentity", ExperimentRecord{}.buildIdentity);
     if (!staging.directory.getChildFile("result.json").replaceWithText(juce::JSON::toString(json)))

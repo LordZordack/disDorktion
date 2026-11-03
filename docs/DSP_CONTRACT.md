@@ -1,5 +1,12 @@
 # DSP module contract
 
+The isolated `ResonantComb` follows the shared module interface below, including
+transactional preparation/settings, prepare-only allocation, mono/stereo and
+chunking. Its finite input envelope is float maximum/128, latency is zero, and
+recursive history continues during dry bypass. The
+[comb design](okf/methods/resonant_comb.md) specifies controls, delay glides,
+headroom and tail assumptions. X5 production integration is separate.
+
 This document defines the interface and processing behavior for the reference gain foundation. Validation observations are recorded separately in the [foundation validation note](okf/notes/foundation_validation.md). The first implementation milestone is **F1, gain foundation**. **F2, audition integration**, follows later.
 
 ## Interface

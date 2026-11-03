@@ -1,5 +1,22 @@
 # Audition and measurement harness
 
+## Resonant comb
+
+Select **Resonant comb** for the isolated shared-delay feedforward/damped-feedback
+module. Delay is 0.25-40 ms; signed feedforward is [-1,1] and signed feedback is
+[-0.95,0.95]. Damping can be disabled or requested at 20-20000 Hz (effective cap
+0.45 times device rate). Mix blends dry and wet. Delay moves over 100 ms with
+intentional pitch glides; other controls and bypass ramp over 10 ms.
+
+Version-12 `resonant-comb` experiments retain all typed settings. Previous
+experiment versions remain available. Dry bypass continues internal processing;
+reset clears history. The module reports zero algorithmic latency. Renders keep
+the existing fixed-duration policy: request enough generated-source trailing
+silence for the desired tail; file sources loop. See the
+[design](okf/methods/resonant_comb.md) and
+[validation status](okf/notes/resonant_comb_validation.md) before treating the
+module as qualified for production integration.
+
 ## Output section
 
 Select **Output section** for high-pass followed by low-pass at the device rate.

@@ -37,7 +37,7 @@ bool AuditionEngine::prepare(const juce::dsp::ProcessSpec& spec)
     if (!isValidProcessSpec(spec) || !target.prepare(spec) || !productionTarget.prepare(spec)
         || !crusherTarget.prepare(spec) || !saturationTarget.prepare(spec) || !folderTarget.prepare(spec)
         || !highPassTarget.prepare(spec) || !lowPassTarget.prepare(spec) || !inputTarget.prepare(spec)
-        || !middleTarget.prepare(spec) || !outputTarget.prepare(spec) || !fullTarget.prepare(spec)) return false;
+        || !middleTarget.prepare(spec) || !outputTarget.prepare(spec) || !fullTarget.prepare(spec) || !combTarget.prepare(spec)) return false;
     channels = spec.numChannels;
     monitor.reset(spec.sampleRate, 0.010);
     prepared = true;
@@ -66,12 +66,28 @@ bool AuditionEngine::selectTarget(std::string_view id) noexcept
     else if (id == "input-section") selected = &inputTarget;
     else if (id == "middle-section") selected = &middleTarget;
     else if (id == "output-section") selected = &outputTarget;
+    else if (id == "resonant-comb") selected = &combTarget;
     else if (id == "full-chain") selected = &fullTarget;
     else return false;
     reset();
     return true;
 }
 
+bool AuditionEngine::setResonantCombSettings(const ResonantCombSettings& settings) noexcept
+{
+    if(!isValidResonantCombSettings(settings)) return false;
+    for(std::size_t i=0;i<combControls.size();++i)
+        combControls[i].store(getResonantCombControl(settings,resonantCombControls[i].id),std::memory_order_relaxed);
+    return combTarget.setParameters(settings);
+}
+bool AuditionEngine::setResonantCombControl(std::string_view id,float value) noexcept
+{
+    ResonantCombSettings probe;
+    if(!harness::setResonantCombControl(probe,id,value))return false;
+    for(std::size_t i=0;i<combControls.size();++i)
+        if(id==resonantCombControls[i].id){combControls[i].store(value,std::memory_order_relaxed);return true;}
+    return false;
+}
 bool AuditionEngine::setFullChainSettings(const FullChainSettings& settings) noexcept
 {
     if (!isValidFullChainSettings(settings)) return false;
@@ -328,6 +344,7 @@ void AuditionEngine::setOutputStageBypass(bool highPass, bool value) noexcept
 }
 void AuditionEngine::setBypass(bool value) noexcept
 {
+    if (selected == &combTarget) { (void)setResonantCombControl("bypass",value?1.f:0.f);return; }
     if (selected == &fullTarget) { (void)setFullChainControl("chainBypass",value?1.f:0.f);return; }
     if (selected == &outputTarget) { outputBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &middleTarget) { middleBypass.store(value, std::memory_order_relaxed); return; }
@@ -340,6 +357,13 @@ void AuditionEngine::setBypass(bool value) noexcept
 }
 bool AuditionEngine::applyParameters() noexcept
 {
+    if(selected==&combTarget)
+    {
+        ResonantCombSettings settings;
+        for(std::size_t i=0;i<combControls.size();++i)
+            if(!harness::setResonantCombControl(settings,resonantCombControls[i].id,combControls[i].load(std::memory_order_relaxed)))return false;
+        return combTarget.setParameters(settings);
+    }
     if (selected == &fullTarget)
     {
         FullChainSettings settings;

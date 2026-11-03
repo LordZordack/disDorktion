@@ -47,6 +47,13 @@ The section adds zero samples of latency. See the [design](docs/okf/methods/inpu
 
 ### Output section
 
+Issue #17 adds an isolated **Resonant comb** audition target with delay,
+feedforward, damped signed feedback, mix and bypass controls. Delay changes
+produce pitch glides; high feedback rings and can amplify peaks. It is available
+for experimentation before X5 production-chain integration. See the
+[design](docs/okf/methods/resonant_comb.md) and
+[verification status](docs/okf/notes/resonant_comb_validation.md).
+
 Select **Output section** in the audition app for native-rate high-pass then
 low-pass filtering. Both stages have independent cutoff, response and bypass
 controls; common bypass retains those choices. Version-10 records reproduce

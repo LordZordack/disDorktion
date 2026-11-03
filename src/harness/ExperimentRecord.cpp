@@ -28,6 +28,19 @@ ExperimentRecord::ExperimentRecord() : buildIdentity(DISDORKTION_BUILD_ID) {}
 bool ExperimentRecord::validate(juce::String& error) const
 {
     error.clear();
+    if(version==12)
+    {
+        if(targetId!="resonant-comb" || !isValidResonantCombSettings(comb) || bypass
+            || gain!=1.f || gainDb!=0.f || mute || bitDepth!=64 || captureRateHz!=384000.f)
+            return fail(error,"Invalid or foreign comb settings");
+        auto common=*this;common.version=1;common.targetId="reference-gain";common.comb={};
+        return common.validate(error);
+    }
+    const ResonantCombSettings defaultComb;
+    if(comb.delayMs!=defaultComb.delayMs || comb.feedforward!=defaultComb.feedforward
+        || comb.feedback!=defaultComb.feedback || comb.dampingHz!=defaultComb.dampingHz
+        || comb.mix!=defaultComb.mix || comb.dampingEnabled!=defaultComb.dampingEnabled || comb.bypass)
+        return fail(error,"Foreign comb settings");
     if (version == 11)
     {
         if (targetId != "full-chain" || !isValidFullChainSettings(fullChain)
@@ -119,6 +132,16 @@ bool ExperimentRecord::validate(juce::String& error) const
 
 juce::var ExperimentRecord::toJson() const
 {
+    if(version==12)
+    {
+        auto common=*this;common.version=1;common.targetId="reference-gain";common.comb={};
+        auto result=common.toJson();auto* root=result.getDynamicObject();root->removeProperty("gain");
+        root->setProperty("version",12);root->setProperty("targetId","resonant-comb");
+        root->setProperty("delayMs",comb.delayMs);root->setProperty("feedforward",comb.feedforward);
+        root->setProperty("feedback",comb.feedback);root->setProperty("dampingHz",comb.dampingHz);
+        root->setProperty("combMix",comb.mix);root->setProperty("dampingEnabled",comb.dampingEnabled);
+        root->setProperty("bypass",comb.bypass);return result;
+    }
     if (version == 11)
     {
         auto common=*this;common.version=1;common.targetId="reference-gain";common.fullChain={};
@@ -206,6 +229,33 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto* o = value.getDynamicObject();
     if (o == nullptr) return fail(error, "Experiment must be a JSON object");
     auto get = [o](const char* key) { return o->getProperty(key); };
+    if(integer(get("version"),12,12))
+    {
+        if(!get("targetId").isString() || get("targetId").toString()!="resonant-comb"
+            || !get("bypass").isBool() || !get("dampingEnabled").isBool())return fail(error,"Invalid comb target or boolean");
+        const auto allowedCommon=ExperimentRecord{}.toJson();
+        for(const auto& property:o->getProperties())
+        {
+            const auto key=property.name.toString();
+            const bool combField=key=="delayMs" || key=="feedforward" || key=="feedback" || key=="dampingHz" || key=="combMix" || key=="dampingEnabled";
+            if(!combField && (key=="gain" || !allowedCommon.getDynamicObject()->hasProperty(property.name)))return fail(error,"Mixed comb schemas");
+        }
+        constexpr const char* keys[]{"delayMs","feedforward","feedback","dampingHz","combMix"};
+        constexpr double lows[]{.25,-1.,-.95,20.,0.}, highs[]{40.,1.,.95,20000.,1.};
+        for(unsigned i=0;i<5;++i)
+            if(!number(get(keys[i])) || !std::isfinite(static_cast<double>(get(keys[i])))
+                || static_cast<double>(get(keys[i]))<lows[i] || static_cast<double>(get(keys[i]))>highs[i])return fail(error,"Invalid comb number");
+        juce::var common(o->clone().release());auto* base=common.getDynamicObject();
+        for(auto key:keys)base->removeProperty(key);base->removeProperty("dampingEnabled");
+        base->setProperty("version",1);base->setProperty("targetId","reference-gain");base->setProperty("gain",1.f);base->setProperty("bypass",false);
+        ExperimentRecord candidate;if(!fromJson(common,candidate,error))return false;
+        candidate.version=12;candidate.targetId="resonant-comb";
+        candidate.comb={static_cast<float>(get("delayMs")),static_cast<float>(get("feedforward")),static_cast<float>(get("feedback")),
+            static_cast<float>(get("dampingHz")),static_cast<float>(get("combMix")),static_cast<bool>(get("dampingEnabled")),static_cast<bool>(get("bypass"))};
+        if(!candidate.validate(error))return false;destination=std::move(candidate);return true;
+    }
+    for(auto key:{"delayMs","feedforward","feedback","dampingHz","combMix","dampingEnabled"})
+        if(o->hasProperty(key))return fail(error,"Mixed comb schemas");
     if (integer(get("version"),11,11))
     {
         if (get("targetId").toString()!="full-chain" || !get("middleQuality").isString()

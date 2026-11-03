@@ -1,0 +1,1447 @@
+{
+  "kind": "resonant-comb-cpu-reference",
+  "reference_qualified": true,
+  "listening_approved": false,
+  "cases": [
+    {
+      "case": "0",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "1",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "2",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "3",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "4",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "5",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "6",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005014925373134329,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "7",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "8",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "9",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.000675,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "10",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "11",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "12",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.000675,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "13",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "14",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006961832061068702,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "15",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "16",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005291338582677165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "17",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005669291338582677,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "18",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005291338582677165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "19",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005669291338582677,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "20",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006047244094488189,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "21",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0004913385826771653,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "22",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005603112840466926,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "23",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005291338582677165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "24",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00048750000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "25",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005812500000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "26",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00048750000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "27",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00065625,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "28",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00065625,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "29",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005625000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "30",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0004846601941747573,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "31",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00048750000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "32",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "33",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0004734375,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "34",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "35",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0004921875,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "36",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.000646875,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "37",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005578125,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "38",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005476352998537299,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "39",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006609375000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "40",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0018000000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "41",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "42",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "43",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "44",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "45",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "46",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010029850746268657,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "47",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "48",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "49",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "50",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "51",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "52",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "53",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "54",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010259541984732824,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "55",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "56",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011338582677165353,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "57",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001058267716535433,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "58",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0014362204724409449,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "59",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012094488188976378,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "60",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001662992125984252,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "61",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011338582677165353,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "62",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010085603112840466,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "63",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009070866141732283,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "64",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010875000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "65",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "66",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009750000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "67",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "68",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "69",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "70",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009879611650485437,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "71",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010875000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "72",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009750000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "73",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.000965625,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "74",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010031250000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "75",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001190625,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "76",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015375,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "77",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001415625,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "78",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011935641150658217,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "79",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0013312500000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "80",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "81",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "82",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "83",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "84",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "85",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "86",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005014925373134329,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "87",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "88",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "89",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "90",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "91",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "92",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.000825,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "93",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "94",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005129770992366412,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "95",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "96",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005291338582677165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "97",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005291338582677165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "98",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005669291338582677,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "99",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005291338582677165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "100",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006803149606299212,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "101",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005669291338582677,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "102",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005416342412451361,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "103",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005669291338582677,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "104",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00065625,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "105",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005437500000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "106",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00048750000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "107",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00048750000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "108",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00076875,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "109",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00046875000000000004,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "110",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005499029126213592,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "111",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005625000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "112",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0004734375,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "113",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00048750000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "114",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00048750000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "115",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005062500000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "116",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0007453125,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "117",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00045000000000000004,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "118",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006365675280351049,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "119",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005015625000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "120",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "121",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "122",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "123",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "124",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "125",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "126",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010029850746268657,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "127",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "128",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "129",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "130",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "131",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "132",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "133",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "134",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0013923664122137405,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "135",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "136",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011338582677165353,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "137",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001058267716535433,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "138",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001058267716535433,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "139",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001058267716535433,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "140",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012094488188976378,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "141",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001058267716535433,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "142",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009712062256809338,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "143",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001058267716535433,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "144",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "145",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "146",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009750000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "147",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009750000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "148",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001275,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "149",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010875000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "150",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009506796116504855,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "151",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009375000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "152",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001021875,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "153",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010125000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "154",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010875000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "155",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010031250000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "156",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0013968750000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "157",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "158",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0013152608483666505,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "159",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.000946875,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "160",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "161",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "162",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "163",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "164",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "165",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "166",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0007164179104477612,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "167",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "168",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "169",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "170",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "171",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "172",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00075,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "173",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "174",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005129770992366412,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "175",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "176",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0007559055118110235,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "177",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005669291338582677,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "178",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005291338582677165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "179",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005291338582677165,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "180",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0007937007874015748,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "181",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0006047244094488189,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "182",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005416342412451361,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "183",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005669291338582677,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "184",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00046875000000000004,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "185",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00046875000000000004,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "186",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "187",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00048750000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "188",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.000675,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "189",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00046875000000000004,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "190",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005219417475728156,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "191",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005625000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "192",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00048750000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "193",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "194",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.000571875,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "195",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005015625000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "196",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005437500000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "197",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00045937500000000004,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "198",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005101901511457826,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "199",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0005296875,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "200",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "201",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "202",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "203",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "204",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0021000000000000003,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "205",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "206",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001146268656716418,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "207",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "208",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "209",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "210",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "211",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "212",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0015,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "213",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "214",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001319083969465649,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "215",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012000000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "216",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011338582677165353,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "217",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012094488188976378,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "218",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011338582677165353,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "219",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011338582677165353,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "220",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012094488188976378,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "221",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001058267716535433,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "222",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009712062256809338,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "223",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001058267716535433,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "224",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009750000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "225",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0009750000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "226",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010875000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "227",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010875000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "228",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0012375,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "229",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00135,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "230",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001043883495145631,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "231",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001275,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "232",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001378125,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "233",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "234",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00110625,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "235",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0010500000000000002,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "236",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.00129375,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "237",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.0011250000000000001,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "238",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001062506094588006,
+      "reference_sampling_coverage": true
+    },
+    {
+      "case": "239",
+      "within_budget": true,
+      "p99_deadline_fraction": 0.001078125,
+      "reference_sampling_coverage": true
+    }
+  ]
+}
