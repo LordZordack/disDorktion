@@ -1,5 +1,21 @@
 # Building
 
+Issue #17 adds `disdorktion_comb_measurements` and `disdorktion_comb_benchmark`.
+Both are available in full and DSP-only builds. After a Release build, capture
+and independently audit into fresh destinations:
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_comb_measurements.exe ./renders/comb-measurements-001
+uv run --no-project --python 3.12 scripts/validate_comb_measurements.py ./renders/comb-measurements-001 --executable ./build/windows-vs2026/Release/disdorktion_comb_measurements.exe --output ./renders/comb-measurements-001-audit.json
+uv run --no-project --python 3.12 tests/test_comb_validator.py -v
+```
+
+Create the parent directory first. Measurement captures include long tails and
+can consume hundreds of MB. The script checks raw hashes, analytical transfer,
+independent recurrence and automation, and source/executable provenance. It
+also audits CPU collector directories. See [performance](PERFORMANCE.md) for
+CPU procedures and [comb status](okf/notes/resonant_comb_validation.md) for gates.
+
 The output section uses the shared `DisDorktionAudition` and
 `disdorktion_render` targets. Its numerical/listening fixtures use
 `disdorktion_output_measurements`; its isolated CPU collector is

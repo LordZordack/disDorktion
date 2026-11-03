@@ -67,6 +67,7 @@ if(BUILD_TESTING)
         tests/MiddleSectionQualificationTests.cpp
         tests/AdaaWaveFolderTests.cpp
         tests/CutoffFilterTests.cpp
+        tests/ResonantCombTests.cpp
         tests/BenchmarkSamplingTests.cpp
     )
     target_link_libraries(disdorktion_dsp_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -83,6 +84,7 @@ if(BUILD_TESTING)
         tests/WaveFolderRealtimeTests.cpp
         tests/MiddleSectionRealtimeTests.cpp
         tests/CutoffFilterRealtimeTests.cpp
+        tests/ResonantCombRealtimeTests.cpp
         tests/AllocationTracking.cpp
     )
     target_link_libraries(disdorktion_realtime_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
@@ -205,6 +207,17 @@ target_compile_definitions(disdorktion_harness PUBLIC
     JUCE_MODULE_AVAILABLE_juce_cryptography=1)
 
 add_executable(disdorktion_render tools/RenderMain.cpp)
+add_executable(disdorktion_comb_measurements tools/ResonantCombMeasureMain.cpp)
+add_executable(disdorktion_comb_benchmark benchmarks/ResonantCombBenchmark.cpp)
+foreach(comb_target disdorktion_comb_measurements disdorktion_comb_benchmark)
+    target_link_libraries(${comb_target} PRIVATE disdorktion_dsp juce::juce_cryptography)
+    target_compile_definitions(${comb_target} PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+endforeach()
+if(WIN32)
+    target_link_libraries(disdorktion_comb_benchmark PRIVATE PowrProf)
+    target_compile_definitions(disdorktion_comb_benchmark PRIVATE
+        DISDORKTION_WINDOWS_SDK_VERSION="${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+endif()
 add_executable(disdorktion_full_chain_measurements tools/FullChainMeasureMain.cpp)
 target_link_libraries(disdorktion_full_chain_measurements PRIVATE disdorktion_dsp juce::juce_cryptography)
 target_compile_definitions(disdorktion_full_chain_measurements PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
@@ -246,6 +259,7 @@ if(BUILD_TESTING)
         tests/InputSectionHarnessTests.cpp
         tests/HarnessEngineTests.cpp
         tests/CutoffHarnessTests.cpp
+        tests/ResonantCombHarnessTests.cpp
         tests/SignalSourceTests.cpp
         tests/SineVoiceTests.cpp
         tests/LoopSourceTests.cpp
@@ -260,6 +274,7 @@ if(BUILD_TESTING)
         tests/OutputSectionHarnessRealtimeTests.cpp
         tests/InputSectionHarnessRealtimeTests.cpp
         tests/CutoffHarnessRealtimeTests.cpp
+        tests/ResonantCombHarnessRealtimeTests.cpp
         tests/HarnessRealtimeTests.cpp tests/AllocationTracking.cpp)
     target_link_libraries(disdorktion_harness_realtime_tests PRIVATE disdorktion_harness Catch2::Catch2WithMain)
     catch_discover_tests(disdorktion_harness_realtime_tests TEST_PREFIX "harness-rt::" PROPERTIES TIMEOUT 30)

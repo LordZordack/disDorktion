@@ -2,7 +2,7 @@
 type: "Index"
 title: "Methods"
 description: "Index of methods research documents."
-timestamp: "2026-10-17T19:50:36Z"
+timestamp: "2026-11-03T02:32:02Z"
 ---
 
 # Methods
@@ -19,5 +19,6 @@ timestamp: "2026-10-17T19:50:36Z"
 - [Native-Rate Output Filter Section](./output_section.md) — Ordered high-pass and low-pass composition with independent controls and reproducible section qualification.
 - [Plugin interface, presets and host state](./plugin_interface.md) — Presentation and lifecycle rules for the shared production chain without changing the host parameter schema.
 - [Real-time DSP processing contract](./processing_contract.md) — Implemented module interface and callback behavior for DisDorktion's JUCE DSP foundation, including the reference gain processor.
+- [Resonant comb filtering](./resonant_comb.md) — Reviewed isolated feedforward and damped feedback comb design and acceptance limits for issue 17.
 - [Tanh saturation](./tanh_saturation.md) — Approved memoryless tanh saturation design, controls, transition behavior, and pre-implementation acceptance limits for DisDorktion.
 - [Wave folding](./wave_folding.md) — Reviewed symmetric triangle wave-folder design, controls, transitions, and pre-implementation acceptance limits.

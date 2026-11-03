@@ -6,6 +6,7 @@
 #include "MiddleSectionTarget.h"
 #include "OutputSectionTarget.h"
 #include "FullChainTarget.h"
+#include "ResonantCombTarget.h"
 #include <atomic>
 
 namespace disdorktion::harness
@@ -29,6 +30,8 @@ public:
         for (std::size_t i=0;i<fullControls.size();++i)
             fullControls[i].store(fullChainControls[i].defaultValue,std::memory_order_relaxed);
     }
+    bool setResonantCombSettings(const ResonantCombSettings&) noexcept;
+    bool setResonantCombControl(std::string_view,float) noexcept;
     bool setFullChainSettings(const FullChainSettings&) noexcept;
     bool setFullChainControl(std::string_view,float) noexcept;
     void setFullChainJitterSeed(std::uint32_t value) noexcept { fullSeed.store(value,std::memory_order_relaxed); }
@@ -101,6 +104,8 @@ private:
     MiddleSectionTarget middleTarget;
     OutputSectionTarget outputTarget;
     FullChainTarget fullTarget;
+    ResonantCombTarget combTarget;
+    std::array<std::atomic<float>,7> combControls {{5.f,0.f,.7f,6000.f,.5f,1.f,0.f}};
     std::array<std::atomic<float>,fullChainControls.size()> fullControls;
     std::atomic<std::uint32_t> fullSeed {1};
     std::atomic<float> postHighPassPeak {0.f}, wetPeak {0.f};

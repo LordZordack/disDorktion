@@ -118,3 +118,15 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-10-17T19:42:09Z: Recorded issue 14 local verification: full Debug/Release 255 tests each, headless 197, preset fixture grid and inspected editor renders; host/listening gates remain open.
 
 - 2026-10-17T19:50:36Z: Replaced plugin sliders with compact rotary controls; editor default 820x560, minimum 740x520, with unchanged host mappings.
+
+- 2026-11-01T21:17:23Z: Recorded reviewed resonant comb design and initial validation status for issue 17
+
+- 2026-11-01T21:23:29Z: Added comb implementation references and tail semantics
+
+- 2026-11-01T21:32:19Z: Recorded comb Release and Debug tests, independent numerical audit and listening fixtures
+
+- 2026-11-01T22:16:59Z: Clarified comb delay modulation aliasing limits
+
+- 2026-11-01T22:29:42Z: Completed comb three-run AC performance-core CPU qualification and independent 34826506-timing audit; human listening and GUI gates remain open
+
+- 2026-11-03T02:32:02Z: Prepared issue 17 publication with compact measurement evidence and explicit pending listening/GUI gates

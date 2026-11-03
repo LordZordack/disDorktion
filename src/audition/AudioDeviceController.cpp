@@ -34,6 +34,8 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
         processor.setOutputSettings(settings.output, settings.bypass);
     else if (settings.version == 11)
         processor.setFullChainSettings(settings.fullChain);
+    else if (settings.version == 12)
+        processor.setResonantCombSettings(settings.comb);
     processor.setMonitorDb(settings.monitorDb);
     processor.setMuted(settings.muted);
     playing.store(false);

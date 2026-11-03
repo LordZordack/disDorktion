@@ -1,5 +1,33 @@
 # Performance procedure and proposed budgets
 
+## Resonant comb budget (X2)
+
+Issue #17 proposes an isolated comb p99 ceiling below 5% of the incoming
+callback deadline. This is a module qualification budget, not a reallocation
+of the existing complete-chain ceiling. Include parameter application, delay
+interpolation, damping, mixing and bypass. Test 48/96 kHz stereo, capacities
+32/64/127/256/1024, endpoints, automated controls, bypass, oversized blocks and
+quiet decay. Reference acceptance requires three pinned AC Release runs with
+environment, raw timing distributions and executable/source provenance.
+Diagnostics and analytical cost estimates do not establish acceptance. See the
+[comb validation record](okf/notes/resonant_comb_validation.md).
+
+```powershell
+./build/windows-vs2026/Release/disdorktion_comb_benchmark.exe --diagnostic --quick --conditions "Record actual environment; quick unpinned diagnostic" --output ./renders/comb-cpu-quick-001
+./build/windows-vs2026/Release/disdorktion_comb_benchmark.exe --runs 3 --conditions "Record actual environment and thermal limitations; no competing builds/tests" --output ./renders/comb-cpu-reference-001
+uv run --no-project --python 3.12 scripts/validate_comb_measurements.py ./renders/comb-cpu-reference-001 --executable ./build/windows-vs2026/Release/disdorktion_comb_benchmark.exe --output ./renders/comb-cpu-reference-001-audit.json
+```
+
+Use fresh destinations. Quick/diagnostic collectors return exit 1 deliberately;
+only qualified reference results return zero. Exit 2 indicates an operation
+failure. The full reference matrix contains 240 cases with adaptive 10-120 s
+timing windows, 2 s warmup and 2 s probe per case, and may take over an hour.
+Observed Windows hybrid topology, performance-core affinity, AC power and stable
+power scheme are required. The collector does not measure ambient temperature
+or thermal throttling; record those limitations in conditions. Quiet-decay
+scenarios process 120 seconds of audio before timing, without recycling output
+as input. Raw scheduler outliers and timer overhead are retained.
+
 ## Output section budget (S3)
 
 Issue #12 allocates **10% of the incoming callback deadline** to native-rate

@@ -45,6 +45,26 @@ MainComponent::MainComponent()
     target.addItem("Middle section (candidate)", 9);
     target.addItem("Output section", 10);
     target.addItem("Full chain (candidate)", 11);
+    target.addItem("Resonant comb", 12);
+    combViewport.setViewedComponent(&combPanel,false);addChildComponent(combViewport);
+    for(std::size_t i=0;i<resonantCombControls.size();++i)
+    {
+        const auto& c=resonantCombControls[i];
+        combLabels[i].setText(juce::String(c.name.data()),juce::dontSendNotification);combPanel.addAndMakeVisible(combLabels[i]);
+        if(i<5)
+        {
+            auto& slider=combSliders[i];combPanel.addAndMakeVisible(slider);
+            slider.setSliderStyle(juce::Slider::LinearHorizontal);slider.setTextBoxStyle(juce::Slider::TextBoxRight,false,100,26);
+            slider.setRange(c.minimum,c.maximum,0);slider.setValue(c.defaultValue,juce::dontSendNotification);
+            if(i==3)slider.setSkewFactorFromMidPoint(1000.);
+            slider.onValueChange=[this,i] {if(record.version==12)audio.engine().setResonantCombControl(resonantCombControls[i].id,static_cast<float>(combSliders[i].getValue()));};
+        }
+        else
+        {
+            auto& toggle=combToggles[i-5];combPanel.addAndMakeVisible(toggle);
+            toggle.onClick=[this,i] {if(record.version==12)audio.engine().setResonantCombControl(resonantCombControls[i].id,combToggles[i-5].getToggleState()?1.f:0.f);};
+        }
+    }
     fullViewport.setViewedComponent(&fullPanel,false);
     addChildComponent(fullViewport);
     for(std::size_t i=0;i<fullChainControls.size();++i)
@@ -191,9 +211,9 @@ MainComponent::MainComponent()
     target.onChange = [this] {
         auto next = snapshot();
         const auto selected = target.getSelectedId();
-        next.version = selected == 11 ? 11 : selected == 10 ? 10 : selected == 9 ? 9 : selected == 8 ? 8 : selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
+        next.version = selected == 12 ? 12 : selected == 11 ? 11 : selected == 10 ? 10 : selected == 9 ? 9 : selected == 8 ? 8 : selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
         next.targetId = selected == 1 ? "reference-gain" : selected == 2 ? "gain" : selected == 3 ? "bit-crusher"
-            : selected == 4 ? "tanh-saturation" : selected == 5 ? "wave-folder" : selected == 6 ? "high-pass" : selected == 7 ? "low-pass" : selected == 8 ? "input-section" : selected == 9 ? "middle-section" : selected==10 ? "output-section" : "full-chain";
+            : selected == 4 ? "tanh-saturation" : selected == 5 ? "wave-folder" : selected == 6 ? "high-pass" : selected == 7 ? "low-pass" : selected == 8 ? "input-section" : selected == 9 ? "middle-section" : selected==10 ? "output-section" : selected==12 ? "resonant-comb" : "full-chain";
         next.gain = 1.0f; next.gainDb = 0.0f; next.mute = false; next.bypass = false;
         next.gainBypass = false; next.crusherBypass = false;
         next.bitDepth = 64; next.captureRateHz = 384000.0f;
@@ -205,6 +225,7 @@ MainComponent::MainComponent()
         next.middle = {};
         next.output = {};
         next.fullChain = {};
+        next.comb = {};
         next.middleQuality = "4x-fir-adaa-v1";
         configureRecord(next);
     };
@@ -394,6 +415,14 @@ void MainComponent::resized()
     }
     monitorLabel.setBounds(bounds.removeFromTop(24));
     fullViewport.setBounds(gain.getBounds().getUnion(jitterSeed.getBounds()).withWidth(getWidth()-44));
+    combViewport.setBounds(fullViewport.getBounds());
+    combPanel.setSize(std::max(300,combViewport.getWidth()-18),7*34);
+    for(std::size_t i=0;i<resonantCombControls.size();++i)
+    {
+        auto controlRow=juce::Rectangle<int>(0,static_cast<int>(i)*34,combPanel.getWidth(),32);
+        combLabels[i].setBounds(controlRow.removeFromLeft(220));
+        if(i<5)combSliders[i].setBounds(controlRow);else combToggles[i-5].setBounds(controlRow);
+    }
     fullPanel.setSize(std::max(300,fullViewport.getWidth()-18),static_cast<int>(fullChainControls.size()+1)*34);
     for(std::size_t i=0;i<fullChainControls.size();++i)
     {
@@ -465,7 +494,12 @@ ExperimentRecord MainComponent::snapshot() const
         result.gainBypass = gainBypass.getToggleState();
         result.crusherBypass = crusherBypass.getToggleState();
     }
-    result.bypass = result.version==11 ? false : bypass.getToggleState();
+    if(result.version==12)
+    {
+        for(std::size_t i=0;i<resonantCombControls.size();++i)
+            harness::setResonantCombControl(result.comb,resonantCombControls[i].id,i<5?static_cast<float>(combSliders[i].getValue()):(combToggles[i-5].getToggleState()?1.f:0.f));
+    }
+    result.bypass = result.version>=11 ? false : bypass.getToggleState();
     result.monitorDb = static_cast<float>(monitor.getValue()); result.muted = muted.getToggleState();
     result.observations = observations.getText();
     if (audio.sampleRate() > 0) result.sampleRate = audio.sampleRate();
@@ -535,7 +569,7 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     const auto filtering = record.version == 7 || outputSection;
     const auto middle = record.version == 9;
     const auto driven = saturation || folder || middle;
-    target.setSelectedId(record.version==11 ? 11 : outputSection ? 10 : middle ? 9 : section ? 8 : filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
+    target.setSelectedId(record.version==12 ? 12 : record.version==11 ? 11 : outputSection ? 10 : middle ? 9 : section ? 8 : filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
     gain.setRange(production ? -60.0 : 0.0, production ? 24.0 : 4.0, 0.0);
     gainLabel.setText(outputSection ? "Output section: high-pass then low-pass | independent responses and bypasses"
         : middle ? "Middle candidate: tanh then ADAA folder | 4x FIR | 92 samples | sound acceptance pending"
@@ -613,14 +647,23 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     renderDuration.setText(juce::String(static_cast<juce::int64>(record.renderDurationSamples)), false);
     seed.setText(juce::String(static_cast<juce::int64>(record.source.seed)), false);
     observations.setText(record.observations, false);
+    combViewport.setVisible(record.version==12);
+    if(record.version==12)
+    {
+        for(std::size_t i=0;i<resonantCombControls.size();++i)
+        {
+            const auto value=getResonantCombControl(record.comb,resonantCombControls[i].id);
+            if(i<5)combSliders[i].setValue(value,juce::dontSendNotification);else combToggles[i-5].setToggleState(value!=0.f,juce::dontSendNotification);
+        }
+    }
     fullViewport.setVisible(record.version==11);
-    bypass.setVisible(record.version!=11);
-    if(record.version==11)
+    bypass.setVisible(record.version<11);
+    if(record.version>=11)
     {
         for(juce::Component* control:std::initializer_list<juce::Component*>{&gain,&moduleMuted,&bypass,&bitDepth,&captureRateHz,
             &bitDepthLabel,&captureRateLabel,&effectiveRateLabel,&fullRateLabel,&crusherMix,&crusherCrush,&crusherShape,&crusherJitter,&jitterSeed,
             &crusherMixLabel,&crusherCrushLabel,&crusherShapeLabel,&crusherJitterLabel,&jitterSeedLabel}) control->setVisible(false);
-        gainLabel.setText("Full chain | 4x FIR ADAA | aligned pre-input dry | final gain | scroll for all controls",juce::dontSendNotification);
+        gainLabel.setText(record.version==12 ? "Resonant comb | delay glides over 100 ms | controls 10 ms | 0 samples latency | scroll for bypass" : "Full chain | 4x FIR ADAA | aligned pre-input dry | final gain | scroll for all controls",juce::dontSendNotification);
         gainLabel.setEnabled(true);
         for(std::size_t i=0;i<fullChainControls.size();++i)
         {
@@ -684,6 +727,7 @@ void MainComponent::beginJob(std::function<void()> operation)
 void MainComponent::setWorkerControlsEnabled(bool enabled)
 {
     fullViewport.setEnabled(enabled);
+    combViewport.setEnabled(enabled);
     for (juce::Component* component : std::initializer_list<juce::Component*>{
         &target,&source,&apply,&load,&save,&restore,&render,&frequency,&frequency2,
         &amplitude,&phase,&duration,&renderDuration,&seed,&gain,&bitDepth,&captureRateHz,
