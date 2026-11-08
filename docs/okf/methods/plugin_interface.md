@@ -12,7 +12,7 @@ resource: "https://github.com/LordZordack/disDorktion/issues/14"
 The custom editor exposes the [full chain](./full_chain.md) in three visible
 processing panels, with global mix/final gain and compatibility controls.
 Continuous controls use rotary knobs with editable values below them. The
-default editor is 820x560, with a 740x520 minimum; Global and Compatibility
+default editor is 1120x740, with a 1000x680 minimum; Global and Compatibility
 share a row to preserve screen space. This replaces the initial 1120x850
 slider layout without changing parameter ranges or host normalization.
 The repository guide `docs/PLUGIN_INTERFACE.md` records ranges, defaults,
@@ -23,8 +23,8 @@ implementation rules from measured acceptance.
 
 ## Stable sound representation
 
-The existing 30 APVTS parameters remain two legacy controls plus 28 chain
-controls. IDs, ordering and normalized mappings retain host session meaning.
+The original 30 APVTS parameters remain at their original indices; 12
+Output parameters append. IDs, ordering and normalized mappings retain host session meaning.
 Readable units, percent formatting, response names and frequency slider skew
 belong to presentation. In particular, host bit-depth indices are decoded to
 the actual permitted DSP bit values before validation or serialization.
@@ -66,3 +66,20 @@ the final output meter.
 
 See [full-chain qualification](../notes/full_chain_validation.md) for inherited
 DSP evidence and its pending human listening, CPU and host gates.
+
+
+## Issue #20 integration update
+
+The [Output section](output_section.md) now runs comb -> frequency dispersion
+-> tone -> HP -> LP at native rate. All additions default to bypass. Original
+30 host parameters keep their order and meanings; 12 new controls append.
+Plugin state v4 restores old v1/v2 gain-only sessions and v3 modes with the
+new effects bypassed. Successful restore clears full-chain histories and snaps its targets; legacy
+gain-only scalar ramps retain their original behavior.
+Full-chain latency remains 92 samples; partial dry/wet can color phase-shaped
+wet audio. Full mode reports a conservative 20-second tail plus FIR latency,
+even while bypassed. Existing five factory sounds are retained.
+
+The editor defaults to 1120x740 with a 1000x680 minimum and 1400x1000 maximum,
+providing more space for Output controls. Old evidence below describes the
+prior interface; see the current `docs/PLUGIN_INTERFACE.md`.

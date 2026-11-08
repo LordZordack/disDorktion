@@ -30,9 +30,9 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
              settings.crush, settings.shape, settings.jitter, settings.jitterSeed}}, settings.bypass);
     else if (settings.version == 9)
         processor.setMiddleSettings(settings.middle, settings.bypass);
-    else if (settings.version == 10)
+    else if ((settings.version == 10 || settings.version == 15))
         processor.setOutputSettings(settings.output, settings.bypass);
-    else if (settings.version == 11)
+    else if ((settings.version == 11 || settings.version == 16))
         processor.setFullChainSettings(settings.fullChain);
     else if (settings.version == 12)
         processor.setResonantCombSettings(settings.comb);

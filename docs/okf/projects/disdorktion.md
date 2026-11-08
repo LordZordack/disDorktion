@@ -17,7 +17,7 @@ from pending human listening and reference CPU acceptance; X5 owns integration.
 
 The agreed first release is a mono and stereo Windows VST3 plugin with a standalone audition application. Its serial wet path is input gain, bit crusher, tanh saturation, wave folder, high-pass filter, and low-pass filter. A global dry/wet control follows the output filters, then final output gain. The dry signal is captured before input gain; final output gain affects both paths. See the [overarching project plan](https://github.com/LordZordack/DisDorktion/blob/main/docs/PROJECT_PLAN.md) for architecture, acceptance gates, tests, and release strategy.
 
-Carrier modulation and demodulation, resonant comb filtering, frequency warping, and a dedicated tone module are experimental extensions. Research may precede the first release; integration follows qualification.
+Resonant comb filtering, frequency dispersion, and a dedicated tone module form the experimental expansion. The user discarded carrier modulation/demodulation on 2026-11-07. The integrated expansion's listening check is user-confirmed; stress and reference CPU evidence are tracked in the [expanded Output validation note](../notes/expanded_output_validation.md).
 
 ## Research records
 

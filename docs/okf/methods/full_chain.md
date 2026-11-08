@@ -79,3 +79,20 @@ flush. Monitoring gain is outside recorded DSP measurements.
 See [qualification evidence](../notes/full_chain_validation.md). Existing
 section listening/dependency gates remain open; integration does not imply
 their acceptance or first-release qualification.
+
+
+## Issue #20 integration update
+
+The [Output section](output_section.md) now runs comb -> frequency dispersion
+-> tone -> HP -> LP at native rate. All additions default to bypass. Original
+30 host parameters keep their order and meanings; 12 new controls append.
+Plugin state v4 restores old v1/v2 gain-only sessions and v3 modes with the
+new effects bypassed. Successful restore clears full-chain histories and snaps its targets; legacy
+gain-only scalar ramps retain their original behavior.
+Full-chain latency remains 92 samples; partial dry/wet can color phase-shaped
+wet audio. Full mode reports a conservative 20-second tail plus FIR latency,
+even while bypassed. Existing five factory sounds are retained.
+
+The editor defaults to 1120x740 with a 1000x680 minimum and 1400x1000 maximum,
+providing more space for Output controls. Old evidence below describes the
+prior interface; see the current `docs/PLUGIN_INTERFACE.md`.

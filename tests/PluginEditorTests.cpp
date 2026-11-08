@@ -42,9 +42,9 @@ TEST_CASE("Production editor exposes all host controls at minimum and expanded s
     disdorktion::PluginProcessor processor;
     {
         disdorktion::PluginEditor editor(processor);
-        REQUIRE(editor.getWidth() == 820);
-        REQUIRE(editor.getHeight() == 560);
-        for (const auto size : {juce::Point<int>(740, 520), juce::Point<int>(820, 560), juce::Point<int>(1200, 800)})
+        REQUIRE(editor.getWidth() == 1120);
+        REQUIRE(editor.getHeight() == 740);
+        for (const auto size : {juce::Point<int>(1000, 680), juce::Point<int>(1120, 740), juce::Point<int>(1200, 800)})
         {
             editor.setSize(size.x, size.y);
             requireVisibleControls(editor);
@@ -110,7 +110,7 @@ TEST_CASE("Editor attachments synchronize sliders choices buttons and active res
 TEST_CASE("Active editor follows every supported state mode and rejects malformed restore", "[adapter][editor][state]")
 {
     juce::ScopedJuceInitialiser_GUI gui;
-    for (const auto version : {1, 2, 3})
+    for (const auto version : {1, 2, 3, 4})
         for (const bool legacy : {false, true})
         {
             if (version < 3 && !legacy) continue;
@@ -164,7 +164,11 @@ TEST_CASE("Editor numeric entry preserves readable Hz dB and percent units", "[a
         {"hpCutoffHz", "1234 Hz", 1234.0, "Hz"},
         {"tanhDriveDb", "6.5 dB", 6.5, "dB"},
         {"globalMix", "37.5 %", 0.375, "%"},
-        {"shape", "-25 %", -0.25, "%"}
+        {"shape", "-25 %", -0.25, "%"},
+        {"combDelayMs", "12.5 ms", 12.5, "ms"},
+        {"combFeedforward", "-0.75", -0.75, "-0.75"},
+        {"combFeedback", "0.9", 0.9, "0.90"},
+        {"toneDb", "-4.5 dB", -4.5, "dB"}
     };
     for (const auto& entry : entries)
     {

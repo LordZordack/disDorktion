@@ -1,0 +1,286 @@
+{
+  "reference_qualified": false,
+  "complete": false,
+  "cases": [
+    {
+      "id": 0,
+      "count": 148357,
+      "p99_fraction": 0.12300000000000001,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 1,
+      "count": 148372,
+      "p99_fraction": 0.12345,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 2,
+      "count": 148321,
+      "p99_fraction": 0.12465000000000001,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 3,
+      "count": 148264,
+      "p99_fraction": 0.1188,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 4,
+      "count": 146685,
+      "p99_fraction": 0.11756417910447761,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 5,
+      "count": 148547,
+      "p99_fraction": 0.09045,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 6,
+      "count": 145656,
+      "p99_fraction": 0.11467500000000001,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 7,
+      "count": 144975,
+      "p99_fraction": 0.116025,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 8,
+      "count": 146456,
+      "p99_fraction": 0.11797500000000001,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 9,
+      "count": 146913,
+      "p99_fraction": 0.11265,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 10,
+      "count": 147168,
+      "p99_fraction": 0.10838473282442748,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 11,
+      "count": 145426,
+      "p99_fraction": 0.093375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 12,
+      "count": 146990,
+      "p99_fraction": 0.10514645669291338,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 13,
+      "count": 146835,
+      "p99_fraction": 0.10612913385826771,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 14,
+      "count": 146585,
+      "p99_fraction": 0.10960629921259842,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 15,
+      "count": 146520,
+      "p99_fraction": 0.10635590551181101,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 16,
+      "count": 147033,
+      "p99_fraction": 0.09990350194552529,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 17,
+      "count": 146010,
+      "p99_fraction": 0.08813858267716534,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 18,
+      "count": 147263,
+      "p99_fraction": 0.098025,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 19,
+      "count": 146017,
+      "p99_fraction": 0.10175625,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 20,
+      "count": 144222,
+      "p99_fraction": 0.10374375000000001,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 21,
+      "count": 145365,
+      "p99_fraction": 0.1020375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 22,
+      "count": 145122,
+      "p99_fraction": 0.0980411650485437,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 23,
+      "count": 145188,
+      "p99_fraction": 0.0858,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 24,
+      "count": 145609,
+      "p99_fraction": 0.093375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 25,
+      "count": 144572,
+      "p99_fraction": 0.0947953125,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 26,
+      "count": 143323,
+      "p99_fraction": 0.0959953125,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 27,
+      "count": 137711,
+      "p99_fraction": 0.0951,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 28,
+      "count": 141260,
+      "p99_fraction": 0.09251292052657241,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 29,
+      "count": 139825,
+      "p99_fraction": 0.0817921875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 30,
+      "count": 147003,
+      "p99_fraction": 0.2787,
+      "budget_ok": false,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    }
+  ],
+  "worst_p99_fraction": 0.2787
+}

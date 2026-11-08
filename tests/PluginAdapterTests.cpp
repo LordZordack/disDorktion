@@ -40,6 +40,18 @@ TEST_CASE("Adapter appends production host controls after unchanged legacy contr
             REQUIRE(parameter->convertFrom0to1(1.0f) == 24.0f);
         }
     }
+    const char* appendedIds[] = {"bitDepth", "captureRateHz", "crusherBypass", "crusherMix", "crush", "shape", "jitter",
+        "tanhDriveDb", "tanhOutputDb", "tanhBypass", "folderDriveDb", "folderOutputDb", "folderThreshold", "folderBypass",
+        "hpCutoffHz", "hpResponse", "hpBypass", "lpCutoffHz", "lpResponse", "lpBypass", "globalMix", "chainBypass",
+        "combDelayMs", "combFeedforward", "combFeedback", "combDampingHz", "combMix", "combDampingEnabled", "combBypass",
+        "dispersionFrequencyHz", "dispersionMix", "dispersionBypass", "toneDb", "toneBypass"};
+    REQUIRE(controls.size() == 42);
+    for (int i = 0; i < 34; ++i)
+    {
+        const auto* parameter = dynamic_cast<juce::RangedAudioParameter*>(controls[i + 8]);
+        REQUIRE(parameter != nullptr);
+        REQUIRE(parameter->paramID == appendedIds[i]);
+    }
 }
 
 namespace
@@ -141,7 +153,7 @@ TEST_CASE("Adapter legacy imports preserve tiny linear values and reset all prod
             fill(audio, 0.25f); processor.processBlock(audio, midi);
             REQUIRE(audio.getSample(0, 0) == (bypass ? 0.25f : 0.25f * value));
             auto saved = savedControls(processor); REQUIRE(saved != nullptr);
-            REQUIRE(saved->getStringAttribute("version") == "3"); REQUIRE(saved->getStringAttribute("mode") == "legacyGain");
+            REQUIRE(saved->getStringAttribute("version") == "4"); REQUIRE(saved->getStringAttribute("mode") == "legacyGain");
             REQUIRE(static_cast<float>(saved->getDoubleAttribute("gain")) == value);
         }
 }
@@ -156,7 +168,7 @@ TEST_CASE("Adapter v2 restores synchronized host values raw DSP controls and rou
     REQUIRE(hostControl(processor, 2).convertFrom0to1(hostControl(processor, 2).getValue()) == 24.0f);
     REQUIRE(hostControl(processor, 5).convertFrom0to1(hostControl(processor, 5).getValue()) == -60.0f);
     auto saved = savedControls(processor); REQUIRE(saved != nullptr);
-    REQUIRE(saved->getStringAttribute("version") == "3");
+    REQUIRE(saved->getStringAttribute("version") == "4");
     REQUIRE(saved->getStringAttribute("mode") == "legacyGain");
     for (const auto* id : {"gain", "bypass", "inputGainDb", "inputMute", "inputBypass", "outputGainDb", "outputMute", "outputBypass"})
         REQUIRE(saved->getDoubleAttribute(id) == xml.getDoubleAttribute(id));

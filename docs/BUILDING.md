@@ -1,5 +1,11 @@
 # Building
 
+Catch discovers tests at test time for the selected configuration. This keeps
+VS multi-configuration builds from reusing a Debug test list for the Release
+preset, or vice versa. Build the selected configuration before running its
+CTest preset; `ctest --preset windows-vs2026-release -N -V` shows the resolved
+executable paths without running tests.
+
 Issue #17 adds `disdorktion_comb_measurements` and `disdorktion_comb_benchmark`.
 Both are available in full and DSP-only builds. After a Release build, capture
 and independently audit into fresh destinations:

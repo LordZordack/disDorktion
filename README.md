@@ -15,8 +15,9 @@
 
 The plugin editor exposes Input, Middle and Output sections, global dry/wet,
 final gain, compatibility trim, raw-input/final-output meters and five factory
-settings from Initialize through Digital Destruction. The existing 30 host
-parameters and version-1/2/3 state compatibility are retained. Preset recall
+settings from Initialize through Digital Destruction. The original 30 host
+parameters retain their order and meanings; 12 Output controls are appended.
+State version 4 also restores version-1/2/3 sessions. Preset recall
 preserves output mute; Initialize restores defaults. See the
 [interface and state guide](docs/PLUGIN_INTERFACE.md),
 [interface design](docs/okf/methods/plugin_interface.md) and
@@ -26,9 +27,9 @@ latency, preset transition behavior and pending host/listening checks.
 ### Full chain candidate
 
 Select **Full chain** in the audition app for input gain/crushing, fixed 4x
-FIR/ADAA tanh/folding, output filters, global dry/wet and final gain. Dry is
+FIR/ADAA tanh/folding, comb, frequency dispersion, tone, output filters, global dry/wet and final gain. Dry is
 captured before input drive and aligned by 92 samples. Chain bypass preserves
-that delay and final gain; each effect also has independent bypass. Version-11
+that delay and final gain; each effect also has independent bypass. Version-16
 experiments reproduce the chain. New plugin instances use the same processor;
 old plugin states retain their gain-only behavior. See the
 [design](docs/okf/methods/full_chain.md) and
@@ -51,20 +52,26 @@ Select **Tone** in the audition app for a dark/bright balance control, -6 to
 +6 dB around a fixed 1 kHz unity pivot. Zero is exact neutral; tone and bypass
 changes take 10 ms. The isolated module adds zero samples of compensating
 latency, and version-14 experiments retain its settings. Positive tone cuts lows
-and boosts highs, so leave headroom. Production-chain integration remains X5.
+and boosts highs, so leave headroom. The production Output section now includes this module, bypassed by default.
 See the [design](docs/okf/methods/tone.md) and
 [qualification status](docs/okf/notes/tone_validation.md).
 
 Issue #17 adds an isolated **Resonant comb** audition target with delay,
 feedforward, damped signed feedback, mix and bypass controls. Delay changes
-produce pitch glides; high feedback rings and can amplify peaks. It is available
-for experimentation before X5 production-chain integration. See the
+produce pitch glides; high feedback rings and can amplify peaks. It is also integrated into the production Output section, bypassed by default. See the
 [design](docs/okf/methods/resonant_comb.md) and
 [verification status](docs/okf/notes/resonant_comb_validation.md).
 
-Select **Output section** in the audition app for native-rate high-pass then
-low-pass filtering. Both stages have independent cutoff, response and bypass
-controls; common bypass retains those choices. Version-10 records reproduce
+The production **Output section** uses native-rate comb -> frequency dispersion
+-> tone -> high-pass -> low-pass. The three added modules default to bypass,
+preserving existing sessions and the five factory preset sounds. Dispersion is
+all-pass phase shaping; blending it with dry can cause frequency-dependent
+cancellation. Comb feedback and tone boost can raise peaks, so leave headroom.
+Host latency remains 92 samples for the full chain. Expanded-chain automated
+checks do not replace host, listening, or release qualification.
+
+Select **Output section** in the audition app for the same expanded chain. Both stages have independent cutoff, response and bypass
+controls; common bypass retains those choices. Version-15 records reproduce
 the section in live audition and offline renders. Equal and crossed cutoffs are
 allowed. The section adds zero samples of latency; filter phase and tails remain.
 See the [design](docs/okf/methods/output_section.md) and
@@ -162,7 +169,7 @@ See the [design](docs/okf/methods/middle_oversampling.md),
 [evidence](docs/okf/notes/middle_oversampling_validation.md), and
 [commands](docs/AUDITION_HARNESS.md#middle-section-quality-comparisons-q1).
 
-Design modularily. Each state (demodulation, bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)
+Design modularily. Each stage (bit crush, tanh, etc.) should be its own separate module that can be chained together to output the final result. (In series, though maybe later in parallel can be experimented with)
 
 To test each function, a simple GUI either with prerecorded looped input or simple keyboard MIDI sinwave synth input should be used. Settings for the given module should be modifiable, and there should be a way to control output volume. This way, each module is able to be a sort of "standalone plugin". (but more importantly, it allows for rapid testing)
 
@@ -171,7 +178,7 @@ To test each function, a simple GUI either with prerecorded looped input or simp
 Input Stage: Receiving the signal
 
 - input gain
-- Demodulation: modulate the signal to a higher frequency, then peform demodulation. Allow user to change phase of demodulation oscillator to provide distortion that might be found in radio. 
+- Carrier modulation/demodulation was discarded on 2026-11-07 and is excluded from integration.
 - Bit Crushing: Reduces the bit depth and sample rate to create a Crunchy, aliased character at the input source. Adds digital distortion by lowering quality dynamically.
     - Select number of bits
     - Select sample rate
@@ -185,7 +192,7 @@ Middle Stage: Processing the signal
 Output Stage: Outputting the signal
 - Resonant Comb Filter: Mixes the input with a delayed version of itself, creating a series of evenly spaced resonances and notches. This colors the sound in a hollow, metallic, or phasey way that highlights specific frequencies.
 
-- Frequency dispersion (X3): An isolated 32-stage all-pass cascade reshapes transients through frequency-dependent phase and delay. Static settings retain spectral-line frequencies; dry/wet blending colors magnitude and automation can create sidebands. The audition harness exposes requested frequency (20–20000 Hz), mix and bypass. Effective frequency is limited by sample rate and a coefficient safety bound. Outer feedback and true frequency remapping are separate alternatives; production-chain integration belongs to X5. See the [design](docs/okf/methods/frequency_dispersion.md) and [validation status](docs/okf/notes/frequency_dispersion_validation.md).
+- Frequency dispersion (X3): An isolated 32-stage all-pass cascade reshapes transients through frequency-dependent phase and delay. Static settings retain spectral-line frequencies; dry/wet blending colors magnitude and automation can create sidebands. The audition harness exposes requested frequency (20–20000 Hz), mix and bypass. Effective frequency is limited by sample rate and a coefficient safety bound. Outer feedback and true frequency remapping are separate alternatives; the cascade is integrated into the production Output section, bypassed by default. See the [design](docs/okf/methods/frequency_dispersion.md) and [validation status](docs/okf/notes/frequency_dispersion_validation.md).
 
 - Low pass
 - High pass

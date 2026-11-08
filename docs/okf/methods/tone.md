@@ -73,3 +73,13 @@ Three pinned AC Release runs and independent raw audit are required; quiet-decay
 and automation are included. Diagnostics do not establish reference acceptance.
 Matched-level guitar, bass, percussion and mix listening requires human verdicts
 with source/settings provenance. Dependency listening and GUI gates remain open.
+
+## Production integration (issue 20)
+
+This module is integrated into the native-rate [Output section](output_section.md)
+in the fixed comb -> dispersion -> tone -> high-pass -> low-pass order.
+It defaults to bypass for Initialize, existing factory sounds and old sessions;
+its histories remain warm. The isolated design and limits above remain module
+contracts, not a universal peak bound for cascaded resonant inputs. See
+[expanded-chain qualification](../notes/expanded_output_validation.md) for
+combined-chain stress, state/automation and conditional CPU acceptance.

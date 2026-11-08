@@ -1,0 +1,6 @@
+{
+  "stress_passed": true,
+  "cases": 48,
+  "maximum_peak": 155.1373748779297,
+  "maximum_residual_after_20s": 1.689022477435742e-09
+}

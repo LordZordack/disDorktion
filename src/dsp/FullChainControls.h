@@ -34,7 +34,19 @@ inline constexpr std::array fullChainControls {
     FullChainControl {"lpResponse", "Low-pass response", 0.0f, 2.0f, 0.0f, true},
     FullChainControl {"lpBypass", "Bypass low-pass", 0.0f, 1.0f, 0.0f, true},
     FullChainControl {"globalMix", "Global dry/wet", 0.0f, 1.0f, 1.0f, false},
-    FullChainControl {"chainBypass", "Bypass chain", 0.0f, 1.0f, 0.0f, true}
+    FullChainControl {"chainBypass", "Bypass chain", 0.0f, 1.0f, 0.0f, true},
+    FullChainControl {"combDelayMs", "Comb delay (ms)", 0.25f, 40.0f, 5.0f, false},
+    FullChainControl {"combFeedforward", "Comb feedforward", -1.0f, 1.0f, 0.0f, false},
+    FullChainControl {"combFeedback", "Comb feedback", -0.95f, 0.95f, 0.7f, false},
+    FullChainControl {"combDampingHz", "Comb damping (Hz)", 20.0f, 20000.0f, 6000.0f, false},
+    FullChainControl {"combMix", "Comb mix", 0.0f, 1.0f, 0.5f, false},
+    FullChainControl {"combDampingEnabled", "Comb damping enabled", 0.0f, 1.0f, 1.0f, true},
+    FullChainControl {"combBypass", "Bypass comb", 0.0f, 1.0f, 1.0f, true},
+    FullChainControl {"dispersionFrequencyHz", "Dispersion frequency (Hz)", 20.0f, 20000.0f, 500.0f, false},
+    FullChainControl {"dispersionMix", "Dispersion mix", 0.0f, 1.0f, 1.0f, false},
+    FullChainControl {"dispersionBypass", "Bypass dispersion", 0.0f, 1.0f, 1.0f, true},
+    FullChainControl {"toneDb", "Tone (dB)", -6.0f, 6.0f, 0.0f, false},
+    FullChainControl {"toneBypass", "Bypass tone", 0.0f, 1.0f, 1.0f, true}
 };
 inline float getFullChainControl(const FullChainSettings& settings, std::string_view id) noexcept
 {
@@ -66,6 +78,18 @@ inline float getFullChainControl(const FullChainSettings& settings, std::string_
     if (id == "lpBypass") return static_cast<float>(settings.output.lowPass.bypass);
     if (id == "globalMix") return static_cast<float>(settings.mix);
     if (id == "chainBypass") return static_cast<float>(settings.bypass);
+    if (id == "combDelayMs") return static_cast<float>(settings.output.comb.delayMs);
+    if (id == "combFeedforward") return static_cast<float>(settings.output.comb.feedforward);
+    if (id == "combFeedback") return static_cast<float>(settings.output.comb.feedback);
+    if (id == "combDampingHz") return static_cast<float>(settings.output.comb.dampingHz);
+    if (id == "combMix") return static_cast<float>(settings.output.comb.mix);
+    if (id == "combDampingEnabled") return static_cast<float>(settings.output.comb.dampingEnabled);
+    if (id == "combBypass") return static_cast<float>(settings.output.comb.bypass);
+    if (id == "dispersionFrequencyHz") return static_cast<float>(settings.output.dispersion.frequencyHz);
+    if (id == "dispersionMix") return static_cast<float>(settings.output.dispersion.mix);
+    if (id == "dispersionBypass") return static_cast<float>(settings.output.dispersion.bypass);
+    if (id == "toneDb") return static_cast<float>(settings.output.tone.toneDb);
+    if (id == "toneBypass") return static_cast<float>(settings.output.tone.bypass);
     return std::numeric_limits<float>::quiet_NaN();
 }
 inline bool setFullChainControl(FullChainSettings& settings, std::string_view id, float value) noexcept
@@ -104,6 +128,18 @@ inline bool setFullChainControl(FullChainSettings& settings, std::string_view id
         else if (id == "lpBypass") next.output.lowPass.bypass = value != 0.f;
         else if (id == "globalMix") next.mix = value;
         else if (id == "chainBypass") next.bypass = value != 0.f;
+        else if (id == "combDelayMs") next.output.comb.delayMs = value;
+        else if (id == "combFeedforward") next.output.comb.feedforward = value;
+        else if (id == "combFeedback") next.output.comb.feedback = value;
+        else if (id == "combDampingHz") next.output.comb.dampingHz = value;
+        else if (id == "combMix") next.output.comb.mix = value;
+        else if (id == "combDampingEnabled") next.output.comb.dampingEnabled = value != 0.f;
+        else if (id == "combBypass") next.output.comb.bypass = value != 0.f;
+        else if (id == "dispersionFrequencyHz") next.output.dispersion.frequencyHz = value;
+        else if (id == "dispersionMix") next.output.dispersion.mix = value;
+        else if (id == "dispersionBypass") next.output.dispersion.bypass = value != 0.f;
+        else if (id == "toneDb") next.output.tone.toneDb = value;
+        else if (id == "toneBypass") next.output.tone.bypass = value != 0.f;
         if (!isValidFullChainSettings(next)) return false;
         settings = next; return true;
     }

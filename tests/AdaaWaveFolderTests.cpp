@@ -116,3 +116,122 @@ TEST_CASE("ADAA handles large complete-cycle jumps tiny steps and silent channel
     REQUIRE(folder.process(juce::dsp::AudioBlock<float>(b)));
     for(int n=0;n<10;++n) { REQUIRE(std::isfinite(b.getSample(0,n))); REQUIRE(b.getSample(1,n)==0); REQUIRE(std::abs(b.getSample(0,n))<=.3f); }
 }
+
+TEST_CASE("ADAA folding remains correct after equal linear and tiny-delta passages", "[adaa][regression]")
+{
+    // Consecutive primitive evaluations are separated by each early-return
+    // path, with distinct histories on the two channels.
+    const std::array<float, 20> left {
+        0.f, .4f, .9f, .9f, std::nextafter(.9f, 1.f), .1f, -.1f,
+        .8f, .8f, std::nextafter(.8f, 1.f), .15f, -.95f, -.95f,
+        std::nextafter(-.95f, -1.f), 0.f, -.0f, .65f, -.7f, .05f, .95f
+    };
+    const std::array<float, 20> right {
+        -.6f, .7f, .7f, std::nextafter(.7f, 1.f), -.05f, .05f, -.8f,
+        .95f, -.95f, -.95f, std::nextafter(-.95f, -1.f), .1f, -.1f,
+        .45f, .6f, .6f, 0.f, -.0f, -.9f, .8f
+    };
+    for (float driveDb : {0.f, 12.f})
+    {
+        disdorktion::AdaaWaveFolder folder;
+        REQUIRE(folder.setParameters({driveDb, .25f, 0.f, false}));
+        REQUIRE(folder.prepareOversampled({48000, 3, 2}, 4));
+        juce::AudioBuffer<float> block(2, int(left.size()));
+        for (std::size_t n = 0; n < left.size(); ++n)
+        {
+            block.setSample(0, int(n), left[n]);
+            block.setSample(1, int(n), right[n]);
+        }
+        REQUIRE(folder.process(juce::dsp::AudioBlock<float>(block)));
+        const double drive = std::pow(10., double(driveDb) / 20.);
+        for (unsigned c = 0; c < 2; ++c)
+        {
+            double previous = 0., one = 0., two = 0.;
+            const auto& input = c == 0 ? left : right;
+            for (std::size_t n = 0; n < input.size(); ++n)
+            {
+                CAPTURE(driveDb, c, n);
+                const auto raw = intervalAverage(input[n], previous, drive, .25);
+                const auto expected = -.125 * raw + 1.25 * one - .125 * two;
+                REQUIRE(block.getSample(int(c), int(n)) == Catch::Approx(expected).margin(2e-6));
+                previous = input[n]; two = one; one = raw;
+            }
+        }
+    }
+}
+
+TEST_CASE("ADAA interrupted drive and threshold ramps preserve their interval average", "[adaa][regression]")
+{
+    // Analytic linear segments provide control values independently of JUCE's
+    // incrementing smoother, including interruptions and exact target arrival.
+    struct LinearSegment
+    {
+        double value, start, target;
+        unsigned elapsed = 160;
+        void set(double next)
+        {
+            if (next != target) { start = value; target = next; elapsed = 0; }
+        }
+        double advance()
+        {
+            if (elapsed < 160)
+            {
+                ++elapsed;
+                value = elapsed == 160 ? target : start + (target - start) * (double(elapsed) / 160.);
+            }
+            return value;
+        }
+    };
+    LinearSegment drive {1., 1., 1.}, threshold {1., 1., 1.}, bypass {0., 0., 0.};
+    const std::array<unsigned, 7> changes {0, 7, 31, 89, 143, 211, 400};
+    const std::array<disdorktion::WaveFolderSettings, 7> snapshots {{
+        {12.f, .25f, 0.f, false}, {6.f, .7f, 0.f, false},
+        {18.f, .15f, 0.f, false}, {0.f, .9f, 0.f, false},
+        {12.f, .25f, 0.f, false}, {12.f, .25f, 0.f, true},
+        {6.f, .5f, 0.f, false}
+    }};
+    disdorktion::AdaaWaveFolder folder;
+    REQUIRE(folder.prepareOversampled({8000, 17, 2}, 2)); // 160 internal frames per ramp.
+    juce::AudioBuffer<float> frame(2, 1);
+    std::array<double, 2> previous {}, one {}, two {};
+    disdorktion::WaveFolderSettings retained;
+    unsigned event = 0;
+    for (unsigned n = 0; n < 650; ++n)
+    {
+        if (event < changes.size() && n == changes[event])
+        {
+            retained = snapshots[event++];
+            drive.set(std::pow(10., double(retained.driveDb) / 20.));
+            threshold.set(retained.threshold);
+            bypass.set(retained.bypass ? 1. : 0.);
+        }
+        // Identical setters must leave an unfinished ramp progressing normally.
+        REQUIRE(folder.setParameters(retained));
+        drive.set(std::pow(10., double(retained.driveDb) / 20.));
+        threshold.set(retained.threshold);
+        bypass.set(retained.bypass ? 1. : 0.);
+        if (n == 47 || n == 223)
+        {
+            auto invalid = retained; invalid.threshold = 0.f;
+            REQUIRE_FALSE(folder.setParameters(invalid));
+            REQUIRE_FALSE(folder.prepareOversampled({4000, 17, 2}, 2));
+        }
+        const auto a = drive.advance(), t = threshold.advance(), b = bypass.advance();
+        const std::array<float, 2> input {
+            float(.55 * std::sin(.21 * n) + .1),
+            float(.43 * std::cos(.17 * n) - .08)
+        };
+        for (unsigned c = 0; c < 2; ++c) frame.setSample(int(c), 0, input[c]);
+        REQUIRE(folder.process(juce::dsp::AudioBlock<float>(frame)));
+        for (unsigned c = 0; c < 2; ++c)
+        {
+            CAPTURE(n, c);
+            const auto dry = .5 * (input[c] + previous[c]);
+            const auto wet = intervalAverage(input[c], previous[c], a, t);
+            const auto raw = b == 1. ? dry : b == 0. ? wet : b * dry + (1. - b) * wet;
+            const auto expected = -.125 * raw + 1.25 * one[c] - .125 * two[c];
+            REQUIRE(frame.getSample(int(c), 0) == Catch::Approx(expected).margin(2e-6));
+            previous[c] = input[c]; two[c] = one[c]; one[c] = raw;
+        }
+    }
+}

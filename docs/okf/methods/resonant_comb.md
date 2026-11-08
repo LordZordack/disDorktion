@@ -123,3 +123,13 @@ Adopted suggestions: slower delay ramp, explicit denormal protection, effective
 damping clamp, continuous damping history, buffer margin, tail-aware frequency
 tests, and reprepare/quiet-tail coverage. A reverse read trajectory alone does
 not invalidate the contraction proof. Review CPU estimates remain predictions.
+
+## Production integration (issue 20)
+
+This module is integrated into the native-rate [Output section](output_section.md)
+in the fixed comb -> dispersion -> tone -> high-pass -> low-pass order.
+It defaults to bypass for Initialize, existing factory sounds and old sessions;
+its histories remain warm. The isolated design and limits above remain module
+contracts, not a universal peak bound for cascaded resonant inputs. See
+[expanded-chain qualification](../notes/expanded_output_validation.md) for
+combined-chain stress, state/automation and conditional CPU acceptance.
