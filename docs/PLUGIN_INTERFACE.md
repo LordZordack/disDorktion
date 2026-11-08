@@ -2,7 +2,7 @@
 
 The editor exposes the shared [full chain](okf/methods/full_chain.md) used by
 the audition application. Input gain and crushing feed fixed 4x FIR/ADAA tanh
-and folding, then high-pass and low-pass filters, global mixing and final
+and folding, then comb, dispersion, tone, high-pass and low-pass, global mixing and final
 gain. Mono and stereo use matching input/output layouts. Full-chain latency
 is 92 host samples; legacy gain mode reports zero. See
 [qualification status](okf/notes/plugin_interface_validation.md) for evidence
@@ -22,7 +22,7 @@ default. Frequencies display Hz, gains display dB, the legacy trim displays a
 linear multiplier, and mix/shape/threshold/jitter values display percentages.
 Frequency knobs use a visual skew for mouse travel; host normalization stays
 linear. Bit depth and filter response use named choices. The editor starts at
-820 by 560 pixels and can resize from 740 by 520 to 1400 by 1000. Compact
+1120 by 740 pixels and can resize from 1000 by 680 to 1400 by 1000. Compact
 knob grids keep the three processing sections visible; Global and Compatibility
 share the lower row. Drag knobs vertically or horizontally to adjust values.
 
@@ -40,7 +40,13 @@ share the lower row. Drag knobs vertically or horizontally to adjust values.
 | High-pass; low-pass cutoff | 20 to 20000 Hz | 20; 20000 Hz |
 | Filter response | Butterworth, Chebyshev I, Chebyshev II | Butterworth |
 | Legacy trim | 0 to 4 times | 1 time |
-| All mute and bypass switches | Off / On | Off |
+| Comb delay | 0.25 to 40 ms | 5 ms |
+| Comb feedforward; feedback | -1 to +1; -0.95 to +0.95 | 0; 0.7 |
+| Comb damping; mix | 20 to 20000 Hz; 0 to 100% | 6000 Hz; 50% |
+| Dispersion frequency; mix | 20 to 20000 Hz; 0 to 100% | 500 Hz; 100% |
+| Tone | -6 to +6 dB, unity pivot at 1 kHz | 0 dB |
+| Comb, dispersion, tone bypass; comb damping enabled | Off / On | On |
+| Other mute and bypass switches | Off / On | Off |
 
 Requested capture rate is retained even when the effective rate is capped by
 the processing rate. Filter cutoff is capped at 45% of host sample rate. The
@@ -48,9 +54,9 @@ defaults enable the processing chain; Initialize is not a transparent bypass.
 
 ## Automation compatibility
 
-The schema remains **30 parameters**: two legacy controls plus 28 full-chain
-controls. Parameter IDs, version hints, ordering, defaults and normalized host
-mappings are retained. UI formatting and frequency mouse skew add no parameters.
+The schema now has **42 parameters**: the original 30 retain their IDs,
+version hints, order, defaults and normalized mappings, followed by 12 Output
+controls. UI formatting and frequency mouse skew add no parameters.
 The first eight host parameters are `referenceGain`, `referenceBypass`,
 `inputGainDb`, `inputMute`, `inputBypass`, `outputGainDb`, `outputMute`,
 `outputBypass`; subsequent parameters follow
@@ -136,14 +142,15 @@ must be assessed before treating preset loudness as accepted.
 
 ## Save and restore policy
 
-The binary JUCE XML payload has root `DisDorktionState`. New saves remain
-version 3. Parsing and validating the complete candidate precedes publication.
+The binary JUCE XML payload has root `DisDorktionState`. New saves use
+version 4. Parsing and validating the complete candidate precedes publication.
 
 | Version | Required fields and migration |
 | --- | --- |
 | 1 | `gain`, `bypass`; restore legacy gain mode and default all production controls |
 | 2 | `gain`, `bypass` and the six original production gain/mute/bypass fields; restore legacy mode and default later chain controls |
-| 3 | `gain`, `bypass`, all 28 chain fields and `mode` equal to `legacyGain` or `fullChain` |
+| 3 | `gain`, `bypass`, original 28 chain fields and `mode`; added effects restore bypassed defaults |
+| 4 | `gain`, `bypass`, all 40 chain fields and `mode` equal to `legacyGain` or `fullChain` |
 
 Null/empty input, malformed XML/binary data, wrong root, unsupported or missing
 version, invalid mode, missing required fields, nonfinite/out-of-range values,
@@ -161,3 +168,26 @@ independent atomics. Direct processor callers must provide the same exclusive
 lifecycle ownership as JUCE host wrappers. Editor preset operations run on the
 message thread, without taking the callback lock. Each instance owns its
 parameters, DSP, meters and derived preset matching.
+
+
+## Expanded Output state and tails (issue #20)
+
+Output processes comb -> frequency dispersion -> tone -> high-pass -> low-pass.
+The new effects default to bypass. The five existing presets retain their
+sounds. Dispersion changes phase/group delay; partial global dry/wet can
+produce frequency-dependent cancellation. Neither dispersion nor comb adds
+compensating bulk latency: full-chain alignment remains 92 samples.
+
+State version 4 stores all 42 host controls. Versions 1/2 retain gain-only
+routing; version 3 retains its recorded mode and original controls. Loading
+any old state explicitly restores the new controls to their defaults, ignoring
+extra new-field attributes. Successful restore clears full-chain histories and snaps its smoothers even
+when the mode does not change. Legacy gain-only restores preserve their
+historical scalar gain ramps. Malformed v4 states are rejected
+before publication. Host-serialized restore is a lifecycle operation.
+
+Full-chain tail reporting is conservatively 20 seconds plus FIR latency,
+including bypass states, to cover retained histories and the combined chain.
+Legacy gain mode reports zero. This allowance is tested with extreme comb
+feedback/delay and slow dispersion/filter settings; it is not a proof for
+arbitrary input or an absolute silence promise for recursive filters.

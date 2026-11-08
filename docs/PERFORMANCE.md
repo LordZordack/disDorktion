@@ -1,5 +1,64 @@
 # Performance procedure and proposed budgets
 
+## Expanded chain qualification (issue #20)
+
+`disdorktion_expanded_chain_qualification` adds active comb, dispersion and tone
+to full-chain CPU coverage. Carrier modulation was discarded by the user.
+The reference attempt runs three pinned AC Release repetitions at 48/96 kHz,
+stereo, capacities 32/64/127/256/1024. The six regimes are warm bypass, active
+static resonance, combined automation, child/common bypass transitions,
+oversized dispatch and quiet decay. Controls, processing and peak acquisition
+are timed together under `ScopedNoDenormals`; fixtures, finite checks and file
+I/O stay outside that interval. The existing 25% incoming callback deadline
+gate remains unchanged. No timer overhead or scheduling outliers are removed.
+
+Each case uses two seconds warmup, a two-second throughput probe and the
+full-chain adaptive 10–1200 second equal-wall-time sampler. The original
+120-second ceiling retained too few samples for large/oversized blocks; the
+ceiling was revised before retry without lowering the sample-count gate.
+Reference acceptance
+requires 100,000–200,000 observations per case, automation residue coverage,
+settled active/bypassed observations, stable observed AC power/profile and
+observed performance-core affinity. Quiet cases also retain a 31-second audio
+trace (one second drive followed by 30 seconds decay). Settings, executable and
+source identities are retained. Quiet excitation/decay cycles repeat throughout
+the sampled window, with coverage required during excitation, early decay,
+later decay and settled silence. Thermal sensing/ambient limitations are explicit.
+
+```powershell
+cmake --build --preset windows-vs2026-release --target disdorktion_expanded_chain_qualification --parallel 4
+./build/windows-vs2026/Release/disdorktion_expanded_chain_qualification.exe --stress --conditions 'Record actual conditions' --output NEW_STRESS_DIRECTORY
+./build/windows-vs2026/Release/disdorktion_expanded_chain_qualification.exe --high-qos --fail-fast --conditions 'Explicit HighQoS standalone reference; record actual conditions; no competing jobs' --output NEW_CPU_DIRECTORY
+python scripts/validate_expanded_chain.py NEW_CPU_DIRECTORY --executable ./build/windows-vs2026/Release/disdorktion_expanded_chain_qualification.exe --output NEW_AUDIT_JSON
+```
+
+`--quick` is a short unpinned smoke diagnostic, never reference evidence.
+`--diagnostic` runs one unpinned full-window matrix. CPU exit 0 requires all
+reference gates; exit 1 retains unqualified results; exit 2 means an execution
+error. `--fail-fast` preserves a partial unqualified report at the first failed
+reference gate. Each completed case flushes CSVs and saves case metadata;
+session environment and provenance are saved before collection starts.
+Stress mode reports finite output, channel isolation, measured peaks,
+20-second residual and latency at 8–384 kHz with static/dynamic excitation.
+It retains interleaved raw captures for independent validation of all 48 cases,
+including high-gain upstream bypass. Latency must remain 92 samples.
+Its overdriven tail measurements do not replace the existing nominal unit-input
+Output-section decay gate. User listening acceptance and host validation are
+separate from these numerical measurements.
+
+Measured 2026-11-07: all 48 expanded stress cases passed independent raw-capture
+audit. The revised CPU reference attempt stopped after 31 cases at its first
+timing failure. All 30 cases at 48 kHz passed; stereo 96 kHz / 32 frames with
+the new effects warm-bypassed measured p99 92.9 us, 27.87% of the incoming
+deadline, above the unchanged 25% allowance (83.33 us). Its 147,003 observations,
+pinning, AC and power-profile gates were valid. That system-managed-policy
+attempt remains **unqualified** and partial. A separate, fresh 180-case reference
+subsequently qualified under the explicitly requested HighQoS method, with
+worst p99 6.49% of deadline and the same 25% gate. These are different recorded
+environments; the cache's small DSP saving is not credited with the policy gain.
+See the [evidence and conditions](okf/notes/expanded_output_validation.md), the
+process-policy investigation below, and the [published evidence inventory](measurements/expanded_chain_issue20_evidence.md).
+
 ## Tone budget (X4 / issue #19)
 
 Proposed isolated tone ceiling: p99 <2% of incoming callback deadline at
@@ -417,3 +476,37 @@ for 20 ms and keeps 1000 timings; default warms for 2 seconds and keeps 10000.
 Neither timer overhead nor outliers are removed. Raw schedules and source /
 executable hashes identify the actual run. Reference qualification, actual DAW
 callback timing and human listening remain separate acceptance evidence.
+
+## Issue 20 CPU resolution investigation (2026-11-07)
+
+Focused screens of the same frozen executable expose substantial Windows process-policy sensitivity. At 48/96 kHz and 32 frames, system-managed policy gave median 51.2/50.0 us and p99 107.9/97.4 us; explicitly requested process HighQoS gave median 16.1/15.7 us and p99 24.3/23.8 us. Raw counters do not establish processor frequency or the cause of individual tail events.
+
+The exact-argument ADAA primitive cache preserves all 48 golden captures byte-for-byte and passes 75,384 assertions in eight ADAA tests. Its default-policy median improvement is only about 0.5 us and does not resolve that policy's budget failure. Candidate HighQoS diagnostic repeats measured p99 23.5–24.1 us. These short screens do not establish reference acceptance.
+
+The standalone collector's explicit --high-qos option declares method windows-explicit-highqos-v1. It requests policy for its own process, captures readback and restores the prior policy. The plugin never changes host policy. Microsoft documents HighQoS for audible processes and a separate Deadline QoS classification for audio work under MMCSS; this offline method is an active-audio surrogate, not proof of equivalent behavior in every host. [Microsoft QoS documentation](https://learn.microsoft.com/en-us/windows/win32/procthread/quality-of-service)
+
+This is a declared measurement-environment revision. The 25% deadline gate, three repetitions, 180-case matrix, raw retention, sample counts, coverage and latency requirements remain unchanged. A fresh complete passing matrix and independent policy/raw audit are required. The original default-policy failure remains valid and retained; it is never combined with the revised matrix.
+
+The fresh reference completed and independently qualified all 180 cases across
+three repetitions under `windows-explicit-highqos-v1`. Worst p99 was 45,300 ns
+for a 67-frame oversized callback at 96 kHz (run 1, zero-based): 6.490746% of
+the 697,916.667 ns deadline, below the unchanged 25% ceiling. That case retained
+148,958 observations. Every case passed timing, coverage, power and processing
+checks; latency remained 92 samples. Independent policy auditing confirmed
+application, actual selected affinity, collection stability and exact restoration.
+AC/Balanced/group0/mask0x1 conditions apply; thermal sensing was unavailable
+and ambient conditions unconfirmed. This qualification is conditional on the
+declared standalone environment and does not replace actual host validation.
+
+Evidence: [reference report](measurements/expanded_chain_issue20_cpu_reference_highqos_v1/result.json)
+and [independent raw audit](measurements/expanded_chain_issue20_cpu_reference_highqos_v1_audit.json).
+The fixed baseline default/HighQoS/HighQoS/default screen retained all four
+distributions: default medians 50.0–51.4 us versus 15.6–16.1 us under HighQoS;
+default p99 varied from 67.6–89.1 us versus 20.6–22.5 us under HighQoS.
+The cache itself is not credited with this environment-dependent gain.
+
+Post-change correctness: 309/309 Release and 309/309 Debug tests passed,
+84 Python tests passed, all 48 exact-byte golden comparisons passed, and the
+fresh 48-case stress capture audit passed. Maximum stress peak was
+155.1373748779297 and maximum residual after 20 seconds was
+1.689022477435742e-9; the original nominal Output decay gate remains unchanged.

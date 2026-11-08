@@ -3,6 +3,26 @@
 #include <catch2/catch_test_macros.hpp>
 #include <thread>
 using namespace disdorktion;
+TEST_CASE("Expanded output scalar automation and history resets allocate nothing", "[output-section][harness-realtime][expanded]")
+{
+    harness::AuditionEngine engine;REQUIRE(engine.selectTarget("output-section"));REQUIRE(engine.prepare({48000,7,2}));
+    juce::AudioBuffer<float> audio(2,1031);audio.clear();bool ok=true;
+    {
+        test::ScopedAllocationTracking tracking;
+        for(unsigned event=0;event<16;++event)
+        {
+            for(const auto& control:harness::outputSectionControls)
+                ok &= engine.setOutputControl(control.id,control.defaultValue);
+            ok &= engine.setOutputControl("combBypass",static_cast<float>(event%2));
+            ok &= engine.setOutputControl("dispersionBypass",static_cast<float>(event%2));
+            ok &= engine.setOutputControl("toneBypass",static_cast<float>(event%2));
+            ok &= engine.setOutputControl("toneDb",event%2?6.f:-6.f);
+            ok &= !engine.setOutputControl("combBypass",.5f);
+            ok &= engine.process(juce::dsp::AudioBlock<float>(audio),false);engine.reset();
+        }
+    }
+    const auto counts=test::getAllocationCounts();REQUIRE(ok);REQUIRE(counts.allocations==0);REQUIRE(counts.deallocations==0);
+}
 TEST_CASE("Output harness scalar changes and reset allocate nothing", "[output-section][harness-realtime]")
 {
     harness::AuditionEngine engine; REQUIRE(engine.selectTarget("output-section"));REQUIRE(engine.prepare({48000,7,2}));

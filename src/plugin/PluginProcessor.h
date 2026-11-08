@@ -69,11 +69,11 @@ private:
     bool legacyMode = false;
     std::atomic<bool> requestedLegacyMode {false};
     std::atomic<int> fullLatency {0};
-    std::atomic<double> fullTailSeconds {3.0};
+    std::atomic<double> fullTailSeconds {20.0};
     std::atomic<float> inputMeter {0}, outputMeter {0};
     std::atomic<bool> inputClip {false}, outputClip {false}, clearOverloads {false};
     // Publish host metadata independently: hosts may query tails concurrently.
-    std::atomic<double> tailSeconds {3.0};
+    std::atomic<double> tailSeconds {20.0};
     double preparedSampleRate = 0.0;
     // JUCE calls prepare before playback and release after playback stops.
     // Lifecycle/reset/restore and processing must be serialized. JUCE wrappers

@@ -49,6 +49,9 @@ target_link_libraries(disdorktion_dsp
 )
 
 if(BUILD_TESTING)
+    # Discover against the configuration selected by CTest. POST_BUILD shares
+    # one test list across VS configurations and can run Debug for Release.
+    set(CMAKE_CATCH_DISCOVER_TESTS_DISCOVERY_MODE PRE_TEST)
     include(Catch)
 
     add_executable(disdorktion_dsp_tests
@@ -74,7 +77,9 @@ if(BUILD_TESTING)
         tests/BenchmarkSamplingTests.cpp
     )
     target_link_libraries(disdorktion_dsp_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain)
-    catch_discover_tests(disdorktion_dsp_tests TEST_PREFIX "dsp::" PROPERTIES TIMEOUT 120)
+    # The full independent response matrix also runs the warm bypass stages;
+    # allow its unoptimized Debug workload without relaxing numeric gates.
+    catch_discover_tests(disdorktion_dsp_tests TEST_PREFIX "dsp::" PROPERTIES TIMEOUT 300)
 
     add_executable(disdorktion_realtime_tests
         tests/RealtimeSafetyTests.cpp
@@ -249,6 +254,24 @@ add_executable(disdorktion_full_chain_measurements tools/FullChainMeasureMain.cp
 target_link_libraries(disdorktion_full_chain_measurements PRIVATE disdorktion_dsp juce::juce_cryptography)
 target_compile_definitions(disdorktion_full_chain_measurements PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 add_executable(disdorktion_full_chain_benchmark benchmarks/FullChainBenchmark.cpp)
+
+add_executable(disdorktion_expanded_chain_qualification tools/ExpandedChainQualification.cpp)
+add_executable(disdorktion_expanded_chain_profile tools/ExpandedChainProfile.cpp)
+add_executable(disdorktion_expanded_chain_golden tools/ExpandedChainGolden.cpp)
+foreach(cpu_research_target disdorktion_expanded_chain_profile disdorktion_expanded_chain_golden)
+    target_link_libraries(${cpu_research_target} PRIVATE disdorktion_dsp juce::juce_cryptography)
+    target_compile_definitions(${cpu_research_target} PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+    if(WIN32)
+        target_link_libraries(${cpu_research_target} PRIVATE PowrProf)
+        target_compile_definitions(${cpu_research_target} PRIVATE DISDORKTION_WINDOWS_SDK_VERSION="${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+    endif()
+endforeach()
+target_link_libraries(disdorktion_expanded_chain_qualification PRIVATE disdorktion_dsp juce::juce_cryptography)
+target_compile_definitions(disdorktion_expanded_chain_qualification PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+if(WIN32)
+    target_link_libraries(disdorktion_expanded_chain_qualification PRIVATE PowrProf)
+    target_compile_definitions(disdorktion_expanded_chain_qualification PRIVATE DISDORKTION_WINDOWS_SDK_VERSION="${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+endif()
 target_link_libraries(disdorktion_full_chain_benchmark PRIVATE disdorktion_dsp juce::juce_cryptography)
 target_compile_definitions(disdorktion_full_chain_benchmark PRIVATE DISDORKTION_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(disdorktion_render PRIVATE disdorktion_harness)

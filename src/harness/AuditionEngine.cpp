@@ -347,6 +347,8 @@ void AuditionEngine::setInputCrusherBypass(bool value) noexcept { crusherBypass.
 bool AuditionEngine::setOutputSettings(const OutputSettings& value, bool commonBypass) noexcept
 {
     if (!isValidOutputSettings(value)) return false;
+    for(std::size_t i=0;i<outputControls.size();++i)
+        outputControls[i].store(getOutputControl(value,outputSectionControls[i].id),std::memory_order_relaxed);
     outputHighCutoff.store(value.highPass.cutoffHz, std::memory_order_relaxed);
     outputLowCutoff.store(value.lowPass.cutoffHz, std::memory_order_relaxed);
     outputHighResponse.store(static_cast<unsigned>(value.highPass.response), std::memory_order_relaxed);
@@ -356,6 +358,17 @@ bool AuditionEngine::setOutputSettings(const OutputSettings& value, bool commonB
     outputBypass.store(commonBypass, std::memory_order_relaxed);
     outputTarget.setBypass(commonBypass);
     return outputTarget.setParameters(value);
+}
+bool AuditionEngine::setOutputControl(std::string_view id,float value) noexcept
+{
+    OutputSettings probe;
+    if(!harness::setOutputControl(probe,id,value)) return false;
+    if(id=="hpCutoffHz" || id=="lpCutoffHz") return setOutputCutoffHz(id=="hpCutoffHz",value);
+    if(id=="hpResponse" || id=="lpResponse") return setOutputResponse(id=="hpResponse",static_cast<FilterResponse>(static_cast<unsigned>(value)));
+    if(id=="hpBypass" || id=="lpBypass") {setOutputStageBypass(id=="hpBypass",value!=0.f);return true;}
+    for(std::size_t i=6;i<outputControls.size();++i)
+        if(id==outputSectionControls[i].id) {outputControls[i].store(value,std::memory_order_relaxed);return true;}
+    return false;
 }
 bool AuditionEngine::setOutputCutoffHz(bool highPass, float value) noexcept
 {
@@ -417,11 +430,14 @@ bool AuditionEngine::applyParameters() noexcept
     if (selected == &outputTarget)
     {
         outputTarget.setBypass(outputBypass.load(std::memory_order_relaxed));
-        return outputTarget.setParameters({
+        OutputSettings settings {
             {outputHighCutoff.load(std::memory_order_relaxed),outputHighBypass.load(std::memory_order_relaxed),
              static_cast<FilterResponse>(outputHighResponse.load(std::memory_order_relaxed))},
             {outputLowCutoff.load(std::memory_order_relaxed),outputLowBypass.load(std::memory_order_relaxed),
-             static_cast<FilterResponse>(outputLowResponse.load(std::memory_order_relaxed))}});
+             static_cast<FilterResponse>(outputLowResponse.load(std::memory_order_relaxed))}};
+        for(std::size_t i=6;i<outputControls.size();++i)
+            if(!harness::setOutputControl(settings,outputSectionControls[i].id,outputControls[i].load(std::memory_order_relaxed))) return false;
+        return outputTarget.setParameters(settings);
     }
     if (selected == &middleTarget)
     {

@@ -55,10 +55,21 @@ TEST_CASE("Full chain wet matches ordered accepted sections for every stage bypa
 }
 TEST_CASE("Full chain mix and bypass ramps are sample continuous across chunk partitions", "[full-chain]")
 {
+    for(bool expanded:{false,true})
+    {
+    CAPTURE(expanded);
     FullChain whole,split,dry,wet;FullChainSettings s;
+    if(expanded)
+    {
+        s.output.comb={5.f,.6f,.9f,1200.f,.8f,true,false};
+        s.output.dispersion={350.f,.7f,false}; s.output.tone={6.f,false};
+    }
+    REQUIRE(whole.setParameters(s)); REQUIRE(split.setParameters(s)); REQUIRE(wet.setParameters(s));
     REQUIRE(whole.prepare({48000,17,2}));REQUIRE(split.prepare({48000,1024,2}));
     auto d=s;d.mix=0;REQUIRE(dry.setParameters(d));REQUIRE(dry.prepare({48000,17,2}));
     REQUIRE(wet.prepare({48000,17,2}));
+    REQUIRE(whole.getLatencySamples()==92); REQUIRE(split.getLatencySamples()==92);
+    REQUIRE(dry.getLatencySamples()==92); REQUIRE(wet.getLatencySamples()==92);
     s.mix=.25f;s.bypass=true;REQUIRE(whole.setParameters(s));REQUIRE(split.setParameters(s));
     juce::AudioBuffer<float>a(2,1031),b(2,1031),dr(2,1031),we(2,1031);source(a);b.makeCopyOf(a);dr.makeCopyOf(a);we.makeCopyOf(a);
     REQUIRE(whole.process(juce::dsp::AudioBlock<float>(a)));
@@ -68,8 +79,63 @@ TEST_CASE("Full chain mix and bypass ramps are sample continuous across chunk pa
     {
         const float t=std::min(1.f,(n+1)/480.f),weight=(1.f-.75f*t)*(1.f-t);
         REQUIRE(a.getSample(c,n)==b.getSample(c,n));
-        REQUIRE(a.getSample(c,n)==Catch::Approx(dr.getSample(c,n)*(1.f-weight)+we.getSample(c,n)*weight).margin(1e-7));
+        // The independent ideal ramp differs from JUCE's repeated float step
+        // accumulation by at most 3.13e-6 in blend weight over these 480 frames.
+        // Its audio error scales with wet-dry separation, which active output
+        // effects increase. Keep the partition comparison above bit-exact.
+        const auto drySample=dr.getSample(c,n),wetSample=we.getSample(c,n);
+        const auto roundingAllowance=1e-7f+(expanded?4e-6f*std::abs(wetSample-drySample):0.f);
+        REQUIRE(a.getSample(c,n)==Catch::Approx(drySample*(1.f-weight)+wetSample*weight).margin(roundingAllowance));
     }
+    }
+}
+
+TEST_CASE("Full chain active output automation matches independent modules in accepted order", "[full-chain][expanded-output]")
+{
+    FullChain chain; InputSection input; MiddleSection middle; Gain gain;
+    ResonantComb comb, reversedComb; FrequencyDispersion dispersion, reversedDispersion;
+    Tone tone, reversedTone; HighPass hp, reversedHp; LowPass lp, reversedLp;
+    FullChainSettings s; s.input.gain.gainDb=6.f; s.middle.tanh.driveDb=8.f; s.finalGain.gainDb=-3.f;
+    const juce::dsp::ProcessSpec spec{48000,31,2};
+    REQUIRE(chain.setParameters(s)); REQUIRE(chain.prepare(spec)); REQUIRE(chain.getLatencySamples()==92);
+    REQUIRE(input.setParameters(s.input)); REQUIRE(input.prepare(spec));
+    REQUIRE(middle.setParameters(s.middle)); REQUIRE(middle.prepare(spec,4,MiddleLatencyCorrection::fir,MiddleFoldAlgorithm::adaaTriangle));
+    REQUIRE(gain.setParameters(s.finalGain)); REQUIRE(gain.prepare(spec));
+    for(auto* f:{&comb,&reversedComb}) { REQUIRE(f->setParameters(s.output.comb)); REQUIRE(f->prepare(spec)); }
+    for(auto* f:{&dispersion,&reversedDispersion}) { REQUIRE(f->setParameters(s.output.dispersion)); REQUIRE(f->prepare(spec)); }
+    for(auto* f:{&tone,&reversedTone}) { REQUIRE(f->setParameters(s.output.tone)); REQUIRE(f->prepare(spec)); }
+    for(auto* f:{&hp,&reversedHp}) REQUIRE(f->prepare(spec));
+    for(auto* f:{&lp,&reversedLp}) REQUIRE(f->prepare(spec));
+    double error=0.,discrimination=0.; juce::AudioBuffer<float> a(2,127);
+    for(unsigned event=0;event<64;++event)
+    {
+        s.output.comb={event%2?.25f:40.f,event%2?-.8f:.8f,event%2?-.9f:.9f,1200.f,.8f,true,event%7==0};
+        s.output.dispersion={event%2?20.f:18000.f,.7f,event%5==0};
+        s.output.tone={event%2?-6.f:6.f,event%3==0};
+        s.output.highPass={event%2?20.f:12000.f,false,FilterResponse::chebyshev1};
+        s.output.lowPass={event%2?19000.f:300.f,false,FilterResponse::chebyshev2};
+        REQUIRE(chain.setParameters(s));
+        for(auto* f:{&comb,&reversedComb}) REQUIRE(f->setParameters(s.output.comb));
+        for(auto* f:{&dispersion,&reversedDispersion}) REQUIRE(f->setParameters(s.output.dispersion));
+        for(auto* f:{&tone,&reversedTone}) REQUIRE(f->setParameters(s.output.tone));
+        for(auto* f:{&hp,&reversedHp}) REQUIRE(f->setParameters(s.output.highPass));
+        for(auto* f:{&lp,&reversedLp}) REQUIRE(f->setParameters(s.output.lowPass));
+        for(int c=0;c<2;++c)for(int n=0;n<127;++n)
+            a.setSample(c,n,float((c?-.7:1.)*(.6*std::sin((event*127+n)*.37)+.3*std::sin((event*127+n)*.013))));
+        auto expected=a; auto reference=juce::dsp::AudioBlock<float>(expected);
+        REQUIRE(input.process(reference)); REQUIRE(middle.process(reference));
+        auto reversed=expected; auto wrong=juce::dsp::AudioBlock<float>(reversed);
+        REQUIRE(reversedLp.process(wrong)); REQUIRE(reversedHp.process(wrong)); REQUIRE(reversedTone.process(wrong));
+        REQUIRE(reversedDispersion.process(wrong)); REQUIRE(reversedComb.process(wrong));
+        REQUIRE(comb.process(reference)); REQUIRE(dispersion.process(reference)); REQUIRE(tone.process(reference));
+        REQUIRE(hp.process(reference)); REQUIRE(lp.process(reference));
+        for(int c=0;c<2;++c)for(int n=0;n<127;++n)
+            discrimination=std::max(discrimination,std::abs(double(expected.getSample(c,n))-reversed.getSample(c,n)));
+        REQUIRE(gain.process(reference)); REQUIRE(chain.process(juce::dsp::AudioBlock<float>(a)));
+        for(int c=0;c<2;++c)for(int n=0;n<127;++n)
+            error=std::max(error,std::abs(double(a.getSample(c,n))-expected.getSample(c,n)));
+    }
+    REQUIRE(error<=1e-6); REQUIRE(discrimination>1e-3); REQUIRE(chain.getLatencySamples()==92);
 }
 TEST_CASE("Full chain rejects settings and preparation transactionally and resets dry history", "[full-chain]")
 {
@@ -89,4 +155,26 @@ TEST_CASE("Full chain rejects settings and preparation transactionally and reset
     REQUIRE_FALSE(chain.process(juce::dsp::AudioBlock<float>(wrong)));REQUIRE(wrong.getSample(0,1)==first);
     chain.reset();a.clear();REQUIRE(chain.process(juce::dsp::AudioBlock<float>(a)));REQUIRE(a.getMagnitude(0,1031)==0);
     REQUIRE(chain.prepare({96000,65536,2}));REQUIRE(chain.prepare({8000,1,1}));
+}
+
+#include "dsp/FullChainControls.h"
+TEST_CASE("Expanded output controls append without changing existing defaults", "[full-chain][expanded-output]")
+{
+    FullChainSettings settings;
+    REQUIRE(fullChainControls.size() == 40);
+    REQUIRE(std::string_view(fullChainControls[27].id) == "chainBypass");
+    REQUIRE(std::string_view(fullChainControls[28].id) == "combDelayMs");
+    for (const auto* id : {"combBypass", "dispersionBypass", "toneBypass"})
+        REQUIRE(getFullChainControl(settings, id) == 1.f);
+    REQUIRE(setFullChainControl(settings, "combFeedback", -.95f));
+    REQUIRE(getFullChainControl(settings, "combFeedback") == -.95f);
+    REQUIRE_FALSE(setFullChainControl(settings, "combFeedback", 1.f));
+    REQUIRE(getFullChainControl(settings, "combFeedback") == -.95f);
+    for (const auto& control : fullChainControls)
+    {
+        REQUIRE(setFullChainControl(settings, control.id, control.minimum));
+        REQUIRE(getFullChainControl(settings, control.id) == control.minimum);
+        REQUIRE(setFullChainControl(settings, control.id, control.maximum));
+        REQUIRE(getFullChainControl(settings, control.id) == control.maximum);
+    }
 }

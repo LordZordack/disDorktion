@@ -8,6 +8,26 @@
 #include <juce_audio_formats/juce_audio_formats.h>
 using namespace disdorktion;
 using namespace disdorktion::harness;
+TEST_CASE("Expanded full chain render reproduces enabled serialized output controls", "[full-chain][harness][render][expanded]")
+{
+    ExperimentRecord record;record.version=16;record.targetId="full-chain";
+    record.renderDurationSamples=1031;record.blockSize=31;record.fullChain.mix=.63f;
+    record.fullChain.output.comb={2.f,.2f,-.7f,4000.f,.4f,true,false};
+    record.fullChain.output.dispersion={300.f,.7f,false};record.fullChain.output.tone={3.f,false};
+    juce::String error;ExperimentRecord restored;
+    REQUIRE(ExperimentRecord::fromJson(record.toJson(),restored,error));
+    const auto directory=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("disdorktion-expanded-chain",{},false);
+    const auto result=renderExperiment(restored,directory);REQUIRE(result.status==RenderStatus::success);
+    juce::WavAudioFormat format;
+    std::unique_ptr<juce::AudioFormatReader> reader(format.createReaderFor(directory.getChildFile("rendered.wav").createInputStream().release(),true));
+    REQUIRE(reader);REQUIRE(reader->lengthInSamples==1031);
+    juce::AudioBuffer<float> actual(2,1031),expected(2,1031);REQUIRE(reader->read(&actual,0,1031,0,true,true));
+    SignalSource source;REQUIRE(source.prepare(record.source,48000,2));source.process(juce::dsp::AudioBlock<float>(expected));
+    FullChain chain;REQUIRE(chain.setParameters(record.fullChain));REQUIRE(chain.prepare({48000,31,2}));
+    REQUIRE(chain.process(juce::dsp::AudioBlock<float>(expected)));
+    for(int c=0;c<2;++c)for(int n=0;n<1031;++n)REQUIRE(actual.getSample(c,n)==expected.getSample(c,n));
+    reader.reset();REQUIRE(directory.deleteRecursively());
+}
 TEST_CASE("Full chain controls validate transactionally", "[full-chain][harness]")
 {
     FullChainSettings settings;

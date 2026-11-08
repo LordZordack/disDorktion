@@ -53,6 +53,7 @@ juce::XmlElement legacyState(int version, PluginProcessor& plugin)
     if (version == 3)
     {
         auto xml = savedState(plugin);
+        xml->setAttribute("version", version);
         xml->setAttribute("mode", "legacyGain");
         return *xml;
     }

@@ -26,7 +26,7 @@ The fixed serial processing chain is:
 
 The dry branch is captured before input gain. Final output gain affects both dry and wet audio. Changing wet-path drive must not change the dry reference.
 
-Carrier modulation/demodulation, resonant comb filtering, frequency warping, and a dedicated tone control follow as experimental expansion modules. Their research can begin before the first release; production integration follows its qualification. Reordering, parallel routing, additional platforms, and additional plugin formats are future extensions.
+Resonant comb filtering, frequency warping, and a dedicated tone control form the experimental expansion. The user discarded carrier modulation/demodulation on 2026-11-07; it is no longer an integration requirement. Research can begin before the first release; production integration follows qualification. Reordering, parallel routing, additional platforms, and additional plugin formats are future extensions.
 
 ## 2. Architecture and shared foundation
 
@@ -128,12 +128,12 @@ Reference: [JUCE Oversampling](https://docs.juce.com/develop/classjuce_1_1dsp_1_
 
 Each experimental algorithm receives one ticket covering separate research/design, implementation, and validation gates. Do not implement an uncertain mechanism until its design is reviewed.
 
-- Carrier modulation/demodulation: define carrier modulation, demodulation, filtering, and the mechanism producing audible distortion; test the effect of phase adjustment. Ideal coherent modulation/demodulation must not be assumed to create the intended radio character.
+- Carrier modulation/demodulation: discarded by user decision on 2026-11-07. Preserve prior research as history; do not integrate it.
 - Resonant comb: choose feedforward/feedback topology, delay controls, damping, feedback limits, and tail behavior.
 - Frequency warping: define the audible objective and choose a structure; distinguish spectral delay, phase shaping, and frequency remapping. A static all-pass response must not be described as harmonic-frequency remapping without evidence.
 - Tone: establish a distinct purpose relative to high-pass and low-pass filtering before choosing its topology and control range.
 
-During X5, approve the expanded fixed order before integration. The README's order is the starting proposal: input gain → demodulation → bit crusher → tanh → wave folder → comb → warping → output filtering/tone → global mix → output gain. Experimental effects default to bypass for existing sessions. Repeat affected section and full-chain qualification.
+The approved expanded fixed order is input gain → bit crusher → tanh → wave folder → comb → frequency dispersion → tone → high-pass → low-pass → global mix → output gain. Carrier modulation was discarded. Experimental effects default to bypass for existing sessions. Repeat affected section and full-chain qualification.
 
 ## 4. Research, testing, and release strategy
 
@@ -225,11 +225,11 @@ The planning IDs below map to published GitHub issues. [Roadmap issue #1](https:
 | C1 | Integrate the full chain, dry/wet mixing, and output gain | [S1 / #10](https://github.com/LordZordack/disDorktion/issues/10), [S2 / #11](https://github.com/LordZordack/disDorktion/issues/11), [S3 / #12](https://github.com/LordZordack/disDorktion/issues/12), [M1 / #4](https://github.com/LordZordack/disDorktion/issues/4) | [#13](https://github.com/LordZordack/disDorktion/issues/13) |
 | U1 | Complete the plugin interface, automation, state, and presets | [C1 / #13](https://github.com/LordZordack/disDorktion/issues/13) | [#14](https://github.com/LordZordack/disDorktion/issues/14) |
 | R1 | Qualify and package the first Windows VST3 release | [U1 / #14](https://github.com/LordZordack/disDorktion/issues/14) | [#15](https://github.com/LordZordack/disDorktion/issues/15) |
-| X1 | Design, implement, and validate carrier modulation and demodulation | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#16](https://github.com/LordZordack/disDorktion/issues/16) |
+| X1 | Carrier modulation and demodulation — discarded by user on 2026-11-07 | Historical research only | [#16](https://github.com/LordZordack/disDorktion/issues/16) |
 | X2 | Design, implement, and validate resonant comb filtering | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#17](https://github.com/LordZordack/disDorktion/issues/17) |
 | X3 | Design, implement, and validate frequency warping | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3) | [#18](https://github.com/LordZordack/disDorktion/issues/18) |
 | X4 | Design, implement, and validate the tone module | [F1 / #2](https://github.com/LordZordack/disDorktion/issues/2), [F2 / #3](https://github.com/LordZordack/disDorktion/issues/3), [S3 / #12](https://github.com/LordZordack/disDorktion/issues/12) | [#19](https://github.com/LordZordack/disDorktion/issues/19) |
-| X5 | Integrate and qualify the experimental modules | [X1 / #16](https://github.com/LordZordack/disDorktion/issues/16), [X2 / #17](https://github.com/LordZordack/disDorktion/issues/17), [X3 / #18](https://github.com/LordZordack/disDorktion/issues/18), [X4 / #19](https://github.com/LordZordack/disDorktion/issues/19), [R1 / #15](https://github.com/LordZordack/disDorktion/issues/15) | [#20](https://github.com/LordZordack/disDorktion/issues/20) |
+| X5 | Integrate and qualify the experimental modules | [X2 / #17](https://github.com/LordZordack/disDorktion/issues/17), [X3 / #18](https://github.com/LordZordack/disDorktion/issues/18), [X4 / #19](https://github.com/LordZordack/disDorktion/issues/19), [R1 / #15](https://github.com/LordZordack/disDorktion/issues/15) | [#20](https://github.com/LordZordack/disDorktion/issues/20) |
 
 Dependencies represent accepted deliverables. Q1 consumes accepted baseline waveshapers and may send them back through validation after quality changes. X5 integrates only accepted experimental modules.
 

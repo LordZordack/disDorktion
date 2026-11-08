@@ -1,0 +1,1629 @@
+{
+  "reference_qualified": true,
+  "complete": true,
+  "cases": [
+    {
+      "id": 0,
+      "count": 148743,
+      "p99_fraction": 0.032400000000000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 1,
+      "count": 148984,
+      "p99_fraction": 0.032400000000000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 2,
+      "count": 148753,
+      "p99_fraction": 0.0327,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 3,
+      "count": 149127,
+      "p99_fraction": 0.031200000000000002,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 4,
+      "count": 148772,
+      "p99_fraction": 0.03252537313432836,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 5,
+      "count": 148876,
+      "p99_fraction": 0.028200000000000003,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 6,
+      "count": 148890,
+      "p99_fraction": 0.0303,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 7,
+      "count": 148830,
+      "p99_fraction": 0.031575,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 8,
+      "count": 148676,
+      "p99_fraction": 0.032100000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 9,
+      "count": 148703,
+      "p99_fraction": 0.03135,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 10,
+      "count": 146699,
+      "p99_fraction": 0.031548091603053434,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 11,
+      "count": 148731,
+      "p99_fraction": 0.026175,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 12,
+      "count": 147447,
+      "p99_fraction": 0.032201574803149606,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 13,
+      "count": 147094,
+      "p99_fraction": 0.03223937007874016,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 14,
+      "count": 146860,
+      "p99_fraction": 0.03303307086614173,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 15,
+      "count": 147595,
+      "p99_fraction": 0.03171023622047244,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 16,
+      "count": 147284,
+      "p99_fraction": 0.032143190661478596,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 17,
+      "count": 147913,
+      "p99_fraction": 0.027174803149606297,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 18,
+      "count": 146757,
+      "p99_fraction": 0.032775,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 19,
+      "count": 147090,
+      "p99_fraction": 0.03174375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 20,
+      "count": 147020,
+      "p99_fraction": 0.03255,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 21,
+      "count": 147097,
+      "p99_fraction": 0.0316875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 22,
+      "count": 147002,
+      "p99_fraction": 0.03202485436893204,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 23,
+      "count": 145894,
+      "p99_fraction": 0.026306250000000003,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 24,
+      "count": 147048,
+      "p99_fraction": 0.032934375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 25,
+      "count": 147099,
+      "p99_fraction": 0.031593750000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 26,
+      "count": 147047,
+      "p99_fraction": 0.030834375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 27,
+      "count": 147535,
+      "p99_fraction": 0.030028125000000003,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 28,
+      "count": 147577,
+      "p99_fraction": 0.030021647976596785,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 29,
+      "count": 146604,
+      "p99_fraction": 0.0260484375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 30,
+      "count": 149032,
+      "p99_fraction": 0.061200000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 31,
+      "count": 149007,
+      "p99_fraction": 0.061200000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 32,
+      "count": 148975,
+      "p99_fraction": 0.06330000000000001,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 33,
+      "count": 149086,
+      "p99_fraction": 0.061500000000000006,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 34,
+      "count": 148734,
+      "p99_fraction": 0.06333134328358209,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 35,
+      "count": 148885,
+      "p99_fraction": 0.0543,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 36,
+      "count": 148578,
+      "p99_fraction": 0.06165,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 37,
+      "count": 148727,
+      "p99_fraction": 0.05985,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 38,
+      "count": 148475,
+      "p99_fraction": 0.06165,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 39,
+      "count": 148606,
+      "p99_fraction": 0.0606,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 40,
+      "count": 147661,
+      "p99_fraction": 0.05928549618320611,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 41,
+      "count": 149342,
+      "p99_fraction": 0.05145,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 42,
+      "count": 147865,
+      "p99_fraction": 0.0609259842519685,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 43,
+      "count": 148005,
+      "p99_fraction": 0.0609259842519685,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 44,
+      "count": 147201,
+      "p99_fraction": 0.06326929133858267,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 45,
+      "count": 147559,
+      "p99_fraction": 0.06266456692913386,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 46,
+      "count": 147194,
+      "p99_fraction": 0.062568093385214,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 47,
+      "count": 148009,
+      "p99_fraction": 0.05162834645669291,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 48,
+      "count": 146697,
+      "p99_fraction": 0.06243750000000001,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 49,
+      "count": 146875,
+      "p99_fraction": 0.062475,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 50,
+      "count": 147128,
+      "p99_fraction": 0.0637875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 51,
+      "count": 146877,
+      "p99_fraction": 0.0622875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 52,
+      "count": 147099,
+      "p99_fraction": 0.0617568932038835,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 53,
+      "count": 145786,
+      "p99_fraction": 0.0521625,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 54,
+      "count": 147183,
+      "p99_fraction": 0.06283125,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 55,
+      "count": 147028,
+      "p99_fraction": 0.062709375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 56,
+      "count": 147396,
+      "p99_fraction": 0.06180937500000001,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 57,
+      "count": 147760,
+      "p99_fraction": 0.059503125000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 58,
+      "count": 147863,
+      "p99_fraction": 0.058039980497318386,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 59,
+      "count": 146995,
+      "p99_fraction": 0.050775,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 60,
+      "count": 148947,
+      "p99_fraction": 0.030750000000000003,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 61,
+      "count": 149096,
+      "p99_fraction": 0.0315,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 62,
+      "count": 149074,
+      "p99_fraction": 0.03135,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 63,
+      "count": 149022,
+      "p99_fraction": 0.030750000000000003,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 64,
+      "count": 148760,
+      "p99_fraction": 0.03159402985074627,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 65,
+      "count": 148889,
+      "p99_fraction": 0.0273,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 66,
+      "count": 148339,
+      "p99_fraction": 0.031275000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 67,
+      "count": 148596,
+      "p99_fraction": 0.0309,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 68,
+      "count": 148533,
+      "p99_fraction": 0.032100000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 69,
+      "count": 148700,
+      "p99_fraction": 0.031275000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 70,
+      "count": 146792,
+      "p99_fraction": 0.032537404580152675,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 71,
+      "count": 148699,
+      "p99_fraction": 0.026850000000000002,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 72,
+      "count": 147609,
+      "p99_fraction": 0.03167244094488189,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 73,
+      "count": 147452,
+      "p99_fraction": 0.03148346456692913,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 74,
+      "count": 146744,
+      "p99_fraction": 0.033184251968503935,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 75,
+      "count": 147324,
+      "p99_fraction": 0.03155905511811023,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 76,
+      "count": 147403,
+      "p99_fraction": 0.03130272373540856,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 77,
+      "count": 148173,
+      "p99_fraction": 0.026683464566929133,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 78,
+      "count": 146676,
+      "p99_fraction": 0.031331250000000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 79,
+      "count": 147128,
+      "p99_fraction": 0.03148125,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 80,
+      "count": 146862,
+      "p99_fraction": 0.03256875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 81,
+      "count": 147090,
+      "p99_fraction": 0.031875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 82,
+      "count": 146960,
+      "p99_fraction": 0.031474951456310685,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 83,
+      "count": 146012,
+      "p99_fraction": 0.026025000000000003,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 84,
+      "count": 146979,
+      "p99_fraction": 0.03148125,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 85,
+      "count": 146674,
+      "p99_fraction": 0.03144375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 86,
+      "count": 146871,
+      "p99_fraction": 0.031921875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 87,
+      "count": 146777,
+      "p99_fraction": 0.030571875000000002,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 88,
+      "count": 147517,
+      "p99_fraction": 0.029394441735738665,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 89,
+      "count": 146880,
+      "p99_fraction": 0.02529375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 90,
+      "count": 149239,
+      "p99_fraction": 0.0606,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 91,
+      "count": 149286,
+      "p99_fraction": 0.060000000000000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 92,
+      "count": 148977,
+      "p99_fraction": 0.063,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 93,
+      "count": 148920,
+      "p99_fraction": 0.0618,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 94,
+      "count": 148958,
+      "p99_fraction": 0.06490746268656716,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 95,
+      "count": 148998,
+      "p99_fraction": 0.0534,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 96,
+      "count": 149004,
+      "p99_fraction": 0.059250000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 97,
+      "count": 148618,
+      "p99_fraction": 0.06165,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 98,
+      "count": 148733,
+      "p99_fraction": 0.0609,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 99,
+      "count": 148829,
+      "p99_fraction": 0.060450000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 100,
+      "count": 147225,
+      "p99_fraction": 0.06294961832061069,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 101,
+      "count": 148421,
+      "p99_fraction": 0.05385,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 102,
+      "count": 147721,
+      "p99_fraction": 0.06145511811023622,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 103,
+      "count": 147562,
+      "p99_fraction": 0.06251338582677166,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 104,
+      "count": 147654,
+      "p99_fraction": 0.06274015748031496,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 105,
+      "count": 147524,
+      "p99_fraction": 0.06137952755905512,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 106,
+      "count": 147202,
+      "p99_fraction": 0.061372762645914396,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 107,
+      "count": 148158,
+      "p99_fraction": 0.05291338582677165,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 108,
+      "count": 146905,
+      "p99_fraction": 0.06086250000000001,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 109,
+      "count": 147078,
+      "p99_fraction": 0.06165,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 110,
+      "count": 147130,
+      "p99_fraction": 0.0636,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 111,
+      "count": 146770,
+      "p99_fraction": 0.061387500000000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 112,
+      "count": 146981,
+      "p99_fraction": 0.061663689320388355,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 113,
+      "count": 146306,
+      "p99_fraction": 0.051750000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 114,
+      "count": 146892,
+      "p99_fraction": 0.06165,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 115,
+      "count": 147006,
+      "p99_fraction": 0.061565625000000006,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 116,
+      "count": 147127,
+      "p99_fraction": 0.062840625,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 117,
+      "count": 147240,
+      "p99_fraction": 0.061603125,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 118,
+      "count": 148015,
+      "p99_fraction": 0.058255290102389085,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 119,
+      "count": 147061,
+      "p99_fraction": 0.049668750000000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 120,
+      "count": 149105,
+      "p99_fraction": 0.031200000000000002,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 121,
+      "count": 149240,
+      "p99_fraction": 0.0309,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 122,
+      "count": 149006,
+      "p99_fraction": 0.03195,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 123,
+      "count": 149315,
+      "p99_fraction": 0.03045,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 124,
+      "count": 149120,
+      "p99_fraction": 0.03195223880597015,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 125,
+      "count": 149155,
+      "p99_fraction": 0.026850000000000002,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 126,
+      "count": 149025,
+      "p99_fraction": 0.031725,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 127,
+      "count": 149092,
+      "p99_fraction": 0.031200000000000002,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 128,
+      "count": 149165,
+      "p99_fraction": 0.032475000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 129,
+      "count": 148987,
+      "p99_fraction": 0.031575,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 130,
+      "count": 146709,
+      "p99_fraction": 0.031218320610687026,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 131,
+      "count": 148710,
+      "p99_fraction": 0.027375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 132,
+      "count": 147476,
+      "p99_fraction": 0.032012598425196846,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 133,
+      "count": 147362,
+      "p99_fraction": 0.032125984251968505,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 134,
+      "count": 146824,
+      "p99_fraction": 0.03273070866141732,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 135,
+      "count": 147412,
+      "p99_fraction": 0.03174803149606299,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 136,
+      "count": 146869,
+      "p99_fraction": 0.0324420233463035,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 137,
+      "count": 148056,
+      "p99_fraction": 0.026456692913385826,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 138,
+      "count": 146682,
+      "p99_fraction": 0.03200625,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 139,
+      "count": 147077,
+      "p99_fraction": 0.031781250000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 140,
+      "count": 146979,
+      "p99_fraction": 0.0324375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 141,
+      "count": 146986,
+      "p99_fraction": 0.03166875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 142,
+      "count": 147555,
+      "p99_fraction": 0.031474951456310685,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 143,
+      "count": 145982,
+      "p99_fraction": 0.0263625,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 144,
+      "count": 147377,
+      "p99_fraction": 0.0317109375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 145,
+      "count": 147091,
+      "p99_fraction": 0.031485937500000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 146,
+      "count": 145784,
+      "p99_fraction": 0.032821875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 147,
+      "count": 146822,
+      "p99_fraction": 0.031321875,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 148,
+      "count": 147354,
+      "p99_fraction": 0.030220575329107754,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 149,
+      "count": 147008,
+      "p99_fraction": 0.0245390625,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 150,
+      "count": 149695,
+      "p99_fraction": 0.0597,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 151,
+      "count": 149646,
+      "p99_fraction": 0.0597,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 152,
+      "count": 149676,
+      "p99_fraction": 0.062400000000000004,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 153,
+      "count": 149616,
+      "p99_fraction": 0.0606,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 154,
+      "count": 149573,
+      "p99_fraction": 0.06118208955223881,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 155,
+      "count": 149574,
+      "p99_fraction": 0.0531,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 156,
+      "count": 149481,
+      "p99_fraction": 0.06135,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 157,
+      "count": 149599,
+      "p99_fraction": 0.05865,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 158,
+      "count": 149636,
+      "p99_fraction": 0.06165,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 159,
+      "count": 149604,
+      "p99_fraction": 0.06015,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 160,
+      "count": 148184,
+      "p99_fraction": 0.059798473282442755,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 161,
+      "count": 149535,
+      "p99_fraction": 0.05145,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 162,
+      "count": 148582,
+      "p99_fraction": 0.05911181102362204,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 163,
+      "count": 148487,
+      "p99_fraction": 0.06001889763779527,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 164,
+      "count": 148097,
+      "p99_fraction": 0.06115275590551181,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 165,
+      "count": 148521,
+      "p99_fraction": 0.05926299212598425,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 166,
+      "count": 147811,
+      "p99_fraction": 0.05838443579766537,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 167,
+      "count": 149308,
+      "p99_fraction": 0.05049448818897637,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 168,
+      "count": 147718,
+      "p99_fraction": 0.058275,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 169,
+      "count": 147083,
+      "p99_fraction": 0.058537500000000006,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 170,
+      "count": 147559,
+      "p99_fraction": 0.059925000000000006,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 171,
+      "count": 147987,
+      "p99_fraction": 0.058800000000000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 172,
+      "count": 147831,
+      "p99_fraction": 0.05737631067961165,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 173,
+      "count": 147057,
+      "p99_fraction": 0.04995,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 174,
+      "count": 147843,
+      "p99_fraction": 0.057215625000000006,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 175,
+      "count": 147759,
+      "p99_fraction": 0.057412500000000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 176,
+      "count": 148087,
+      "p99_fraction": 0.057065625,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 177,
+      "count": 147640,
+      "p99_fraction": 0.056934375,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 178,
+      "count": 147832,
+      "p99_fraction": 0.05534392979034618,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    },
+    {
+      "id": 179,
+      "count": 146939,
+      "p99_fraction": 0.048656250000000005,
+      "budget_ok": true,
+      "coverage_ok": true,
+      "power_ok": true,
+      "processing_ok": true
+    }
+  ],
+  "method_id": "windows-explicit-highqos-v1",
+  "policy_ok": true,
+  "worst_p99_fraction": 0.06490746268656716
+}

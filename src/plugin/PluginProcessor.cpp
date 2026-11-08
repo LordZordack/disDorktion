@@ -122,10 +122,12 @@ void PluginProcessor::prepareToPlay(double sampleRate, int maximumBlockSize)
     bypassScratch.setSize(channels, static_cast<int>(chunkCapacity));
     bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
     fullLatency.store(static_cast<int>(chain.getLatencySamples()), std::memory_order_relaxed);
-    fullTailSeconds.store(3.0 + chain.getLatencySamples() / sampleRate, std::memory_order_relaxed);
+    // Static allowance covers maximum comb feedback decay plus dispersion and
+    // cutoff-filter histories, including warm bypass and automation transitions.
+    fullTailSeconds.store(20.0 + chain.getLatencySamples() / sampleRate, std::memory_order_relaxed);
     setLatencySamples(legacyMode ? 0 : static_cast<int>(chain.getLatencySamples()));
     preparedSampleRate = sampleRate;
-    tailSeconds.store(legacyMode ? 0.0 : 3.0 + chain.getLatencySamples() / sampleRate, std::memory_order_relaxed);
+    tailSeconds.store(legacyMode ? 0.0 : fullTailSeconds.load(std::memory_order_relaxed), std::memory_order_relaxed);
     hostReady = true;
 }
 void PluginProcessor::releaseResources() { hostReady = false; resetMeters(); }
@@ -219,7 +221,7 @@ void PluginProcessor::getStateInformation(juce::MemoryBlock& destination)
 {
     const juce::ScopedLock lock(getCallbackLock());
     juce::XmlElement state("DisDorktionState");
-    state.setAttribute("version", "3"); state.setAttribute("mode", isLegacyMode() ? "legacyGain" : "fullChain");
+    state.setAttribute("version", "4"); state.setAttribute("mode", isLegacyMode() ? "legacyGain" : "fullChain");
     attribute(state, "gain", gainControl->load(std::memory_order_relaxed));
     attribute(state, "bypass", bypassControl->load(std::memory_order_relaxed));
     for (std::size_t i = 0; i < fullChainControls.size(); ++i)
@@ -240,9 +242,9 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
     const auto xml = getXmlFromBinary(data, sizeInBytes);
     if (!xml || !xml->hasTagName("DisDorktionState")) return;
     const auto version = xml->getStringAttribute("version");
-    if (version != "1" && version != "2" && version != "3") return;
+    if (version != "1" && version != "2" && version != "3" && version != "4") return;
     const auto mode = xml->getStringAttribute("mode");
-    if (version == "3" && mode != "legacyGain" && mode != "fullChain") return;
+    if ((version == "3" || version == "4") && mode != "legacyGain" && mode != "fullChain") return;
     float trim = 1, bypass = 0;
     if (!read(*xml,"gain",0,4,false,false,trim) || !read(*xml,"bypass",0,1,true,true,bypass)) return;
     FullChainSettings settings;
@@ -251,7 +253,11 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
     {
         const auto& control = fullChainControls[i];
         values[i] = control.defaultValue;
-        const bool required = version == "3" || (version == "2" && oldGainControl(control.id));
+        // Version 3 contained exactly the original 28 production controls.
+        // Ignore future extras on old states and overwrite missing additions
+        // with defaults, even when restoring into an already-enabled session.
+        const bool required = version == "4" || (version == "3" && i < 28)
+            || (version == "2" && oldGainControl(control.id));
         if (required && !read(*xml,control.id,control.minimum,control.maximum,
                 control.discrete && control.minimum == 0 && control.maximum == 1,control.discrete,values[i])) return;
         if (!setFullChainControl(settings, control.id, values[i])) return;
@@ -261,14 +267,21 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
     // Restore is a host-serialized lifecycle operation, never an audio callback.
     publishControl("referenceGain",trim); publishControl("referenceBypass",bypass);
     for (std::size_t i = 0; i < fullChainControls.size(); ++i) publishControl(fullChainControls[i].id,values[i]);
-    const bool nextLegacy = version != "3" || mode == "legacyGain";
+    const bool nextLegacy = version == "1" || version == "2" || mode == "legacyGain";
     {
         const juce::ScopedLock lock(getCallbackLock());
         requestedLegacyMode.store(nextLegacy, std::memory_order_release);
         applyControls();
         updateProcessingMode();
+        // Flush the full-chain path even for same-mode restores. Legacy gain
+        // restores retain their historical ramp behavior; those scalar gains
+        // contain no delay/filter history and must not be snapped here.
+        chain.reset();
+        bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
+        if (!nextLegacy) { gain.reset(); inputGain.reset(); outputGain.reset(); }
+        resetMeters();
     }
-    // Conservative filter decay allowance plus the fixed FIR/delay latency.
+    // Conservative static decay allowance plus the fixed FIR/delay latency.
     tailSeconds.store(nextLegacy ? 0.0 : fullTailSeconds.load(std::memory_order_relaxed),
                       std::memory_order_relaxed);
     setLatencySamples(nextLegacy ? 0 : fullLatency.load(std::memory_order_relaxed));

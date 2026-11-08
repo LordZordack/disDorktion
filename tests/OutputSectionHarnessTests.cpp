@@ -7,6 +7,105 @@
 using namespace disdorktion;
 using namespace disdorktion::harness;
 
+TEST_CASE("Expanded output records reject flat controls mixed with nested module schemas", "[output-section][experiment][expanded][schema-strictness]")
+{
+    ExperimentRecord record;record.version=15;record.targetId="output-section";
+    ExperimentRecord restored;juce::String error;
+    REQUIRE(ExperimentRecord::fromJson(record.toJson(),restored,error));
+    const auto before=juce::JSON::toString(restored.toJson());
+    for(auto key:{"toneBypass","combFeedback","combDelayMs","combFeedforward","combDampingHz",
+                  "combMix","combDampingEnabled","combBypass","dispersionFrequencyHz","dispersionMix",
+                  "dispersionBypass","toneDb","unknownModuleSetting"})
+    {
+        auto mixed=record.toJson();mixed.getDynamicObject()->setProperty(key,1);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(mixed,restored,error));
+        REQUIRE(juce::JSON::toString(restored.toJson())==before);
+    }
+}
+
+TEST_CASE("Expanded output experiment schemas and controls are available", "[output-section][harness][expanded]")
+{
+    OutputSectionTarget target;
+    for (auto id : {"combDelayMs", "combFeedforward", "combFeedback", "combDampingHz", "combMix",
+                    "combDampingEnabled", "combBypass", "dispersionFrequencyHz", "dispersionMix",
+                    "dispersionBypass", "toneDb", "toneBypass"})
+    {
+        bool found=false;
+        for(const auto& control:target.descriptor().controls) if(control.id==id) found=true;
+        REQUIRE(found);
+    }
+    juce::String error;
+    for(int version:{15,16})
+    {
+        ExperimentRecord record;record.version=version;record.targetId=version==15?"output-section":"full-chain";
+        REQUIRE(record.validate(error));
+        ExperimentRecord restored;
+        REQUIRE(ExperimentRecord::fromJson(record.toJson(),restored,error));
+        REQUIRE(juce::JSON::toString(restored.toJson())==juce::JSON::toString(record.toJson()));
+    }
+}
+
+TEST_CASE("Expanded experiments preserve enabled settings and replace dirty legacy destinations", "[output-section][experiment][expanded]")
+{
+    juce::String error;
+    for(int version:{15,16})
+    {
+        ExperimentRecord record;record.version=version;record.targetId=version==15?"output-section":"full-chain";
+        auto& output=version==15?record.output:record.fullChain.output;
+        output.comb={17.f,-.3f,.85f,2500.f,.6f,false,false};
+        output.dispersion={1900.f,.73f,false};output.tone={4.f,false};
+        REQUIRE(record.validate(error));
+        ExperimentRecord restored;REQUIRE(ExperimentRecord::fromJson(record.toJson(),restored,error));
+        REQUIRE(juce::JSON::toString(restored.toJson())==juce::JSON::toString(record.toJson()));
+        const auto before=juce::JSON::toString(restored.toJson());
+        for(auto key:{"comb","dispersion","tone"})
+        {
+            auto broken=record.toJson();auto* section=version==15?broken.getDynamicObject():broken["output"].getDynamicObject();
+            section->removeProperty(key);
+            REQUIRE_FALSE(ExperimentRecord::fromJson(broken,restored,error));
+            REQUIRE(juce::JSON::toString(restored.toJson())==before);
+        }
+        auto old=record;old.version=version==15?10:11;
+        REQUIRE_FALSE(old.validate(error)); // Never silently discard enabled additions on legacy save.
+        old.output={};old.fullChain.output={};
+        REQUIRE(ExperimentRecord::fromJson(old.toJson(),restored,error));
+        const auto& defaults=version==15?restored.output:restored.fullChain.output;
+        REQUIRE(defaults.comb.bypass);REQUIRE(defaults.dispersion.bypass);REQUIRE(defaults.tone.bypass);
+        REQUIRE(defaults.comb.feedback==OutputSettings{}.comb.feedback);REQUIRE(defaults.tone.toneDb==0.f);
+    }
+}
+
+TEST_CASE("Expanded output engine retains controls through common bypass and offline rendering", "[output-section][harness][render][expanded]")
+{
+    ExperimentRecord record;record.version=15;record.targetId="output-section";record.renderDurationSamples=1031;record.blockSize=31;
+    record.output.comb={3.f,.4f,-.6f,3000.f,.7f,true,false};
+    record.output.dispersion={800.f,.8f,false};record.output.tone={-3.f,false};
+    AuditionEngine engine;OutputSection reference;
+    REQUIRE(engine.selectTarget("output-section"));REQUIRE(engine.setOutputSettings(record.output,true));
+    auto effective=record.output;effective.comb.bypass=effective.dispersion.bypass=effective.tone.bypass=true;
+    effective.highPass.bypass=effective.lowPass.bypass=true;
+    REQUIRE(reference.setParameters(effective));REQUIRE(engine.prepare({48000,31,2}));REQUIRE(reference.prepare({48000,31,2}));
+    juce::AudioBuffer<float> a(2,1031),b(2,1031);
+    for(unsigned event=0;event<3;++event)
+    {
+        if(event==1){engine.setBypass(false);REQUIRE(reference.setParameters(record.output));}
+        if(event==2){REQUIRE(engine.setOutputControl("toneDb",5.f));record.output.tone.toneDb=5.f;REQUIRE(reference.setParameters(record.output));}
+        for(int c=0;c<2;++c)for(int n=0;n<1031;++n)a.setSample(c,n,static_cast<float>(.25*std::sin((n+event*1031)*.07)));
+        b=a;REQUIRE(engine.process(juce::dsp::AudioBlock<float>(a),false));REQUIRE(reference.process(juce::dsp::AudioBlock<float>(b)));
+        for(int c=0;c<2;++c)for(int n=0;n<1031;++n)REQUIRE(a.getSample(c,n)==b.getSample(c,n));
+    }
+    const auto directory=juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("disdorktion-expanded-output",{},false);
+    const auto result=renderExperiment(record,directory);REQUIRE(result.status==RenderStatus::success);
+    juce::WavAudioFormat format;
+    std::unique_ptr<juce::AudioFormatReader> reader(format.createReaderFor(directory.getChildFile("rendered.wav").createInputStream().release(),true));
+    REQUIRE(reader);REQUIRE(reader->lengthInSamples==1031);
+    REQUIRE(reader->read(&a,0,1031,0,true,true));
+    SignalSource source;REQUIRE(source.prepare(record.source,48000,2));source.process(juce::dsp::AudioBlock<float>(b));
+    REQUIRE(reference.setParameters(record.output));reference.reset();REQUIRE(reference.process(juce::dsp::AudioBlock<float>(b)));
+    for(int c=0;c<2;++c)for(int n=0;n<1031;++n)REQUIRE(a.getSample(c,n)==b.getSample(c,n));
+    reader.reset();REQUIRE(directory.deleteRecursively());
+}
+
 TEST_CASE("Output harness retains independent settings through common bypass and rates", "[output-section][harness]")
 {
     for(double rate:{8000.,44100.,48000.,96000.,192000.,384000.})

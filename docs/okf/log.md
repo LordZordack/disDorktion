@@ -146,3 +146,23 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-11-03T19:47:06Z: Prepared tone draft PR with compact evidence; raw artifacts retained locally
 
 - 2026-11-03T19:48:33Z: Completed full staged tone graph analysis: 42 files 123 symbols, critical shared-flow risk; draft acceptance gates retained
+
+- 2026-11-03T20:14:59Z: Integrated comb, frequency dispersion and tone into Output; documented compatibility and qualification scope
+
+- 2026-11-03T20:26:36Z: Recorded expanded Output validation and remaining release gates
+
+- 2026-11-03T20:39:24Z: Completed approved issue 20 integration and Debug/Release automated verification
+
+- 2026-11-07T03:04:58Z: Assess Argon issue20 continuation review; record collector coverage and remaining interim qualification gates
+
+- 2026-11-07T03:08:04Z: Record fresh issue20 continuation builds and 307-case Debug and Release test passes
+
+- 2026-11-07T17:41:32Z: Discard carrier scope, record user listening acceptance and48-case independently audited expanded-chain stress; revise full-chain CPU sampling before retry
+
+- 2026-11-07T18:29:58Z: Record independently audited48-case stress pass and failed96k32-frame full-chain CPU budget gate; retain31-case fail-fast evidence
+
+- 2026-11-07T22:56:27Z: Record issue20 CPU attribution, exact ADAA cache evidence and explicit process-policy investigation; fresh qualification pending
+
+- 2026-11-08T00:52:16Z: Record independently qualified 180-case explicit-HighQoS issue20 reference, unchanged budgets, full regression/golden/stress passes and preserved original policy failure
+
+- 2026-11-08T20:27:01Z: Prepare issue20 publication: reconcile current conditional CPU acceptance, cross-link integrated module concepts and describe compact evidence versus local raw artifacts

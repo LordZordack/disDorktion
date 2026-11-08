@@ -21,6 +21,16 @@ bool integer(const juce::var& v, double low, double high)
     const double n = static_cast<double>(v);
     return std::isfinite(n) && n >= low && n <= high && std::floor(n) == n;
 }
+bool defaultOutputAdditions(const OutputSettings& output)
+{
+    const OutputSettings defaults;
+    const auto& a=output.comb;const auto& b=defaults.comb;
+    return a.delayMs==b.delayMs && a.feedforward==b.feedforward && a.feedback==b.feedback
+        && a.dampingHz==b.dampingHz && a.mix==b.mix && a.dampingEnabled==b.dampingEnabled && a.bypass==b.bypass
+        && output.dispersion.frequencyHz==defaults.dispersion.frequencyHz
+        && output.dispersion.mix==defaults.dispersion.mix && output.dispersion.bypass==defaults.dispersion.bypass
+        && output.tone.toneDb==defaults.tone.toneDb && output.tone.bypass==defaults.tone.bypass;
+}
 }
 
 ExperimentRecord::ExperimentRecord() : buildIdentity(DISDORKTION_BUILD_ID) {}
@@ -28,6 +38,15 @@ ExperimentRecord::ExperimentRecord() : buildIdentity(DISDORKTION_BUILD_ID) {}
 bool ExperimentRecord::validate(juce::String& error) const
 {
     error.clear();
+    if(version==15)
+    {
+        if(targetId!="output-section" || !isValidOutputSettings(output)) return fail(error,"Invalid expanded output settings");
+        auto legacy=*this;legacy.version=10;
+        const OutputSettings defaults;
+        legacy.output.comb=defaults.comb;legacy.output.dispersion=defaults.dispersion;legacy.output.tone=defaults.tone;
+        return legacy.validate(error);
+    }
+    if(!defaultOutputAdditions(output)) return fail(error,"Foreign or legacy expanded output settings");
     if(version==14)
     {
         if(targetId!="tone" || !isValidToneSettings(tone) || bypass)
@@ -60,10 +79,11 @@ bool ExperimentRecord::validate(juce::String& error) const
         || comb.feedback!=defaultComb.feedback || comb.dampingHz!=defaultComb.dampingHz
         || comb.mix!=defaultComb.mix || comb.dampingEnabled!=defaultComb.dampingEnabled || comb.bypass)
         return fail(error,"Foreign comb settings");
-    if (version == 11)
+    if (version == 11 || version == 16)
     {
         if (targetId != "full-chain" || !isValidFullChainSettings(fullChain)
             || middleQuality != "4x-fir-adaa-v1") return fail(error,"Invalid full chain settings or quality");
+        if(version==11 && !defaultOutputAdditions(fullChain.output)) return fail(error,"Legacy full chain cannot contain expanded output settings");
         auto common=*this;common.version=1;common.targetId="reference-gain";common.fullChain={};
         if (gain != 1.f || gainDb != 0.f || bypass || mute || bitDepth!=64 || captureRateHz!=384000.f)
             return fail(error,"Foreign full chain settings");
@@ -151,6 +171,16 @@ bool ExperimentRecord::validate(juce::String& error) const
 
 juce::var ExperimentRecord::toJson() const
 {
+    if(version==15)
+    {
+        auto legacy=*this;legacy.version=10;
+        auto result=legacy.toJson();auto* root=result.getDynamicObject();root->setProperty("version",15);
+        ExperimentRecord module;
+        module.version=12;module.targetId="resonant-comb";module.comb=output.comb;root->setProperty("comb",module.toJson());
+        module={};module.version=13;module.targetId="frequency-dispersion";module.dispersion=output.dispersion;root->setProperty("dispersion",module.toJson());
+        module={};module.version=14;module.targetId="tone";module.tone=output.tone;root->setProperty("tone",module.toJson());
+        return result;
+    }
     if(version==14)
     {
         auto common=*this;common.version=1;common.targetId="reference-gain";common.tone={};
@@ -176,12 +206,12 @@ juce::var ExperimentRecord::toJson() const
         root->setProperty("combMix",comb.mix);root->setProperty("dampingEnabled",comb.dampingEnabled);
         root->setProperty("bypass",comb.bypass);return result;
     }
-    if (version == 11)
+    if (version == 11 || version == 16)
     {
         auto common=*this;common.version=1;common.targetId="reference-gain";common.fullChain={};
         auto result=common.toJson();auto* root=result.getDynamicObject();
         root->removeProperty("gain");root->removeProperty("bypass");
-        root->setProperty("version",11);root->setProperty("targetId","full-chain");
+        root->setProperty("version",version);root->setProperty("targetId","full-chain");
         ExperimentRecord input=common,middleRecord=common,outputRecord=common;
         input.version=8;input.targetId="input-section";
         input.gainDb=fullChain.input.gain.gainDb;input.mute=fullChain.input.gain.mute;input.gainBypass=fullChain.input.gain.bypass;
@@ -189,7 +219,7 @@ juce::var ExperimentRecord::toJson() const
         input.bitDepth=crusher.bitDepth;input.captureRateHz=crusher.captureRateHz;input.crusherBypass=crusher.bypass;
         input.mix=crusher.mix;input.crush=crusher.crush;input.shape=crusher.shape;input.jitter=crusher.jitter;input.jitterSeed=crusher.jitterSeed;
         middleRecord.version=9;middleRecord.targetId="middle-section";middleRecord.middle=fullChain.middle;
-        outputRecord.version=10;outputRecord.targetId="output-section";outputRecord.output=fullChain.output;
+        outputRecord.version=version==16?15:10;outputRecord.targetId="output-section";outputRecord.output=fullChain.output;
         root->setProperty("input",input.toJson());root->setProperty("middle",middleRecord.toJson());root->setProperty("output",outputRecord.toJson());
         root->setProperty("globalMix",fullChain.mix);root->setProperty("chainBypass",fullChain.bypass);
         root->setProperty("finalGainDb",fullChain.finalGain.gainDb);root->setProperty("finalMute",fullChain.finalGain.mute);
@@ -263,6 +293,27 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto* o = value.getDynamicObject();
     if (o == nullptr) return fail(error, "Experiment must be a JSON object");
     auto get = [o](const char* key) { return o->getProperty(key); };
+    if(integer(get("version"),15,15))
+    {
+        ExperimentRecord schema;schema.version=15;schema.targetId="output-section";
+        const auto allowed=schema.toJson();
+        for(const auto& property:o->getProperties())
+            if(!allowed.getDynamicObject()->hasProperty(property.name))
+                return fail(error,"Mixed expanded output schema");
+        ExperimentRecord combRecord,dispersionRecord,toneRecord;
+        if(!fromJson(get("comb"),combRecord,error) || combRecord.version!=12
+            || !fromJson(get("dispersion"),dispersionRecord,error) || dispersionRecord.version!=13
+            || !fromJson(get("tone"),toneRecord,error) || toneRecord.version!=14)
+            return fail(error,"Invalid expanded output module record");
+        juce::var common(o->clone().release());auto* base=common.getDynamicObject();
+        for(auto key:{"comb","dispersion","tone"})base->removeProperty(key);
+        base->setProperty("version",10);
+        ExperimentRecord candidate;if(!fromJson(common,candidate,error))return false;
+        candidate.version=15;candidate.output.comb=combRecord.comb;candidate.output.dispersion=dispersionRecord.dispersion;candidate.output.tone=toneRecord.tone;
+        if(!candidate.validate(error))return false;
+        destination=std::move(candidate);return true;
+    }
+    for(auto key:{"comb","dispersion","tone"})if(o->hasProperty(key))return fail(error,"Mixed expanded output schema");
     if(integer(get("version"),14,14))
     {
         if(!get("targetId").isString() || get("targetId").toString()!="tone" || !get("bypass").isBool()
@@ -333,7 +384,7 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     }
     for(auto key:{"delayMs","feedforward","feedback","dampingHz","combMix","dampingEnabled"})
         if(o->hasProperty(key))return fail(error,"Mixed comb schemas");
-    if (integer(get("version"),11,11))
+    if (integer(get("version"),11,11) || integer(get("version"),16,16))
     {
         if (get("targetId").toString()!="full-chain" || !get("middleQuality").isString()
             || get("middleQuality").toString()!="4x-fir-adaa-v1") return fail(error,"Unsupported full chain target or quality");
@@ -356,7 +407,7 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
         ExperimentRecord input,middleRecord,outputRecord;
         if (!fromJson(get("input"),input,error) || input.version!=8 || input.bypass
             || !fromJson(get("middle"),middleRecord,error) || middleRecord.version!=9 || middleRecord.bypass
-            || !fromJson(get("output"),outputRecord,error) || outputRecord.version!=10 || outputRecord.bypass)
+            || !fromJson(get("output"),outputRecord,error) || outputRecord.version!=(static_cast<int>(get("version"))==16?15:10) || outputRecord.bypass)
             return fail(error,"Invalid nested full chain section");
         juce::var common(o->clone().release());
         auto* base=common.getDynamicObject();
@@ -365,7 +416,7 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
         base->setProperty("version",1);base->setProperty("targetId","reference-gain");base->setProperty("gain",1.f);base->setProperty("bypass",false);
         ExperimentRecord candidate;
         if (!fromJson(common,candidate,error)) return false;
-        candidate.version=11;candidate.targetId="full-chain";
+        candidate.version=static_cast<int>(get("version"));candidate.targetId="full-chain";
         candidate.fullChain.input={{input.gainDb,input.mute,input.gainBypass},
             {input.bitDepth,input.captureRateHz,input.crusherBypass,input.mix,input.crush,input.shape,input.jitter,input.jitterSeed}};
         candidate.fullChain.middle=middleRecord.middle;candidate.fullChain.output=outputRecord.output;

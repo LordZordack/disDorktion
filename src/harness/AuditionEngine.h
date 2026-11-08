@@ -31,6 +31,8 @@ public:
     {
         for (std::size_t i=0;i<fullControls.size();++i)
             fullControls[i].store(fullChainControls[i].defaultValue,std::memory_order_relaxed);
+        for (std::size_t i=0;i<outputControls.size();++i)
+            outputControls[i].store(outputSectionControls[i].defaultValue,std::memory_order_relaxed);
     }
     bool setFrequencyDispersionSettings(const FrequencyDispersionSettings&) noexcept;
     bool setToneSettings(const ToneSettings&) noexcept;
@@ -73,6 +75,7 @@ public:
     bool setInputSettings(const InputSettings&, bool commonBypass = false) noexcept;
     bool setMiddleSettings(const MiddleSettings&, bool commonBypass = false) noexcept;
     bool setOutputSettings(const OutputSettings&, bool commonBypass = false) noexcept;
+    bool setOutputControl(std::string_view,float) noexcept;
     bool setOutputCutoffHz(bool highPass, float value) noexcept;
     bool setOutputResponse(bool highPass, FilterResponse value) noexcept;
     void setOutputStageBypass(bool highPass, bool value) noexcept;
@@ -117,6 +120,7 @@ private:
     ResonantCombTarget combTarget;
     std::array<std::atomic<float>,7> combControls {{5.f,0.f,.7f,6000.f,.5f,1.f,0.f}};
     std::array<std::atomic<float>,fullChainControls.size()> fullControls;
+    std::array<std::atomic<float>,outputSectionControls.size()> outputControls;
     std::atomic<std::uint32_t> fullSeed {1};
     std::atomic<float> postHighPassPeak {0.f}, wetPeak {0.f};
     TanhSaturationTarget saturationTarget;

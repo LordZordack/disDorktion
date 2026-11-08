@@ -8,7 +8,7 @@ gain; the total low/high difference at +6 is 12 dB. Controls and bypass ramp ove
 10 ms, with zero reported latency. Version-14 records preserve `toneDb` and
 `bypass`; older record versions retain their original targets and meanings.
 Monitoring level remains separate from rendering and measurement. Leave
-headroom when boosting. X5 owns later production-chain integration.
+headroom when boosting. The production Output section also includes Tone, bypassed by default.
 
 Build `disdorktion_tone_measurements` and `disdorktion_tone_benchmark` in Release.
 Both tools require a fresh destination:
@@ -496,3 +496,15 @@ The full-chain offline policy is `fixed-duration-uncompensated`: requested
 frame count, leading latency retained and no tail flush. Result metadata records
 latency, quality and peak diagnostics. Listening observations must be entered
 by a listener; generated samples do not constitute listening acceptance.
+
+
+## Expanded Output (issue #20)
+
+Output and Full chain now share comb -> dispersion -> tone -> HP -> LP.
+The added modules default to bypass, and common Output bypass preserves their
+individual choices. Expanded Output records use version 15; expanded Full chain
+records use version 16. Old v10/v11 records retain HP/LP-only sound through
+bypassed additions. Isolated comb, dispersion and tone targets retain v12-v14.
+Offline rendering retains frame count; select enough duration to capture tails.
+Dispersion is phase shaping and can cancel against a partial dry blend. Comb
+feedback and tone boost need headroom. Full-chain host latency remains 92 samples.

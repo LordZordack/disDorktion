@@ -1,12 +1,30 @@
 ---
 type: Method
-title: "Native-Rate Output Filter Section"
-description: "Ordered high-pass and low-pass composition with independent controls and reproducible section qualification."
+title: "Native-Rate Output Section"
+description: "Native-rate comb, dispersion, tone, high-pass and low-pass composition with independent controls and reproducible qualification."
 timestamp: 2026-10-14T03:46:45Z
 tags: ["output-section", "filter", "realtime", "qualification"]
 ---
 
 # Output section
+
+## Issue #20 expanded Output integration
+
+The approved native-rate order is [resonant comb](resonant_comb.md) ->
+[frequency dispersion](frequency_dispersion.md) -> [tone](tone.md) -> high-pass ->
+low-pass. Each addition has independent bypass, set to On by default. Initialize and
+old sessions therefore retain the previous output sound. Settings validate
+all five stages before mutation. Comb allocates in preparation before the
+nonallocating stages are prepared; reset clears histories and snaps controls.
+
+Dispersion is static all-pass phase shaping, not frequency remapping. Output
+adds zero compensating samples; the full chain retains its 92-sample dry delay.
+Partial global dry/wet can color the spectrum through phase cancellation.
+Warm bypass histories preserve engagement behavior. Comb resonance and tone
+boost expand peak levels; no limiter is inserted. The original limits and
+evidence below apply to HP/LP with the additions bypassed. Expanded tests
+provide scenario evidence, not an extension of the dispersion module's
+conservative input-bound proof or completed release qualification.
 
 The reusable section processes the existing [high-pass](high_pass_filter.md)
 then [low-pass](low_pass_filter.md) at the host sample rate. It uses independent

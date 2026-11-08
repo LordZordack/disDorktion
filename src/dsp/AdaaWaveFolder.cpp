@@ -16,14 +16,22 @@ double primitive(double z, double t) noexcept
     const auto v = r <= 1.0 ? .5*r*r : r <= 3.0 ? 1.0-.5*(r-2.0)*(r-2.0) : .5*(r-4.0)*(r-4.0);
     return t*t*v;
 }
-double averageFold(double current, double previous, double t) noexcept
+double averageFold(double current, double previous, double t,
+                   double& cachedInput, double& cachedThreshold, double& cachedValue, bool& cacheValid) noexcept
 {
     const auto delta = current-previous;
     if (delta == 0.0) return fold(current,t);
     if (std::abs(current) <= t && std::abs(previous) <= t) return .5*(current+previous);
     // Threshold-scaled fallback never mistakes a large many-cycle jump for a small step.
     if (std::abs(delta)/t < 1e-6) return fold(.5*(current+previous),t);
-    return (primitive(current,t)-primitive(previous,t))/delta;
+    const auto currentPrimitive = primitive(current,t);
+    // Key by the actual primitive arguments, including during moving controls.
+    // Early returns and bypass may retain a cache; matching arguments still
+    // identify exactly the same pure calculation when folding resumes.
+    const auto previousPrimitive = cacheValid && cachedInput == previous && cachedThreshold == t
+        ? cachedValue : primitive(previous,t);
+    cachedInput = current; cachedThreshold = t; cachedValue = currentPrimitive; cacheValid = true;
+    return (currentPrimitive-previousPrimitive)/delta;
 }
 }
 
@@ -39,6 +47,7 @@ void AdaaWaveFolder::reset() noexcept
     drive.setCurrentAndTargetValue(driveTarget); threshold.setCurrentAndTargetValue(retained.threshold);
     output.setCurrentAndTargetValue(outputTarget); bypass.setCurrentAndTargetValue(retained.bypass ? 1. : 0.);
     previousInput.fill(0); correctionOne.fill(0); correctionTwo.fill(0);
+    primitiveCacheValid.fill(false);
 }
 bool AdaaWaveFolder::setParameters(const WaveFolderSettings& p) noexcept
 {
@@ -61,7 +70,8 @@ bool AdaaWaveFolder::process(juce::dsp::AudioBlock<float> block) noexcept
             {
                 const double x=chunk.getChannelPointer(c)[n],previous=previousInput[c];
                 const auto dry=.5*(x+previous);
-                const auto wet=b == 1. ? 0. : g*averageFold(a*x,a*previous,t);
+                const auto wet=b == 1. ? 0. : g*averageFold(a*x,a*previous,t,
+                    cachedPrimitiveInput[c],cachedPrimitiveThreshold[c],cachedPrimitive[c],primitiveCacheValid[c]);
                 const auto raw=b == 1. ? dry : b == 0. ? wet : b*dry+(1.-b)*wet;
                 // Matched linear/bypass phase and a maximally-flat droop compensation.
                 chunk.getChannelPointer(c)[n]=static_cast<float>(-.125*raw+1.25*correctionOne[c]-.125*correctionTwo[c]);

@@ -20,5 +20,7 @@ private:
     juce::SmoothedValue<double, juce::ValueSmoothingTypes::Linear> drive {1.0}, threshold {1.0},
         output {1.0}, bypass {0.0};
     std::array<double, 2> previousInput {}, correctionOne {}, correctionTwo {};
+    std::array<double, 2> cachedPrimitiveInput {}, cachedPrimitiveThreshold {}, cachedPrimitive {};
+    std::array<bool, 2> primitiveCacheValid {};
 };
 }

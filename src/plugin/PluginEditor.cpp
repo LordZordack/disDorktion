@@ -70,6 +70,16 @@ public:
                 slider.textFromValueFunction = [](double value) { return juce::String(value, 2) + " x"; };
                 slider.valueFromTextFunction = [](const juce::String& value) { return value.getDoubleValue(); };
             }
+            else if (parameterId.endsWith("Ms"))
+            {
+                slider.textFromValueFunction = [](double value) { return juce::String(value, 2) + " ms"; };
+                slider.valueFromTextFunction = [](const juce::String& value) { return value.getDoubleValue(); };
+            }
+            else if (parameterId == "combFeedforward" || parameterId == "combFeedback")
+            {
+                slider.textFromValueFunction = [](double value) { return juce::String(value, 2); };
+                slider.valueFromTextFunction = [](const juce::String& value) { return value.getDoubleValue(); };
+            }
             else
             {
                 slider.textFromValueFunction = [](double value) { return juce::String(value * 100.0, 1) + " %"; };
@@ -146,7 +156,7 @@ PluginEditor::PluginEditor(PluginProcessor& owner) : AudioProcessorEditor(owner)
     setLookAndFeel(&lookAndFeel);
     title.setText("DisDorktion", juce::dontSendNotification);
     title.setFont(juce::Font(24.0f, juce::Font::bold));
-    subtitle.setText("CRUSH / SATURATE / FOLD / FILTER", juce::dontSendNotification);
+    subtitle.setText("CRUSH / FOLD / RESONATE / DISPERSE", juce::dontSendNotification);
     subtitle.setFont(juce::Font(11.0f));
     compatibilityStatus.setFont(juce::Font(11.0f));
     for (auto* label : {&title, &subtitle, &presetStatus, &compatibilityStatus})
@@ -185,6 +195,18 @@ PluginEditor::PluginEditor(PluginProcessor& owner) : AudioProcessorEditor(owner)
     addControl(1, "folderOutputDb", "Fold trim");
     addControl(1, "folderThreshold", "Threshold");
     addControl(1, "folderBypass", "Bypass folder");
+    addControl(2, "combDelayMs", "Comb delay");
+    addControl(2, "combFeedforward", "Feedforward");
+    addControl(2, "combFeedback", "Feedback");
+    addControl(2, "combDampingHz", "Comb damping");
+    addControl(2, "combMix", "Comb mix");
+    addControl(2, "combDampingEnabled", "Enable comb damping");
+    addControl(2, "combBypass", "Bypass comb");
+    addControl(2, "dispersionFrequencyHz", "Dispersion frequency");
+    addControl(2, "dispersionMix", "Dispersion mix");
+    addControl(2, "dispersionBypass", "Bypass dispersion");
+    addControl(2, "toneDb", "Tone");
+    addControl(2, "toneBypass", "Bypass tone");
     addControl(2, "hpCutoffHz", "High-pass");
     addControl(2, "hpResponse", "High-pass response");
     addControl(2, "hpBypass", "Bypass high-pass");
@@ -203,8 +225,8 @@ PluginEditor::PluginEditor(PluginProcessor& owner) : AudioProcessorEditor(owner)
     addAndMakeVisible(*inputMeter);
     addAndMakeVisible(*outputMeter);
     setResizable(true, true);
-    setResizeLimits(740, 520, 1400, 1000);
-    setSize(820, 560);
+    setResizeLimits(1000, 680, 1400, 1000);
+    setSize(1120, 740);
     refreshPresetAndMode();
     startTimerHz(30);
 }
@@ -257,10 +279,11 @@ void PluginEditor::resized()
     bottom.removeFromRight(8);
     sections[3] = bottom;
     area.removeFromBottom(8);
-    const auto columnWidth = (area.getWidth() - 16) / 3;
+    // Output carries five effects; give it half the available width.
+    const auto columnWidth = (area.getWidth() - 16) / 4;
     for (int i = 0; i < 3; ++i)
     {
-        sections[static_cast<std::size_t>(i)] = area.removeFromLeft(columnWidth);
+        sections[static_cast<std::size_t>(i)] = area.removeFromLeft(i == 2 ? area.getWidth() : columnWidth);
         area.removeFromLeft(8);
         auto cells = sections[static_cast<std::size_t>(i)].reduced(8);
         cells.removeFromTop(22);
@@ -270,13 +293,14 @@ void PluginEditor::resized()
             if (control->hasKnob()) ++knobs;
             else if (control->isSwitch()) ++switches;
             else ++choices;
-        auto switchArea = cells.removeFromBottom(switches * 21);
+        const int switchColumns = i == 2 ? 2 : 1;
+        auto switchArea = cells.removeFromBottom(((switches + switchColumns - 1) / switchColumns) * 21);
         auto choiceArea = cells.removeFromBottom(choices * 38);
-        const int columns = i == 2 ? 2 : 3;
+        const int columns = i == 2 ? 4 : 3;
         const int knobRows = (knobs + columns - 1) / columns;
         const int cellWidth = cells.getWidth() / columns;
         const int cellHeight = cells.getHeight() / juce::jmax(1, knobRows);
-        int knob = 0;
+        int knob = 0, toggle = 0;
         for (auto& control : group)
         {
             if (control->hasKnob())
@@ -285,7 +309,13 @@ void PluginEditor::resized()
                     cells.getY() + (knob / columns) * cellHeight, cellWidth, cellHeight);
                 ++knob;
             }
-            else if (control->isSwitch()) control->setBounds(switchArea.removeFromTop(21));
+            else if (control->isSwitch())
+            {
+                const auto width = switchArea.getWidth() / switchColumns;
+                control->setBounds(switchArea.getX() + (toggle % switchColumns) * width,
+                    switchArea.getY() + (toggle / switchColumns) * 21, width, 21);
+                ++toggle;
+            }
             else control->setBounds(choiceArea.removeFromTop(38));
         }
     }
