@@ -2,10 +2,47 @@
 type: Method
 title: "Middle section qualification candidate"
 description: "Fixed 4x FIR tanh and ADAA folding integration, independent bypass controls, experiment identity and render policy."
-timestamp: 2026-10-13T00:00:00Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["audio-dsp", "oversampling", "integration", "latency"]
 resource: "https://github.com/LordZordack/disDorktion/issues/11"
 ---
+
+## Current Waveshaper contract (issue #38)
+
+The visible Middle panel is now **Waveshaper**; `MiddleSection` remains the
+reusable implementation name. Controls run Tanh Drive -> Fold Drive -> Threshold
+-> Waveshaper Trim -> Waveshaper Mix. Tanh/Fold drives have Off at -24 dB and
+maximum +36 dB. Production defaults set both Off. Shared trim is -60 to +12 dB,
+default 0 dB; mix is 0 to 100%, default 100%. Tanh Trim is removed; the shared trim
+runs after both nonlinear stages, before the section mix.
+
+The approved Driver adjustment adds the GLOBAL 1x-to-4x Driver (default 1x)
+immediately before tanh/fold, after the upstream crusher and inside this wet
+branch. Its 10 ms trajectory also controls delayed fixed calibrated output
+compensation, applied before shared trim and section mixing. The lookup uses
+log-Driver/dB-linear interpolation and +/-6 dB limits; see
+[full-chain design](./full_chain.md) for the calibration matrix. Section dry is
+unchanged. Both stages Off or section mix zero make Driver inaudible; manual
+trim remains active with both stages Off. No live tracking or AGC is used.
+
+Both stages Off crossfade to trimmed delayed dry and suspend unnecessary
+nonlinear/oversampling work. Waveshaper Mix blends this with untrimmed delayed
+dry, so trim remains active with both stages Off. Individual Off paths preserve
+ADAA and boundary timing. Production remains fixed 4x FIR/ADAA with **92 samples**
+of latency at all endpoints.
+
+The dry delay advances continuously. At settled zero section mix, wet histories
+reset and wet processing stops. Reactivation warms the wet branch at zero wet
+contribution before fading toward the latest requested mix. Warm-up changes
+control response time without adding audio/reported latency; interrupted targets
+must not expose stale histories. See the
+[Driver adjustment status](../notes/driver_adjustment_validation.md) and
+[historical issue #38 evidence](../notes/issue38_validation.md).
+
+## Historical S2 design and evidence context
+
+The following records the earlier two-trim/bypass prototype. Its settings,
+records and measurements do not describe the current production controls.
 
 # Middle section qualification candidate
 

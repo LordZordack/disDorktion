@@ -13,7 +13,10 @@ TEST_CASE("Full chain harness scalar automation reset and oversized callbacks al
         for(unsigned event=0;event<16;++event)
         {
             ok &= engine.setFullChainControl("globalMix",event%2?.5f:1.f);
-            ok &= engine.setFullChainControl("chainBypass",static_cast<float>(event%2));
+            engine.setBypass(event % 2 != 0);
+            ok &= engine.setFullChainControl("driver", event % 2 ? 4.f : 1.f);
+            ok &= engine.setFullChainControl("waveshaperMix", event % 2 ? 0.f : 1.f);
+            ok &= engine.setFullChainControl("waveshaperTrimDb", event % 2 ? -6.f : 0.f);
             ok &= engine.setFullChainControl("inputGainDb",event%2?24.f:0.f);
             ok &= engine.setFullChainControl("folderThreshold",event%2?.05f:1.f);
             ok &= !engine.setFullChainControl("hpResponse",.5f);

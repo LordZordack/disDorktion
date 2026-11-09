@@ -13,27 +13,40 @@
 
 ### Plugin interface and presets
 
-The plugin editor exposes Input, Middle and Output sections, global dry/wet,
-final gain, compatibility trim, raw-input/final-output meters and five factory
-settings from Initialize through Digital Destruction. The original 30 host
-parameters retain their order and meanings; 12 Output controls are appended.
-State version 4 also restores version-1/2/3 sessions. Preset recall
-preserves output mute; Initialize restores defaults. See the
+The prototype editor has Input, Waveshaper, Output and GLOBAL panels, with
+editable numeric controls and no visible mute/bypass buttons. GLOBAL contains
+Input Gain, Driver (1x to 4x, default 1x), dry/wet and Final Gain. Input Mix covers
+the entire crusher/sampler. Waveshaper Mix covers tanh, folding and shared
+Waveshaper Trim; trim remains active with both stages Off. Capture rate and
+HP/LP movement are logarithmic. Tanh/Fold minima, HP minimum and LP maximum
+show Off. Comb damping is always active during comb processing.
+
+The current 27-control prototype uses state version 5 and intentionally replaces
+old prototype state/automation compatibility. Five factory settings remain,
+using shared trim and stage Off endpoints. See the
 [interface and state guide](docs/PLUGIN_INTERFACE.md),
 [interface design](docs/okf/methods/plugin_interface.md) and
-[validation status](docs/okf/notes/plugin_interface_validation.md) for bypass,
-latency, preset transition behavior and pending host/listening checks.
+[current verification status](docs/okf/notes/driver_adjustment_validation.md).
 
-### Full chain candidate
+### Full chain prototype
 
-Select **Full chain** in the audition app for input gain/crushing, fixed 4x
-FIR/ADAA tanh/folding, comb, frequency dispersion, tone, output filters, global dry/wet and final gain. Dry is
-captured before input drive and aligned by 92 samples. Chain bypass preserves
-that delay and final gain; each effect also has independent bypass. Version-16
-experiments reproduce the chain. New plugin instances use the same processor;
-old plugin states retain their gain-only behavior. See the
+Production order is Input Gain -> global dry/wet split -> crusher/sampler ->
+Waveshaper -> comb -> dispersion -> tone -> high-pass -> low-pass -> global
+mixing -> Final Gain. Driver acts after the crusher, immediately before the
+tanh/fold stages inside the Waveshaper wet branch. Fixed calibrated compensation
+follows the nonlinear output before shared trim and section mixing. Input Gain
+affects both global branches; Driver leaves global dry and Waveshaper dry
+unchanged. Compensation follows the delayed 10 ms Driver trajectory and uses
+no live level tracking or AGC; perceived loudness can still vary.
+
+Latency remains **92 host samples**, including zero section mix and nonlinear
+Off states. Both nonlinear stages Off use trimmed delayed dry. Settled zero
+section mixes reset/suspend unnecessary wet work; wet histories warm before
+fading back in. Comb clears its history after its mix fade reaches zero.
+DAW bypass returns delayed raw bus input. An internal FullChain bypass remains
+for the development harness only, with no plugin parameter. See the
 [design](docs/okf/methods/full_chain.md) and
-[qualification status](docs/okf/notes/full_chain_validation.md).
+[Driver adjustment validation status](docs/okf/notes/driver_adjustment_validation.md).
 
 ### Input section
 
@@ -42,52 +55,35 @@ then the expressive bit crusher at the device rate. Gain and crusher have
 independent bypasses; common bypass retains those selections. Post-gain metering
 and a latched overload indicator reveal quantizer overload that wet clamping
 could hide. Version-8 records reproduce both modules and all bypass settings.
-The section adds zero samples of latency. See the [design](docs/okf/methods/input_section.md),
+This standalone convenience still owns Gain -> BitCrusher; production FullChain
+owns its separate pre-input Gain and direct BitCrusher so Input Gain precedes
+Driver and both global branches. The section adds zero samples of latency. See the [design](docs/okf/methods/input_section.md),
 [qualification status](docs/okf/notes/input_section_validation.md), and
 [audition guide](docs/AUDITION_HARNESS.md).
 
-### Output section
+### Output and Waveshaper sections
 
-Select **Tone** in the audition app for a dark/bright balance control, -6 to
-+6 dB around a fixed 1 kHz unity pivot. Zero is exact neutral; tone and bypass
-changes take 10 ms. The isolated module adds zero samples of compensating
-latency, and version-14 experiments retain its settings. Positive tone cuts lows
-and boosts highs, so leave headroom. The production Output section now includes this module, bypassed by default.
-See the [design](docs/okf/methods/tone.md) and
-[qualification status](docs/okf/notes/tone_validation.md).
+The production Output order is comb -> frequency dispersion -> tone ->
+high-pass -> low-pass, at native rate. Initialize uses zero comb/dispersion
+mix, neutral tone and the HP/LP Off endpoints. Comb damping is always enabled
+in production. Phase shaping can cause cancellation in partial global blends;
+feedback and tone boost can raise peaks. No limiter is inserted. Isolated
+harness modules retain their own test controls and experiment records. See the
+[Output design](docs/okf/methods/output_section.md).
 
-Issue #17 adds an isolated **Resonant comb** audition target with delay,
-feedforward, damped signed feedback, mix and bypass controls. Delay changes
-produce pitch glides; high feedback rings and can amplify peaks. It is also integrated into the production Output section, bypassed by default. See the
-[design](docs/okf/methods/resonant_comb.md) and
-[verification status](docs/okf/notes/resonant_comb_validation.md).
+Waveshaper controls run Tanh Drive -> Fold Drive -> Threshold -> Waveshaper Trim
+-> Waveshaper Mix. Each nonlinear stage has an Off endpoint. The shared trim
+follows both stages and remains active with both Off, using latency-aligned
+delayed dry. Fixed production latency is 92 samples. The reusable class and
+historical harness target retain the name MiddleSection; see the
+[design](docs/okf/methods/middle_section.md).
 
-The production **Output section** uses native-rate comb -> frequency dispersion
--> tone -> high-pass -> low-pass. The three added modules default to bypass,
-preserving existing sessions and the five factory preset sounds. Dispersion is
-all-pass phase shaping; blending it with dry can cause frequency-dependent
-cancellation. Comb feedback and tone boost can raise peaks, so leave headroom.
-Host latency remains 92 samples for the full chain. Expanded-chain automated
-checks do not replace host, listening, or release qualification.
-
-Select **Output section** in the audition app for the same expanded chain. Both stages have independent cutoff, response and bypass
-controls; common bypass retains those choices. Version-15 records reproduce
-the section in live audition and offline renders. Equal and crossed cutoffs are
-allowed. The section adds zero samples of latency; filter phase and tails remain.
-See the [design](docs/okf/methods/output_section.md) and
-[qualification status](docs/okf/notes/output_section_validation.md).
-
-### Middle section candidate
-
-Select **Middle section (candidate)** in the audition app for tanh followed by
-ADAA triangle folding inside a fixed 4x FIR boundary. Each stage has its own
-drive, trim and bypass; common bypass retains those selections and keeps
-filtering active. The section reports 92 samples of latency. Version-9 records
-preserve both stages and the fixed quality identity. Shared offline renders
-retain their requested frame count, with untrimmed delay and no automatic tail
-flush. See the [design](docs/okf/methods/middle_section.md) and
-[qualification evidence](docs/okf/notes/middle_section_validation.md).
-Human listening and extreme residual-alias acceptance remain open.
+Prior measurement, CPU and listening results linked below apply to the recorded
+implementations. They do not qualify issue #38's revised routing and inactive
+processing. The [issue #38 evidence record](docs/okf/notes/issue38_validation.md)
+preserves its completed automated checks as historical evidence. New Driver
+adjustment verification remains pending in the
+[current validation record](docs/okf/notes/driver_adjustment_validation.md).
 
 ### Launch the Release audition app
 
@@ -107,9 +103,10 @@ still contain older module options. In the module menu, select **High-pass** or
 
 The reusable gain module supports -60 to +24 dB, an explicit mute, and 10 ms
 smoothed gain/bypass changes. Select **Gain (dB)** in the audition app; module
-mute and monitoring mute are separate controls. The plugin has independent
-input/output gain instances. Its original linear reference controls remain as
-a legacy trim so existing host automation and saved states keep their meaning.
+mute and monitoring mute are separate controls. Production FullChain has independent
+input/output gain instances. The current plugin replaces the original linear
+reference/legacy trim with compensated Driver; standalone Gain retains its
+isolated mute/bypass test controls.
 See the [gain validation note](docs/okf/notes/gain_validation.md) for recorded test results and remaining listening
 and performance qualification gates.
 
@@ -192,7 +189,7 @@ Middle Stage: Processing the signal
 Output Stage: Outputting the signal
 - Resonant Comb Filter: Mixes the input with a delayed version of itself, creating a series of evenly spaced resonances and notches. This colors the sound in a hollow, metallic, or phasey way that highlights specific frequencies.
 
-- Frequency dispersion (X3): An isolated 32-stage all-pass cascade reshapes transients through frequency-dependent phase and delay. Static settings retain spectral-line frequencies; dry/wet blending colors magnitude and automation can create sidebands. The audition harness exposes requested frequency (20–20000 Hz), mix and bypass. Effective frequency is limited by sample rate and a coefficient safety bound. Outer feedback and true frequency remapping are separate alternatives; the cascade is integrated into the production Output section, bypassed by default. See the [design](docs/okf/methods/frequency_dispersion.md) and [validation status](docs/okf/notes/frequency_dispersion_validation.md).
+- Frequency dispersion (X3): An isolated 32-stage all-pass cascade reshapes transients through frequency-dependent phase and delay. Static settings retain spectral-line frequencies; dry/wet blending colors magnitude and automation can create sidebands. The audition harness exposes requested frequency (20–20000 Hz), mix and bypass. Effective frequency is limited by sample rate and a coefficient safety bound. Outer feedback and true frequency remapping are separate alternatives; the cascade is integrated into the production Output section with mix zero by default. See the [design](docs/okf/methods/frequency_dispersion.md) and [validation status](docs/okf/notes/frequency_dispersion_validation.md).
 
 - Low pass
 - High pass

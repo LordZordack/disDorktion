@@ -57,7 +57,7 @@ def max_error(a, b):
     return max((abs(x-y) for x, y in zip(a, b)), default=0.)
 
 
-def audit_latency(root, checks):
+def audit_latency(root, checks, schema=1):
     require(len(checks) == 4, "incomplete independent latency matrix")
     seen, results = set(), []
     for case in checks:
@@ -80,8 +80,11 @@ def audit_latency(root, checks):
             "output.highPass.bypass": True, "output.lowPass.bypass": True,
             "finalGain.gainDb": 0, "finalGain.mute": False, "finalGain.bypass": False, "mix": 1, "bypass": False,
         }
+        if schema == 2:
+            expected_settings.update({"driver": 1, "middle.mix": 1, "middle.trimDb": 0,
+                                      "middle.tanh.driveDb": -24, "middle.folder.driveDb": -24})
         require(settings == expected_settings, "latency controls differ from bypassed neutral fixture")
-        require(len(settings) == 29 and settings["mix"] == 1 and settings["bypass"] is False
+        require(len(settings) == (32 if schema == 2 else 29) and settings["mix"] == 1 and settings["bypass"] is False
                 and settings["finalGain.gainDb"] == 0 and settings["finalGain.mute"] is False, "invalid latency settings")
         for field in ("input.gain.bypass", "input.crusher.bypass", "middle.tanh.bypass", "middle.folder.bypass", "output.highPass.bypass", "output.lowPass.bypass"):
             require(settings[field] is True, "latency path effect active")
@@ -123,6 +126,7 @@ def audit_measurements(root, report):
     require(report["lanes"] == "source,dry,wet,mix25,mix50,mix75,ordered,common_bypass,variable_partition,dry_changed_drive,wet_final_gain_6db", "unexpected lane schema")
     require(report["sample_format"] == "little-endian IEEE754 float32 planar lane/channel/frame", "unexpected sample format")
     seen = set()
+    schema = report.get("schema", 1)
     errors = dict(dry=0., blend=0., ordered=0., bypass=0., partition=0., drive_independence=0., final_gain=0., source=0.)
     spectra = []
     max_peak = 0.
@@ -138,7 +142,7 @@ def audit_measurements(root, report):
         require(key not in seen, "duplicate case")
         seen.add(key)
         settings = case["settings"]
-        require(len(settings) == 29, "incomplete settings")
+        require(len(settings) == (32 if schema == 2 else 29), "incomplete settings")
         expected_settings = {
             "input.gain.gainDb": 9, "input.gain.mute": False,
             "input.crusher.bitDepth": 8, "input.crusher.captureRateHz": 12345.5,
@@ -151,6 +155,8 @@ def audit_measurements(root, report):
             "finalGain.gainDb": 0, "finalGain.mute": False, "finalGain.bypass": False,
             "mix": 1, "bypass": False,
         }
+        if schema == 2:
+            expected_settings.update({"driver": 1, "middle.mix": 1, "middle.trimDb": 0})
         for field, expected_value in expected_settings.items():
             require(isinstance(settings[field], (int,float)) and abs(settings[field]-expected_value) < 1e-6, "measurement settings mismatch")
         for bit, field in enumerate(("input.gain.bypass", "input.crusher.bypass", "middle.tanh.bypass", "middle.folder.bypass", "output.highPass.bypass", "output.lowPass.bypass")):
@@ -189,11 +195,15 @@ def audit_measurements(root, report):
         for channel in range(channels):
             expected.extend([0.] * delay)
             expected.extend(lanes[0][channel*frames:channel*frames+frames-delay])
+        if schema == 2 and not settings["input.gain.bypass"]:
+            expected = array.array("f", (x * 10**(settings["input.gain.gainDb"]/20) for x in expected))
         errors["dry"] = max(errors["dry"], max_error(lanes[1], expected))
         for lane, mix in zip(lanes[3:6], (.25, .5, .75)):
             errors["blend"] = max(errors["blend"], max(abs(y-((1-mix)*d+mix*w)) for d, w, y in zip(lanes[1], lanes[2], lane)))
-        for name, left, right in (("ordered", 2, 6), ("bypass", 1, 7), ("partition", 2, 8), ("drive_independence", 1, 9)):
+        for name, left, right in (("ordered", 2, 6), ("bypass", 1, 7), ("partition", 2, 8)):
             errors[name] = max(errors[name], max_error(lanes[left], lanes[right]))
+        gain_ratio = 10**((-24-settings["input.gain.gainDb"])/20) if schema == 2 and not settings["input.gain.bypass"] else 1.
+        errors["drive_independence"] = max(errors["drive_independence"], max(abs(y-x*gain_ratio) for x,y in zip(lanes[1],lanes[9])))
         if category == "sources" and kind == 0:
             for frequency in (40., 1000., 8000., rate*.4):
                 phases = [cmath.exp(-2j*math.pi*frequency*n/rate) for n in range(frames)]
@@ -203,8 +213,8 @@ def audit_measurements(root, report):
                     require(abs(predicted-measured) < 3e-4, "complex blend sum mismatch")
                     spectra.append(dict(case=index, frequency=frequency, mix=mix, real=measured.real, imaginary=measured.imag, phase_radians=cmath.phase(measured), magnitude=abs(measured)))
     for name, error in errors.items():
-        require(error <= (3e-5 if name in ("ordered", "partition", "blend", "final_gain", "source") else 0.), f"{name} error: {error}")
-    latency_results = audit_latency(root, report["latency_checks"])
+        require(error <= (3e-5 if name in ("ordered", "partition", "blend", "final_gain", "source") or schema == 2 and name in ("dry", "drive_independence") else 0.), f"{name} error: {error}")
+    latency_results = audit_latency(root, report["latency_checks"], schema)
     return dict(cases=len(cases), errors=errors, peak_all_captures=max_peak, complex_blends=spectra, independent_wet_latency=latency_results,
                 human_listening="pending", reference_cpu_qualified=False)
 
@@ -271,7 +281,7 @@ def audit(directory, executable, source_root):
     root = Path(directory)
     report = json.loads((root/"result.json").read_text())
     finite_tree(report)
-    require(report["schema"] == 1, "unsupported schema")
+    require(report["schema"] in (1, 2), "unsupported schema")
     audit_provenance(report, executable, Path(source_root))
     if report["kind"] == "full-chain-measurements":
         result = audit_measurements(root, report)

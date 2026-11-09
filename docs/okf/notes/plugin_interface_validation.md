@@ -2,10 +2,21 @@
 type: Note
 title: "Plugin interface qualification"
 description: "Evidence scope and outstanding checks for production controls, presets, meters and host state."
-timestamp: 2026-10-17T18:00:00Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["audio-plugin", "validation", "state", "presets", "metering"]
 resource: "https://github.com/LordZordack/disDorktion/issues/14"
 ---
+
+## Historical evidence scope after issue #38
+
+The results below describe the recorded pre-issue-38 implementation and test
+conditions. They do not qualify the revised Driver routing, section mixes,
+nonlinear/filter Off endpoints, inactive history handling, defaults or v5-only
+plugin state. Standalone module/harness controls may retain their own bypasses.
+See the [current contract and focused evidence](./issue38_validation.md) for
+what has actually been checked; no new CPU or listening result is inferred.
+
+## Earlier validation record
 
 # Plugin interface qualification
 

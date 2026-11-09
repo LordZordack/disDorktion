@@ -25,7 +25,9 @@ void OutputSection::reset() noexcept
 bool OutputSection::setParameters(const OutputSettings& settings) noexcept
 {
     if (!isValidOutputSettings(settings)) return false;
-    (void) comb.setParameters(settings.comb);
+    auto combSettings = settings.comb;
+    combSettings.dampingEnabled = true;
+    (void) comb.setParameters(combSettings);
     (void) dispersion.setParameters(settings.dispersion);
     (void) tone.setParameters(settings.tone);
     (void) highPass.setParameters(settings.highPass);

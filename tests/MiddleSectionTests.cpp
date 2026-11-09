@@ -315,3 +315,112 @@ TEST_CASE("Middle correction equals the original scalar ring across wraps and co
         }
     }
 }
+
+TEST_CASE("Waveshaper both Off is the exact continuously delayed dry branch", "[middle][section-mix]")
+{
+    MiddleSection section;
+    REQUIRE(section.setParameters({{0,0,true},{0,1,0,true}}));
+    REQUIRE(section.prepare({48000,31,2},4,MiddleLatencyCorrection::fir,MiddleFoldAlgorithm::adaaTriangle));
+    juce::AudioBuffer<float> audio(2,512), original(2,512);
+    for(int c=0;c<2;++c) for(int n=0;n<512;++n)
+        audio.setSample(c,n,.25f*std::sin(.31f*n + c));
+    original.makeCopyOf(audio);
+    REQUIRE(section.process(juce::dsp::AudioBlock<float>(audio)));
+    const auto latency=static_cast<int>(section.getLatencySamples());
+    for(int c=0;c<2;++c) for(int n=0;n<512;++n)
+        REQUIRE(audio.getSample(c,n)==(n<latency ? 0.f : original.getSample(c,n-latency)));
+}
+
+TEST_CASE("Waveshaper mix includes shared trim and both Off suspends the wet engine", "[middle][section-mix]")
+{
+    for(unsigned factor : {1u,4u,16u}) for(unsigned channels : {1u,2u}) for(float mix : {0.f,.25f,1.f})
+    {
+        MiddleSection section;
+        MiddleSettings p {{12,-6,true},{24,.25f,-9,true},mix,6.f};
+        REQUIRE(section.setParameters(p));
+        REQUIRE(section.prepare({48000,31,channels},factor,MiddleLatencyCorrection::fir,MiddleFoldAlgorithm::adaaTriangle));
+        juce::AudioBuffer<float> audio(static_cast<int>(channels),1024), original(static_cast<int>(channels),1024);
+        for(unsigned c=0;c<channels;++c) for(int n=0;n<1024;++n)
+            audio.setSample(static_cast<int>(c),n,.25f*std::sin(.31f*n+c));
+        original.makeCopyOf(audio);
+        REQUIRE(section.process(juce::dsp::AudioBlock<float>(audio)));
+        REQUIRE(section.getWetFramesProcessed()==0);
+        const auto delay=static_cast<int>(section.getLatencySamples());
+        const auto gain=1.f+mix*(std::pow(10.f,6.f/20.f)-1.f);
+        for(unsigned c=0;c<channels;++c) for(int n=0;n<1024;++n)
+            REQUIRE(audio.getSample(static_cast<int>(c),n)==Catch::Approx(n<delay ? 0.f : gain*original.getSample(static_cast<int>(c),n-delay)).margin(1e-7));
+    }
+}
+
+TEST_CASE("Waveshaper zero mix keeps dry history and warms current input before fading", "[middle][section-mix]")
+{
+    MiddleSection section;
+    REQUIRE(section.prepare({48000,31,1},4,MiddleLatencyCorrection::fir,MiddleFoldAlgorithm::adaaTriangle));
+    MiddleSettings p {{36,0,false},{24,.05f,0,false},0.f,0.f};
+    REQUIRE(section.setParameters(p)); section.reset();
+    juce::AudioBuffer<float> audio(1,4096);
+    for(int n=0;n<4096;++n) audio.setSample(0,n,.1f);
+    REQUIRE(section.process(juce::dsp::AudioBlock<float>(audio)));
+    REQUIRE(section.getWetFramesProcessed()==0);
+    const auto delay=static_cast<int>(section.getLatencySamples());
+    for(int n=0;n<4096;++n) REQUIRE(audio.getSample(0,n)==(n<delay ? 0.f : .1f));
+    p.mix=1.f; REQUIRE(section.setParameters(p));
+    audio.clear(); REQUIRE(section.process(juce::dsp::AudioBlock<float>(audio).getSubBlock(0,67)));
+    // Even though the old dry reference is nonzero and current wet input is
+    // silent, no partially warmed branch may leak through during this interval.
+    for(int n=0;n<67;++n) REQUIRE(audio.getSample(0,n)==.1f);
+    REQUIRE(section.getWetFramesProcessed()==67);
+    // Interrupt warming, resume on silence, and prove an old nonlinear tail cannot return.
+    p.mix=0.f; REQUIRE(section.setParameters(p)); audio.clear();
+    REQUIRE(section.process(juce::dsp::AudioBlock<float>(audio)));
+    const auto stopped=section.getWetFramesProcessed();
+    audio.clear(); REQUIRE(section.process(juce::dsp::AudioBlock<float>(audio)));
+    REQUIRE(section.getWetFramesProcessed()==stopped);
+    p.mix=1.f; REQUIRE(section.setParameters(p)); audio.clear();
+    REQUIRE(section.process(juce::dsp::AudioBlock<float>(audio)));
+    REQUIRE(section.getWetFramesProcessed()>stopped);
+    for(int n=0;n<4096;++n) REQUIRE(audio.getSample(0,n)==0.f);
+    p.mix=0.f; REQUIRE(section.setParameters(p)); audio.clear();
+    REQUIRE(section.process(juce::dsp::AudioBlock<float>(audio)));
+    const auto faded=section.getWetFramesProcessed();
+    REQUIRE(section.process(juce::dsp::AudioBlock<float>(audio)));
+    REQUIRE(section.getWetFramesProcessed()==faded);
+}
+
+TEST_CASE("Waveshaper section fades and interrupted warmups ignore block partitions", "[middle][section-mix]")
+{
+    for(unsigned channels : {1u,2u})
+    {
+        MiddleSection whole, split;
+        REQUIRE(whole.prepare({48000,127,channels},4,MiddleLatencyCorrection::fir,MiddleFoldAlgorithm::adaaTriangle));
+        REQUIRE(split.prepare({48000,127,channels},4,MiddleLatencyCorrection::fir,MiddleFoldAlgorithm::adaaTriangle));
+        juce::AudioBuffer<float> a(static_cast<int>(channels),1027),b(static_cast<int>(channels),1027);
+        for(int epoch=0;epoch<16;++epoch)
+        {
+            const bool off=epoch%4==1;
+            const MiddleSettings p {{18,0,off},{18,.25f,0,off},epoch%5==0 ? 0.f : .65f,epoch%3==0 ? 6.f : -6.f};
+            REQUIRE(whole.setParameters(p)); REQUIRE(split.setParameters(p));
+            const auto count=epoch%3==0 ? 67 : 1027;
+            for(unsigned c=0;c<channels;++c) for(int n=0;n<count;++n)
+                a.setSample(static_cast<int>(c),n,.2f*std::sin(.31f*(n+epoch*count)+c));
+            b.makeCopyOf(a);
+            REQUIRE(whole.process(juce::dsp::AudioBlock<float>(a).getSubBlock(0,count)));
+            for(int offset=0;offset<count;offset+=17)
+                REQUIRE(split.process(juce::dsp::AudioBlock<float>(b).getSubBlock(offset,std::min(17,count-offset))));
+            for(unsigned c=0;c<channels;++c) for(int n=0;n<count;++n)
+                REQUIRE(a.getSample(static_cast<int>(c),n)==b.getSample(static_cast<int>(c),n));
+            REQUIRE(whole.getWetFramesProcessed()==split.getWetFramesProcessed());
+        }
+    }
+}
+
+TEST_CASE("Waveshaper rejects invalid mix and trim atomically", "[middle][section-mix]")
+{
+    MiddleSection section;
+    MiddleSettings p;
+    for(float mix : {-1.f,1.01f,std::numeric_limits<float>::quiet_NaN()})
+    { p.mix=mix; REQUIRE_FALSE(section.setParameters(p)); }
+    p.mix=1.f;
+    for(float trim : {-60.01f,12.01f,std::numeric_limits<float>::infinity()})
+    { p.trimDb=trim; REQUIRE_FALSE(section.setParameters(p)); }
+}

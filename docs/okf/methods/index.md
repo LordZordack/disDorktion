@@ -2,7 +2,7 @@
 type: "Index"
 title: "Methods"
 description: "Index of methods research documents."
-timestamp: "2026-11-08T20:27:01Z"
+timestamp: "2026-11-09T12:26:29Z"
 ---
 
 # Methods
@@ -10,7 +10,7 @@ timestamp: "2026-11-08T20:27:01Z"
 - [Audition and measurement harness](./audition_measurement.md) — A reproducible source and record workflow for shared DSP audition and exact pre-monitor offline rendering.
 - [Bit crushing](./bit_crushing.md) — Signed PCM amplitude quantization and sample holding for bit-crushing effects.
 - [Frequency dispersion](./frequency_dispersion.md) — Issue 18 normalized allpass cascade, stability bounds and qualification gates.
-- [Full chain integration candidate](./full_chain.md) — Shared section routing, latency aligned dry reference, global mixing and final gain.
+- [Full chain integration candidate](./full_chain.md) — Production gain staging, compensated Driver, section mixes and fixed-latency routing.
 - [Reusable input and output gain](./gain.md) — Reviewed production gain design, parameter semantics, transition rules, and acceptance limits for DisDorktion M1.
 - [Selectable Second-Order High-Pass Filter](./high_pass_filter.md) — Design for a zero-latency high-pass module with selectable Butterworth, Chebyshev I, and Chebyshev II responses and smoothed transitions.
 - [Reusable input section](./input_section.md) — Native-rate composition of production gain and expressive bit crushing, with section acceptance limits and independent bypass semantics.
@@ -18,7 +18,7 @@ timestamp: "2026-11-08T20:27:01Z"
 - [Middle section oversampling and latency](./middle_oversampling.md) — Q1 evaluation boundary, fractional latency correction, and evidence requirements before production middle-section acceptance.
 - [Middle section qualification candidate](./middle_section.md) — Fixed 4x FIR tanh and ADAA folding integration, independent bypass controls, experiment identity and render policy.
 - [Native-Rate Output Section](./output_section.md) — Native-rate comb, dispersion, tone, high-pass and low-pass composition with independent controls and reproducible qualification.
-- [Plugin interface, presets and host state](./plugin_interface.md) — Presentation and lifecycle rules for the shared production chain without changing the host parameter schema.
+- [Plugin interface, presets and host state](./plugin_interface.md) — Current prototype controls, logarithmic frequency movement and version-5-only persistence.
 - [Real-time DSP processing contract](./processing_contract.md) — Implemented module interface and callback behavior for DisDorktion's JUCE DSP foundation, including the reference gain processor.
 - [Resonant comb filtering](./resonant_comb.md) — Reviewed isolated feedforward and damped feedback comb design and acceptance limits for issue 17.
 - [Tanh saturation](./tanh_saturation.md) — Approved memoryless tanh saturation design, controls, transition behavior, and pre-implementation acceptance limits for DisDorktion.

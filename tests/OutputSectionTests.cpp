@@ -95,7 +95,10 @@ TEST_CASE("Output expanded stages follow dynamic native rate module composition"
         s.highPass={event%2?20.f:12000.f,false,FilterResponse::chebyshev1};
         s.lowPass={event%2?19000.f:300.f,false,FilterResponse::chebyshev2};
         REQUIRE(section.setParameters(s));
-        for(auto* f:{&comb,&reversedComb}) REQUIRE(f->setParameters(s.comb));
+        // The composite always enables damping, even for standalone settings
+        // that request the historical undamped comb reference mode.
+        auto dampedComb=s.comb; dampedComb.dampingEnabled=true;
+        for(auto* f:{&comb,&reversedComb}) REQUIRE(f->setParameters(dampedComb));
         for(auto* f:{&dispersion,&reversedDispersion}) REQUIRE(f->setParameters(s.dispersion));
         for(auto* f:{&tone,&reversedTone}) REQUIRE(f->setParameters(s.tone));
         for(auto* f:{&hp,&reversedHp}) REQUIRE(f->setParameters(s.highPass));

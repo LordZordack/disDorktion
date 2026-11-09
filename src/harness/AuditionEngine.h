@@ -122,6 +122,7 @@ private:
     std::array<std::atomic<float>,fullChainControls.size()> fullControls;
     std::array<std::atomic<float>,outputSectionControls.size()> outputControls;
     std::atomic<std::uint32_t> fullSeed {1};
+    std::atomic<bool> fullBypass {false};
     std::atomic<float> postHighPassPeak {0.f}, wetPeak {0.f};
     TanhSaturationTarget saturationTarget;
     WaveFolderTarget folderTarget;

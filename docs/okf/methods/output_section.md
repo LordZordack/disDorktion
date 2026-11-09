@@ -2,9 +2,26 @@
 type: Method
 title: "Native-Rate Output Section"
 description: "Native-rate comb, dispersion, tone, high-pass and low-pass composition with independent controls and reproducible qualification."
-timestamp: 2026-10-14T03:46:45Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["output-section", "filter", "realtime", "qualification"]
 ---
+
+## Current production controls (issue #38)
+
+Production remains comb -> dispersion -> tone -> HP -> LP at native rate.
+Comb damping is always enabled during active processing; its enable button is
+removed. After comb mix finishes fading to zero, history is cleared and
+unnecessary wet work stops, so old tails cannot return. Dispersion likewise
+uses its mix for inactive processing. Initialize uses comb/dispersion mix zero,
+neutral tone, HP Off at 20 Hz and LP Off at 20000 Hz. HP/LP movement is
+logarithmic with numeric entry; endpoint Off transitions are smoothed.
+There are no plugin bypass buttons. Full-chain latency remains 92 samples.
+See [current validation](../notes/issue38_validation.md).
+
+## Historical Output designs and qualification
+
+The following describes pre-issue-38 defaults, bypass controls and measured
+implementations. Standalone harness controls may differ from production.
 
 # Output section
 

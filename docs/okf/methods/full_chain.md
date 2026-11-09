@@ -1,98 +1,67 @@
 ---
 type: Method
 title: "Full chain integration candidate"
-description: "Shared section routing, latency aligned dry reference, global mixing and final gain."
-timestamp: 2026-10-17T12:00:00Z
+description: "Production gain staging, compensated Driver, section mixes and fixed-latency routing."
+timestamp: 2026-11-08T00:00:00Z
 tags: ["audio-dsp", "integration", "latency", "mixing"]
 resource: "https://github.com/LordZordack/disDorktion/issues/13"
 ---
 
-# Full chain integration candidate
+# Full chain prototype routing
 
-`FullChain` composes the [input](./input_section.md),
-[middle](./middle_section.md) and [output](./output_section.md) implementations,
-then mixes delayed dry with wet and applies the reusable [gain](./gain.md).
-The middle quality is fixed at `4x-fir-adaa-v1`; its integer algorithmic latency
-is 92 host samples. Preparation derives the delay from the actual section,
-with no rate or quality switch during processing. Every effect bypass preserves
-this latency, including the folder's compensated bypass path.
+The production path is Input Gain -> global dry/wet split ->
+[crusher/sampler](./bit_crushing.md) -> [Waveshaper](./middle_section.md) ->
+[Output](./output_section.md) -> global mixing -> Final Gain.
+The prepared production latency remains **92 host
+samples**, using fixed 4x FIR/ADAA nonlinear processing. Both global branches
+include Input Gain. The dry branch is delayed by the section latency.
 
-## Mixing and bypass
+Driver ranges 1x to 4x, default 1x, with 10 ms smoothing shared across channels.
+It acts after the crusher, immediately before tanh/fold inside the nonlinear
+wet branch. Fixed calibrated compensation follows the nonlinear output before
+shared trim and section mixing, using the delayed Driver trajectory. Global dry
+and Waveshaper section dry receive neither Driver nor its compensation. Driver
+has no audible effect with both nonlinear stages Off, Waveshaper Mix zero or
+global mix zero. Manual trim remains active with both stages Off.
 
-Dry captures input before production input gain or crushing. A per-channel ring
-delays it by the reported middle latency. Linear mixing uses
-`dry * (1-weight) + wet * weight`. Global mix is [0,1], default 1; common chain
-bypass is false by default. Their independent 10 ms linear envelopes produce
-`weight = mixEnvelope * (1-bypassEnvelope)`. Simultaneous ramps therefore have
-a product trajectory. Dry and wet continue processing at both endpoints.
-Reset clears delay/filter history and snaps envelopes to retained settings.
+The lookup uses Driver knots 1, 1.5, 2, 3 and 4. Each correction is the median
+RMS correction across four active factory configurations, sine/two-tone/seeded
+noise, -24/-18/-12 dB levels and 48/96 kHz; correction is clamped to +/-6 dB.
+Interpolation is linear in dB against log Driver. This replaces unconditional
+inverse gain; there is no live level tracking or AGC and no constant perceived
+loudness claim. Calibration and verification status are recorded in the
+[Driver adjustment note](../notes/driver_adjustment_validation.md).
+`postInputGain` measures after Input Gain, before the global split.
 
-Common chain bypass selects delayed dry before final gain. Independent effect
-bypasses retain the middle FIR/ADAA boundary, so bypassing every wet effect is
-not identical to common chain bypass. The final gain, mute and gain bypass
-retain the production Gain semantics and affect both mixed branches.
+`FullChain` owns a separate pre-input `Gain` and direct `BitCrusher`; it does
+not use the convenience `InputSection` for production routing. The standalone
+[input section](./input_section.md) still composes Gain -> BitCrusher for
+isolated harness use. Input Mix covers only the crusher/sampler.
 
-Integer alignment removes algorithmic delay, without matching the output IIR
-filters' frequency-dependent phase. The dry reference has no added all-pass
-filter. Intermediate mix measurements must compare complex sums, including
-phase cancellation near filter transitions, rather than adding magnitudes.
-No limiter, normalization or extra saturation is introduced.
+Global and section mixes use aligned dry references. At settled zero section
+mix, unnecessary wet work is reset/suspended; histories warm before wet fades
+back in. Both nonlinear stages Off select trimmed delayed section dry; the
+untrimmed delayed reference remains available to Waveshaper Mix. Effective
+latency stays fixed during Off and mix transitions. See the
+[historical issue #38 validation record](../notes/issue38_validation.md).
 
-## Processing ownership and diagnostics
+The plugin exposes no mute/bypass controls or legacy compatibility mode.
+`FullChainSettings::bypass` remains only for the development harness; it selects
+the delayed Input Gain branch before Final Gain and is not a plugin parameter.
+DAW bypass instead selects delayed raw input. Current parameters and v5-only
+state are documented in the [interface method](./plugin_interface.md).
 
-Preparation validates the host domain (8–384 kHz, 1–65536 capacity, mono/stereo)
-and constructs replacement state before replacing a valid preparation. Internal
-chunks are capped at 1024 frames to bound scratch storage. Settings validate
-as a whole before mutation. Processing, controls, reset and peak access require
-exclusive ownership. The adapters publish independent scalar atomics and latch
-them once per outer callback; scalar publication is not a whole-state snapshot.
+Preparation allocates scratch audio and delay/gain history. Runtime processing,
+controls and reset require exclusive ownership and avoid allocation. Scalar
+host controls are latched per callback and do not form an atomic settings bank.
+No limiter is inserted; output phase shaping can cause frequency-dependent
+cancellation in partial global blends. Full-chain tail reporting is 20 seconds
+plus latency. Historical [full-chain qualification](../notes/full_chain_validation.md)
+predates the revised routing and does not qualify it.
 
-Post-input-gain, post-high-pass, pre-mix wet and final-output peak taps describe
-the hot wet path and final mixed signal. They still report internal overload
-when common bypass or zero global mix selects dry. Values above unity are
-diagnostic headroom evidence, not silently limited signals.
-
-## Plugin and harness compatibility
-
-The plugin preserves its first eight parameter IDs and host ordering. New
-instances run the full chain; version-3 state persists its controls and mode.
-Version-1/2 restores select the original gain-only path with zero latency;
-version-3 saves retain that compatibility mode. Restoring mode after prepare
-updates JUCE's latency notification. State parsing finishes before publication
-under the host callback lock; persistence is outside audio processing.
-Switching compatibility modes clears dormant histories so prior audio cannot
-reappear. The host tail declaration is conservatively three seconds plus the
-algorithmic delay in full-chain mode and zero in legacy gain mode.
-
-The legacy reference trim precedes full-chain capture, so the dry reference is
-independent of production input drive but intentionally includes that legacy
-trim. The host's bypass callback supplies untrimmed delayed input, bypassing
-final gain as well, and keeps processing histories warm. This differs from the
-chain bypass control, which preserves final gain.
-
-The audition harness selects `full-chain`, with version-11 experiment records
-and all section/global controls. Nested versions 8, 9 and 10 preserve existing
-validated section schemas. Older experiment targets remain unchanged. Offline
-renders keep the requested frame count, leading latency and no automatic tail
-flush. Monitoring gain is outside recorded DSP measurements.
-
-See [qualification evidence](../notes/full_chain_validation.md). Existing
-section listening/dependency gates remain open; integration does not imply
-their acceptance or first-release qualification.
-
-
-## Issue #20 integration update
-
-The [Output section](output_section.md) now runs comb -> frequency dispersion
--> tone -> HP -> LP at native rate. All additions default to bypass. Original
-30 host parameters keep their order and meanings; 12 new controls append.
-Plugin state v4 restores old v1/v2 gain-only sessions and v3 modes with the
-new effects bypassed. Successful restore clears full-chain histories and snaps its targets; legacy
-gain-only scalar ramps retain their original behavior.
-Full-chain latency remains 92 samples; partial dry/wet can color phase-shaped
-wet audio. Full mode reports a conservative 20-second tail plus FIR latency,
-even while bypassed. Existing five factory sounds are retained.
-
-The editor defaults to 1120x740 with a 1000x680 minimum and 1400x1000 maximum,
-providing more space for Output controls. Old evidence below describes the
-prior interface; see the current `docs/PLUGIN_INTERFACE.md`.
+Full-chain experiment records now use version 17 for Driver, section mix and
+shared trim. Older version-11/16 records load defaults for these new controls;
+this harness migration is separate from the plugin's v5-only state policy.
+The Driver adjustment changes neither parameter IDs nor these persistence
+schemas. Saved sounds above Driver 1x intentionally change; Driver 1x defaults
+retain their prior behavior.

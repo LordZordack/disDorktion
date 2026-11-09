@@ -62,12 +62,12 @@ TEST_CASE("New plugin instances match the shared fixed full chain", "[adapter][f
     }
 }
 
-TEST_CASE("Plugin v4 stores every full chain scalar and rejects malformed state transactionally", "[adapter][fullchain][state]")
+TEST_CASE("Plugin v5 stores every full chain scalar and rejects malformed state transactionally", "[adapter][fullchain][state]")
 {
     PluginProcessor plugin;
     auto initial=state(plugin); REQUIRE(initial);
-    REQUIRE(initial->getStringAttribute("version")=="4");
-    REQUIRE(initial->getStringAttribute("mode")=="fullChain");
+    REQUIRE(initial->getStringAttribute("version")=="5");
+    REQUIRE_FALSE(initial->hasAttribute("mode"));
     for(const auto& item:disdorktion::fullChainControls) REQUIRE(initial->hasAttribute(item.id));
     for(const auto& item:disdorktion::fullChainControls)
     {
@@ -79,14 +79,14 @@ TEST_CASE("Plugin v4 stores every full chain scalar and rejects malformed state 
             REQUIRE(state(plugin)->isEquivalentTo(initial.get(),true));
         }
     }
-    for(const auto* version:{"5","0","4tail"})
+    for(const auto* version:{"1","2","3","4","0","5tail"})
     { auto bad=*initial; bad.setAttribute("version",version); restore(plugin,bad); REQUIRE(state(plugin)->isEquivalentTo(initial.get(),true)); }
-    auto bad=*initial; bad.setAttribute("mode","future"); restore(plugin,bad);
-    REQUIRE(state(plugin)->isEquivalentTo(initial.get(),true));
-    bad=*initial; bad.setAttribute("globalMix","1.0000000001"); restore(plugin,bad);
+    auto bad=*initial; bad.setAttribute("globalMix","1.0000000001"); restore(plugin,bad);
     REQUIRE(state(plugin)->isEquivalentTo(initial.get(),true));
     control(plugin,"inputGainDb",12.0f); control(plugin,"outputGainDb",-6.0f); control(plugin,"globalMix",0.37f);
     auto saved=state(plugin); PluginProcessor roundtrip; restore(roundtrip,*saved);
+    INFO("Saved: " << saved->toString().toStdString());
+    INFO("Restored: " << state(roundtrip)->toString().toStdString());
     REQUIRE(state(roundtrip)->isEquivalentTo(saved.get(),true));
     control(plugin,"folderThreshold",0.05f); control(plugin,"bitDepth",16.0f);
     saved=state(plugin); restore(roundtrip,*saved);
@@ -100,74 +100,10 @@ TEST_CASE("Plugin v4 stores every full chain scalar and rejects malformed state 
     REQUIRE(state(roundtrip)->isEquivalentTo(baseline.get(),true));
 }
 
-TEST_CASE("Plugin legacy mode changes latency before and after prepare and survives v3 roundtrip", "[adapter][fullchain][state]")
-{
-    for(const bool prepared:{false,true}) for(const auto* version:{"1","2"})
-    {
-        PluginProcessor plugin; auto modern=state(plugin);
-        disdorktion::FullChain reference; REQUIRE(reference.prepare({48000.0,32,2}));
-        const auto modernLatency=static_cast<int>(reference.getLatencySamples());
-        if(prepared) plugin.prepareToPlay(48000.0,32);
-        juce::XmlElement legacy("DisDorktionState"); legacy.setAttribute("version",version);
-        legacy.setAttribute("gain","2"); legacy.setAttribute("bypass","0");
-        if(juce::String(version)=="2") for(const auto* id:{"inputGainDb","inputMute","inputBypass","outputGainDb","outputMute","outputBypass"}) legacy.setAttribute(id,"0");
-        restore(plugin,legacy); if(!prepared) plugin.prepareToPlay(48000.0,32);
-        REQUIRE(plugin.getLatencySamples()==0);
-        juce::AudioBuffer<float> audio(2,1024); for(int c=0;c<2;++c) for(int n=0;n<1024;++n) audio.setSample(c,n,0.25f);
-        juce::MidiBuffer midi; plugin.processBlock(audio,midi); REQUIRE(audio.getSample(0,1023)==0.5f);
-        auto migrated=state(plugin); REQUIRE(migrated->getStringAttribute("mode")=="legacyGain");
-        PluginProcessor roundtrip; roundtrip.prepareToPlay(48000.0,32); restore(roundtrip,*migrated); REQUIRE(roundtrip.getLatencySamples()==0);
-        restore(plugin,*modern); REQUIRE(plugin.getLatencySamples()==modernLatency);
-    }
-}
-
-TEST_CASE("Plugin dry capture precedes drive and host bypass retains latency without allocation", "[adapter][fullchain][realtime]")
-{
-    PluginProcessor quiet,driven;
-    for(auto* p:{&quiet,&driven}) { control(*p,"globalMix",0.0f); p->prepareToPlay(48000.0,32); }
-    control(driven,"inputGainDb",24.0f); control(driven,"inputMute",1.0f);
-    juce::MidiBuffer midi; juce::AudioBuffer<float> a(2,2051),b(2,2051);
-    signal(a,0); b.makeCopyOf(a); quiet.processBlock(a,midi); driven.processBlock(b,midi);
-    for(int c=0;c<2;++c) for(int n=0;n<2051;++n) REQUIRE(a.getSample(c,n)==b.getSample(c,n));
-    const auto latency=driven.getLatencySamples();
-    {
-        disdorktion::test::ScopedAllocationTracking tracking;
-        driven.processBlockBypassed(b,midi); driven.reset(); driven.processBlock(b,midi);
-    }
-    const auto counts=disdorktion::test::getAllocationCounts();
-    REQUIRE(counts.allocations==0); REQUIRE(counts.deallocations==0);
-    REQUIRE(driven.getLatencySamples()==latency);
-}
-
-TEST_CASE("Plugin full chain automation final gain and mix endpoints match shared settings", "[adapter][fullchain]")
-{
-    PluginProcessor plugin;
-    disdorktion::FullChain chain;
-    disdorktion::FullChainSettings settings;
-    plugin.prepareToPlay(48000.0,32); REQUIRE(chain.prepare({48000.0,32,2}));
-    juce::MidiBuffer midi; juce::AudioBuffer<float> actual(2,617),expected(2,617);
-    int offset=0;
-    for(const float mix:{0.0f,0.25f,0.5f,0.75f,1.0f})
-        for(const float finalDb:{-60.0f,0.0f,24.0f})
-            for(const bool bypassed:{false,true})
-            {
-                control(plugin,"globalMix",mix); settings.mix=mix;
-                control(plugin,"outputGainDb",finalDb); settings.finalGain.gainDb=finalDb;
-                control(plugin,"chainBypass",bypassed?1.0f:0.0f); settings.bypass=bypassed;
-                control(plugin,"inputGainDb",12.0f); settings.input.gain.gainDb=12.0f;
-                REQUIRE(chain.setParameters(settings));
-                signal(actual,offset); expected.makeCopyOf(actual);
-                plugin.processBlock(actual,midi); REQUIRE(chain.process(juce::dsp::AudioBlock<float>(expected)));
-                for(int c=0;c<2;++c) for(int n=0;n<617;++n)
-                    REQUIRE(actual.getSample(c,n)==Catch::Approx(expected.getSample(c,n)).margin(3e-5f));
-                offset+=617;
-            }
-}
-
 TEST_CASE("Plugin host bypass emits exact delayed untrimmed input", "[adapter][fullchain]")
 {
     PluginProcessor plugin;
-    control(plugin,"referenceGain",4.0f); control(plugin,"outputGainDb",24.0f);
+    control(plugin,"driver",4.0f); control(plugin,"outputGainDb",24.0f);
     plugin.prepareToPlay(48000.0,32);
     const auto latency=plugin.getLatencySamples(); REQUIRE(latency>0);
     juce::AudioBuffer<float> audio(2,2051),original(2,2051); signal(audio,0); original.makeCopyOf(audio);
@@ -182,111 +118,78 @@ TEST_CASE("Plugin host bypass emits exact delayed untrimmed input", "[adapter][f
         REQUIRE(audio.getSample(c,n)==original.getSample(c,2051-latency+n));
 }
 
-TEST_CASE("Plugin mode transitions discard dormant full chain delay and filter histories", "[adapter][fullchain][state]")
-{
-    for(const float mix:{0.0f,1.0f})
-    {
-        PluginProcessor plugin;
-        control(plugin,"globalMix",mix);
-        auto modern=state(plugin);
-        plugin.prepareToPlay(48000.0,32);
-        juce::AudioBuffer<float> audio(2,617); juce::MidiBuffer midi;
-        for(int c=0;c<2;++c) for(int n=0;n<617;++n) audio.setSample(c,n,0.75f);
-        plugin.processBlock(audio,midi);
-        juce::XmlElement legacy("DisDorktionState");
-        legacy.setAttribute("version","1"); legacy.setAttribute("gain","1"); legacy.setAttribute("bypass","0");
-        restore(plugin,legacy); REQUIRE(plugin.getLatencySamples()==0);
-        audio.clear(); plugin.processBlock(audio,midi);
-        restore(plugin,*modern); REQUIRE(plugin.getLatencySamples()>0);
-        // A stopped path must never replay samples from before the mode change.
-        audio.clear(); plugin.processBlock(audio,midi);
-        REQUIRE(audio.getMagnitude(0,617)==0.0f);
-        REQUIRE(audio.getMagnitude(1,0,617)==0.0f);
-    }
-}
-
-TEST_CASE("Plugin publishes full chain tail independently of legacy compatibility mode", "[adapter][fullchain][state]")
-{
-    PluginProcessor plugin;
-    REQUIRE(plugin.getTailLengthSeconds()==20.0);
-    const auto modern=state(plugin);
-    plugin.prepareToPlay(48000.0,32);
-    REQUIRE(plugin.getTailLengthSeconds()==Catch::Approx(20.0+plugin.getLatencySamples()/48000.0));
-    juce::XmlElement legacy("DisDorktionState");
-    legacy.setAttribute("version","1"); legacy.setAttribute("gain","1"); legacy.setAttribute("bypass","0");
-    restore(plugin,legacy);
-    REQUIRE(plugin.getTailLengthSeconds()==0.0);
-    restore(plugin,*modern);
-    REQUIRE(plugin.getTailLengthSeconds()==Catch::Approx(20.0+plugin.getLatencySamples()/48000.0));
-    plugin.prepareToPlay(96000.0,127);
-    REQUIRE(plugin.getTailLengthSeconds()==Catch::Approx(20.0+plugin.getLatencySamples()/96000.0));
-    PluginProcessor unprepared; restore(unprepared,legacy);
-    REQUIRE(unprepared.getTailLengthSeconds()==0.0);
-    restore(unprepared,*modern); REQUIRE(unprepared.getTailLengthSeconds()==20.0);
-}
-
-TEST_CASE("Old plugin states reset new output controls and discard warm histories", "[adapter][fullchain][state][output]")
-{
-    for (const auto* version : {"1", "2", "3", "4"})
-    {
-        CAPTURE(version);
-        PluginProcessor plugin;
-        auto clean = state(plugin);
-        clean->setAttribute("version", version);
-        // Old versions must ignore even malformed extra future attributes.
-        if (juce::String(version) != "4")
-            for (std::size_t i = 28; i < disdorktion::fullChainControls.size(); ++i)
-                clean->setAttribute(disdorktion::fullChainControls[i].id, "not-a-value");
-        control(plugin,"combDelayMs",40); control(plugin,"combFeedback",0.95f);
-        control(plugin,"combMix",1); control(plugin,"combBypass",0);
-        control(plugin,"dispersionBypass",0); control(plugin,"toneDb",6); control(plugin,"toneBypass",0);
-        plugin.prepareToPlay(48000,32);
-        juce::MidiBuffer midi; juce::AudioBuffer<float> audio(2,4096);
-        signal(audio,0); plugin.processBlock(audio,midi);
-        restore(plugin,*clean);
-        const auto restored = state(plugin);
-        for (std::size_t i = 28; i < disdorktion::fullChainControls.size(); ++i)
-        {
-            const auto& item = disdorktion::fullChainControls[i];
-            REQUIRE(restored->getDoubleAttribute(item.id) == Catch::Approx(item.defaultValue));
-        }
-        audio.clear(); plugin.processBlock(audio,midi);
-        REQUIRE(audio.getMagnitude(0,audio.getNumSamples()) == 0.0f);
-        if (!plugin.isLegacyMode())
-        {
-            // Re-engagement must not reveal bypassed pre-restore delay energy.
-            control(plugin,"combBypass",0); control(plugin,"dispersionBypass",0); control(plugin,"toneBypass",0);
-            audio.clear(); plugin.processBlock(audio,midi);
-            REQUIRE(audio.getMagnitude(0,audio.getNumSamples()) == 0.0f);
-        }
-    }
-}
-
-TEST_CASE("Plugin new output automation follows the shared fixed chain", "[adapter][fullchain][output]")
+TEST_CASE("Plugin automation follows shared controls including section mixes and Driver", "[adapter][fullchain][issue38]")
 {
     PluginProcessor plugin;
     disdorktion::FullChain reference;
     disdorktion::FullChainSettings settings;
-    plugin.prepareToPlay(48000,32);
-    REQUIRE(reference.prepare({48000,32,2}));
-    juce::MidiBuffer midi; juce::AudioBuffer<float> actual(2,617), expected(2,617);
+    plugin.prepareToPlay(48000, 32); REQUIRE(reference.prepare({48000,32,2}));
+    juce::MidiBuffer midi;
+    juce::AudioBuffer<float> actual(2,617), expected(2,617);
     struct Change { const char* id; float value; };
-    const Change changes[] {{"combDelayMs",12.5f},{"combFeedforward",-0.8f},{"combFeedback",-0.9f},
-        {"combDampingHz",1200},{"combMix",0.75f},{"combDampingEnabled",0},{"combBypass",0},
-        {"dispersionFrequencyHz",350},{"dispersionMix",0.7f},{"dispersionBypass",0},
-        {"toneDb",6},{"toneBypass",0},{"combBypass",1},{"toneDb",-6},{"dispersionBypass",1}};
+    const Change changes[] {{"driver",4},{"inputGainDb",12},{"globalMix",0},
+        {"crusherMix",0},{"waveshaperMix",0},{"waveshaperTrimDb",6},
+        {"tanhDriveDb",-24},{"folderDriveDb",-24},{"hpCutoffHz",20},{"lpCutoffHz",20000},
+        {"globalMix",0.37f},{"waveshaperMix",0.8f},{"folderDriveDb",9},
+        {"combMix",0},{"combMix",0.75f},{"dispersionMix",0.7f},{"toneDb",6},{"driver",1}};
     int offset = 0;
     for (const auto& change : changes)
     {
-        CAPTURE(change.id, change.value);
+        CAPTURE(change.id,change.value);
         control(plugin,change.id,change.value);
         REQUIRE(disdorktion::setFullChainControl(settings,change.id,change.value));
         REQUIRE(reference.setParameters(settings));
         signal(actual,offset); expected.makeCopyOf(actual);
-        plugin.processBlock(actual,midi);
-        REQUIRE(reference.process(juce::dsp::AudioBlock<float>(expected)));
-        for (int c=0;c<2;++c) for (int n=0;n<617;++n)
+        plugin.processBlock(actual,midi); REQUIRE(reference.process(juce::dsp::AudioBlock<float>(expected)));
+        for(int c=0;c<2;++c) for(int n=0;n<617;++n)
             REQUIRE(actual.getSample(c,n)==Catch::Approx(expected.getSample(c,n)).margin(3e-5f));
         offset += 617;
     }
+}
+
+TEST_CASE("Plugin Driver automation cancels after global dry split with Input Gain retained", "[adapter][fullchain][realtime][issue38]")
+{
+    PluginProcessor plugin;
+    control(plugin,"globalMix",0); control(plugin,"inputGainDb",6);
+    plugin.prepareToPlay(48000,32);
+    const int latency = plugin.getLatencySamples();
+    REQUIRE(latency > 0);
+    juce::MidiBuffer midi; int offset=0;
+    for(const int frames : {1,31,617,7,2051,32})
+    {
+        control(plugin,"driver",(offset%2) ? 4.0f : 1.0f);
+        juce::AudioBuffer<float> audio(2,frames); signal(audio,offset);
+        { disdorktion::test::ScopedAllocationTracking tracking; plugin.processBlock(audio,midi); }
+        const auto counts=disdorktion::test::getAllocationCounts();
+        REQUIRE(counts.allocations==0); REQUIRE(counts.deallocations==0);
+        for(int c=0;c<2;++c) for(int n=0;n<frames;++n)
+        {
+            const auto t=offset+n-latency;
+            const auto expected=t<0 ? 0.0f : 0.3f*std::sin(0.071f*t)*(c==0?1.0f:-0.7f)*juce::Decibels::decibelsToGain(6.0f);
+            REQUIRE(audio.getSample(c,n)==Catch::Approx(expected).margin(2e-6f));
+        }
+        REQUIRE(plugin.getLatencySamples()==latency); offset+=frames;
+    }
+}
+
+TEST_CASE("Plugin v5 restore flushes wet and host bypass histories without changing latency", "[adapter][fullchain][state]")
+{
+    PluginProcessor plugin;
+    const auto clean=state(plugin);
+    control(plugin,"combDelayMs",40); control(plugin,"combFeedback",0.95f); control(plugin,"combMix",1);
+    control(plugin,"dispersionMix",1); control(plugin,"toneDb",6);
+    plugin.prepareToPlay(48000,32);
+    const auto latency=plugin.getLatencySamples();
+    juce::MidiBuffer midi; juce::AudioBuffer<float> audio(2,4096);
+    signal(audio,0); plugin.processBlock(audio,midi);
+    restore(plugin,*clean);
+    REQUIRE(plugin.getLatencySamples()==latency);
+    REQUIRE(plugin.getTailLengthSeconds()==Catch::Approx(20.0+latency/48000.0));
+    audio.clear(); plugin.processBlock(audio,midi);
+    REQUIRE(audio.getMagnitude(0,audio.getNumSamples())==0);
+    audio.clear(); plugin.processBlockBypassed(audio,midi);
+    REQUIRE(audio.getMagnitude(0,audio.getNumSamples())==0);
+    control(plugin,"combMix",1); control(plugin,"dispersionMix",1);
+    audio.clear(); plugin.processBlock(audio,midi);
+    REQUIRE(audio.getMagnitude(0,audio.getNumSamples())==0);
 }

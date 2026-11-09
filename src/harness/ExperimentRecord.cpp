@@ -38,6 +38,28 @@ ExperimentRecord::ExperimentRecord() : buildIdentity(DISDORKTION_BUILD_ID) {}
 bool ExperimentRecord::validate(juce::String& error) const
 {
     error.clear();
+    if (version == 17)
+    {
+        if (targetId != "full-chain" || !isValidFullChainSettings(fullChain))
+            return fail(error, "Invalid compensated full chain settings");
+        FullChainSettings canonical;
+        for (const auto& control : fullChainControls)
+            if (!setFullChainControl(canonical, control.id, getFullChainControl(fullChain, control.id)))
+                return fail(error, "Invalid compensated full chain control");
+        canonical.input.crusher.jitterSeed = fullChain.input.crusher.jitterSeed;
+        canonical.bypass = fullChain.bypass;
+        auto represented = *this; represented.version = 16; represented.fullChain = canonical;
+        auto actual = *this; actual.version = 16;
+        if (juce::JSON::toString(represented.toJson()) != juce::JSON::toString(actual.toJson()))
+            return fail(error, "Full chain settings contain obsolete flags, trims, or mismatched Off endpoints");
+        auto legacy = *this; legacy.version = 16;
+        legacy.fullChain.driver = 1.f; legacy.fullChain.middle.mix = 1.f; legacy.fullChain.middle.trimDb = 0.f;
+        return legacy.validate(error);
+    }
+    if (fullChain.driver != 1.f || fullChain.middle.mix != 1.f || fullChain.middle.trimDb != 0.f)
+        return fail(error, "Legacy experiment cannot contain compensated full chain settings");
+    if (middle.mix != 1.f || middle.trimDb != 0.f)
+        return fail(error, "Legacy middle experiment cannot contain section mix or trim");
     if(version==15)
     {
         if(targetId!="output-section" || !isValidOutputSettings(output)) return fail(error,"Invalid expanded output settings");
@@ -171,6 +193,16 @@ bool ExperimentRecord::validate(juce::String& error) const
 
 juce::var ExperimentRecord::toJson() const
 {
+    if (version == 17)
+    {
+        auto legacy = *this; legacy.version = 16;
+        auto result = legacy.toJson(); auto* root = result.getDynamicObject();
+        root->setProperty("version", 17);
+        root->setProperty("driver", fullChain.driver);
+        root->setProperty("waveshaperMix", fullChain.middle.mix);
+        root->setProperty("waveshaperTrimDb", fullChain.middle.trimDb);
+        return result;
+    }
     if(version==15)
     {
         auto legacy=*this;legacy.version=10;
@@ -293,6 +325,28 @@ bool ExperimentRecord::fromJson(const juce::var& value, ExperimentRecord& destin
     auto* o = value.getDynamicObject();
     if (o == nullptr) return fail(error, "Experiment must be a JSON object");
     auto get = [o](const char* key) { return o->getProperty(key); };
+    if (integer(get("version"), 17, 17))
+    {
+        constexpr const char* keys[]{"driver", "waveshaperMix", "waveshaperTrimDb"};
+        constexpr double lows[]{1., 0., -60.}, highs[]{4., 1., 12.};
+        for (unsigned i = 0; i < 3; ++i)
+            if (!number(get(keys[i])) || !std::isfinite(static_cast<double>(get(keys[i])))
+                || static_cast<double>(get(keys[i])) < lows[i] || static_cast<double>(get(keys[i])) > highs[i])
+                return fail(error, "Missing or invalid compensated full chain number");
+        juce::var legacy(o->clone().release()); auto* base = legacy.getDynamicObject();
+        for (auto key : keys) base->removeProperty(key);
+        base->setProperty("version", 16);
+        ExperimentRecord candidate;
+        if (!fromJson(legacy, candidate, error)) return false;
+        candidate.version = 17;
+        candidate.fullChain.driver = static_cast<float>(get(keys[0]));
+        candidate.fullChain.middle.mix = static_cast<float>(get(keys[1]));
+        candidate.fullChain.middle.trimDb = static_cast<float>(get(keys[2]));
+        if (!candidate.validate(error)) return false;
+        destination = std::move(candidate); return true;
+    }
+    for (auto key : {"driver", "waveshaperMix", "waveshaperTrimDb"})
+        if (o->hasProperty(key)) return fail(error, "Mixed compensated full chain schema");
     if(integer(get("version"),15,15))
     {
         ExperimentRecord schema;schema.version=15;schema.targetId="output-section";

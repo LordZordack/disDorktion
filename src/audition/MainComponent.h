@@ -2,11 +2,26 @@
 #include "AudioDeviceController.h"
 #include "harness/OfflineRender.h"
 #include <functional>
+#include <algorithm>
 #include <mutex>
 #include <thread>
 
 namespace disdorktion::audition
 {
+// Separate descriptor rows share a viewport but retain their own controls/defaults.
+inline constexpr auto auditionPanelControls = []
+{
+    std::array<FullChainControl, fullChainControls.size() + harness::outputSectionControls.size()> result {};
+    std::copy(fullChainControls.begin(), fullChainControls.end(), result.begin());
+    for (std::size_t i = 0; i < harness::outputSectionControls.size(); ++i)
+    {
+        const auto& c = harness::outputSectionControls[i];
+        const bool discrete = c.id == "hpResponse" || c.id == "lpResponse" || c.id == "hpBypass" || c.id == "lpBypass"
+            || c.id == "combDampingEnabled" || c.id == "combBypass" || c.id == "dispersionBypass" || c.id == "toneBypass";
+        result[fullChainControls.size() + i] = {c.id.data(), c.name.data(), c.minimum, c.maximum, c.defaultValue, discrete};
+    }
+    return result;
+}();
 class MainComponent final : public juce::Component, private juce::Timer,
                             private juce::MidiKeyboardStateListener
 {
@@ -57,10 +72,10 @@ private:
     std::array<juce::ToggleButton,2> combToggles;
     juce::Component fullPanel;
     juce::Viewport fullViewport;
-    std::array<juce::Slider,fullChainControls.size()> fullSliders;
-    std::array<juce::Label,fullChainControls.size()> fullLabels;
-    std::array<juce::ComboBox,fullChainControls.size()> fullChoices;
-    std::array<juce::ToggleButton,fullChainControls.size()> fullToggles;
+    std::array<juce::Slider,auditionPanelControls.size()> fullSliders;
+    std::array<juce::Label,auditionPanelControls.size()> fullLabels;
+    std::array<juce::ComboBox,auditionPanelControls.size()> fullChoices;
+    std::array<juce::ToggleButton,auditionPanelControls.size()> fullToggles;
     juce::TextEditor fullSeed;
     juce::Label fullSeedLabel;
     juce::MidiKeyboardState keyboardState;

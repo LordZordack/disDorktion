@@ -22,7 +22,8 @@ inline const std::array<FactoryPreset, 5> factoryPresets = []
     }};
     auto& subtle = presets[1].settings;
     subtle.middle.tanh.driveDb = 3;
-    subtle.middle.tanh.outputDb = -2;
+    subtle.middle.trimDb = -2;
+    subtle.middle.folder.driveDb = -24;
     subtle.middle.folder.bypass = true;
     subtle.mix = 0.45f;
     subtle.finalGain.gainDb = -0.5;
@@ -30,7 +31,8 @@ inline const std::array<FactoryPreset, 5> factoryPresets = []
     crunch.input.crusher.bitDepth = 8;
     crunch.input.crusher.captureRateHz = 18000;
     crunch.middle.tanh.driveDb = 9;
-    crunch.middle.tanh.outputDb = -6;
+    crunch.middle.trimDb = -6;
+    crunch.middle.folder.driveDb = -24;
     crunch.middle.folder.bypass = true;
     crunch.output.lowPass.cutoffHz = 10000;
     crunch.finalGain.gainDb = -2.5;
@@ -38,7 +40,7 @@ inline const std::array<FactoryPreset, 5> factoryPresets = []
     folded.middle.tanh.driveDb = 6;
     folded.middle.folder.driveDb = 9;
     folded.middle.folder.threshold = 0.45;
-    folded.middle.folder.outputDb = -3;
+    folded.middle.trimDb = -3;
     folded.output.highPass.cutoffHz = 60;
     folded.finalGain.gainDb = -1.5;
     auto& digital = presets[4].settings;
@@ -48,12 +50,16 @@ inline const std::array<FactoryPreset, 5> factoryPresets = []
     digital.input.crusher.shape = 0.3;
     digital.input.crusher.jitter = 0.15;
     digital.middle.tanh.driveDb = 15;
-    digital.middle.tanh.outputDb = -6;
+    digital.middle.trimDb = -6;
     digital.middle.folder.driveDb = 12;
     digital.middle.folder.threshold = 0.3;
     digital.output.highPass.cutoffHz = 80;
     digital.output.lowPass.cutoffHz = 7000;
     digital.finalGain.gainDb = -1;
+    // Canonicalize hidden Off flags through the same mapping used by hosts.
+    for (auto& preset : presets)
+        for (const auto& control : fullChainControls)
+            setFullChainControl(preset.settings, control.id, getFullChainControl(preset.settings, control.id));
     return presets;
 }();
 }

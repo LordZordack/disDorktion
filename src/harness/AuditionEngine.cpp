@@ -125,6 +125,7 @@ bool AuditionEngine::setFullChainSettings(const FullChainSettings& settings) noe
     for (std::size_t i=0;i<fullControls.size();++i)
         fullControls[i].store(getFullChainControl(settings,fullChainControls[i].id),std::memory_order_relaxed);
     fullSeed.store(settings.input.crusher.jitterSeed,std::memory_order_relaxed);
+    fullBypass.store(settings.bypass,std::memory_order_relaxed);
     return fullTarget.setParameters(settings);
 }
 bool AuditionEngine::setFullChainControl(std::string_view id,float value) noexcept
@@ -391,7 +392,7 @@ void AuditionEngine::setBypass(bool value) noexcept
     if (selected == &dispersionTarget) { (void)setFrequencyDispersionControl("bypass",value?1.f:0.f);return; }
     if (selected == &toneTarget) { (void)setToneControl("bypass",value?1.f:0.f);return; }
     if (selected == &combTarget) { (void)setResonantCombControl("bypass",value?1.f:0.f);return; }
-    if (selected == &fullTarget) { (void)setFullChainControl("chainBypass",value?1.f:0.f);return; }
+    if (selected == &fullTarget) { fullBypass.store(value,std::memory_order_relaxed);return; }
     if (selected == &outputTarget) { outputBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &middleTarget) { middleBypass.store(value, std::memory_order_relaxed); return; }
     if (selected == &inputTarget) { inputBypass.store(value, std::memory_order_relaxed); return; }
@@ -425,6 +426,7 @@ bool AuditionEngine::applyParameters() noexcept
         for (std::size_t i=0;i<fullControls.size();++i)
             if (!disdorktion::setFullChainControl(settings,fullChainControls[i].id,fullControls[i].load(std::memory_order_relaxed))) return false;
         settings.input.crusher.jitterSeed=fullSeed.load(std::memory_order_relaxed);
+        settings.bypass=fullBypass.load(std::memory_order_relaxed);
         return fullTarget.setParameters(settings);
     }
     if (selected == &outputTarget)
