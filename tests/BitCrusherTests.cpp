@@ -441,3 +441,18 @@ TEST_CASE("Slow expressive benchmarks extend bounded timing windows", "[benchmar
     REQUIRE(timingWindowSeconds(0)==120);
     REQUIRE(timingWindowSeconds(-1)==120);
 }
+
+TEST_CASE("Crusher zero mix resumes from current input rather than held audio", "[crusher][inactive]")
+{
+    BitCrusher crusher; BitCrusherSettings s {64,100,false};
+    REQUIRE(crusher.setParameters(s)); REQUIRE(crusher.prepare({48000,17,2}));
+    juce::AudioBuffer<float> audio(2,1); audio.setSample(0,0,.75f);audio.setSample(1,0,-.75f);
+    REQUIRE(crusher.process(juce::dsp::AudioBlock<float>(audio)));
+    s.mix=0; REQUIRE(crusher.setParameters(s)); audio.setSize(2,501);
+    for(int c=0;c<2;++c) for(int n=0;n<501;++n) audio.setSample(c,n,.25f);
+    REQUIRE(crusher.process(juce::dsp::AudioBlock<float>(audio)));
+    s.mix=1; REQUIRE(crusher.setParameters(s)); audio.clear();
+    REQUIRE(crusher.process(juce::dsp::AudioBlock<float>(audio)));
+    REQUIRE(audio.getMagnitude(0,501)==0);
+    REQUIRE(crusher.getLatencySamples()==0);
+}

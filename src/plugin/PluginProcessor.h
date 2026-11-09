@@ -1,7 +1,5 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
-#include "dsp/ReferenceGain.h"
-#include "dsp/Gain.h"
 #include "dsp/FullChainControls.h"
 #include <atomic>
 #include <array>
@@ -38,11 +36,9 @@ public:
     void getStateInformation(juce::MemoryBlock& destination) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
     juce::AudioProcessorValueTreeState& parameterState() noexcept { return parameters; }
-    // Presets/Initialize are message-thread operations, serialized with host
-    // lifecycle operations. Audio consumes requested mode at its next boundary.
+    // Presets/Initialize are message-thread operations.
     bool loadFactoryPreset(int index);
     int matchingFactoryPreset() const;
-    bool isLegacyMode() const noexcept { return requestedLegacyMode.load(std::memory_order_acquire); }
     PluginMeters readMeters() noexcept;
     void clearMeterOverloads() noexcept { clearOverloads.store(true, std::memory_order_relaxed); }
 private:
@@ -50,31 +46,19 @@ private:
     bool applyControls() noexcept;
     void render(juce::AudioBuffer<float>&, bool hostBypassed) noexcept;
     void publishControl(const char*, float);
-    void updateProcessingMode() noexcept;
     void resetMeters() noexcept;
     void accumulateMeters(float input, float output) noexcept;
     juce::AudioProcessorValueTreeState parameters;
-    std::atomic<float>* gainControl = nullptr;
-    std::atomic<float>* bypassControl = nullptr;
     std::array<std::atomic<float>*, fullChainControls.size()> chainControls {};
-    ReferenceGain gain;
-    Gain inputGain;
-    Gain outputGain;
     FullChain chain;
     juce::AudioBuffer<float> bypassDelay, bypassScratch;
     std::size_t bypassPosition = 0;
     std::size_t chunkCapacity = 0;
-    // ReferenceGain is a compatibility trim BEFORE the full-chain dry capture.
-    // Restored v1/v2 states explicitly select the original gain-only path.
-    bool legacyMode = false;
-    std::atomic<bool> requestedLegacyMode {false};
-    std::atomic<int> fullLatency {0};
     std::atomic<double> fullTailSeconds {20.0};
     std::atomic<float> inputMeter {0}, outputMeter {0};
     std::atomic<bool> inputClip {false}, outputClip {false}, clearOverloads {false};
     // Publish host metadata independently: hosts may query tails concurrently.
     std::atomic<double> tailSeconds {20.0};
-    double preparedSampleRate = 0.0;
     // JUCE calls prepare before playback and release after playback stops.
     // Lifecycle/reset/restore and processing must be serialized. JUCE wrappers
     // hold getCallbackLock() around callbacks; restore takes that same lock.

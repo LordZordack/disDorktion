@@ -48,25 +48,6 @@ void restoreState(PluginProcessor& plugin, const juce::XmlElement& xml)
     plugin.setStateInformation(bytes.getData(), static_cast<int>(bytes.getSize()));
 }
 
-juce::XmlElement legacyState(int version, PluginProcessor& plugin)
-{
-    if (version == 3)
-    {
-        auto xml = savedState(plugin);
-        xml->setAttribute("version", version);
-        xml->setAttribute("mode", "legacyGain");
-        return *xml;
-    }
-    juce::XmlElement xml("DisDorktionState");
-    xml.setAttribute("version", version);
-    xml.setAttribute("gain", "2");
-    xml.setAttribute("bypass", "0");
-    if (version == 2)
-        for (const auto* id : {"inputGainDb", "inputMute", "inputBypass", "outputGainDb", "outputMute", "outputBypass"})
-            xml.setAttribute(id, "0");
-    return xml;
-}
-
 void fillSignal(juce::AudioBuffer<float>& audio, int offset = 0)
 {
     for (int channel = 0; channel < audio.getNumChannels(); ++channel)
@@ -115,94 +96,6 @@ TEST_CASE("Factory presets contain complete valid settings and stable identities
     }
 }
 
-TEST_CASE("Factory identity tolerates normalized roundoff and ignores only output mute", "[adapter][preset][state]")
-{
-    PluginProcessor plugin;
-    REQUIRE(plugin.loadFactoryPreset(1));
-    auto& mix = parameter(plugin, "globalMix");
-    const auto original = mix.getValue();
-    mix.setValueNotifyingHost(original + 1e-7f);
-    REQUIRE(plugin.matchingFactoryPreset() == 1);
-    setControl(plugin, "outputMute", 1);
-    REQUIRE(plugin.matchingFactoryPreset() == 1);
-    mix.setValueNotifyingHost(original + 0.01f);
-    REQUIRE(plugin.matchingFactoryPreset() == -1);
-    REQUIRE(plugin.loadFactoryPreset(1));
-    setControl(plugin, "inputMute", 1);
-    REQUIRE(plugin.matchingFactoryPreset() == -1);
-    REQUIRE(plugin.loadFactoryPreset(1));
-    setControl(plugin, "referenceGain", 2);
-    REQUIRE(plugin.matchingFactoryPreset() == -1);
-    REQUIRE(plugin.loadFactoryPreset(1));
-    setControl(plugin, "referenceBypass", 1);
-    REQUIRE(plugin.matchingFactoryPreset() == -1);
-}
-
-TEST_CASE("Presets reset compatibility trim preserve mute and roundtrip independently", "[adapter][preset][state]")
-{
-    PluginProcessor plugin;
-    for (int index = 1; index < 5; ++index)
-    {
-        setControl(plugin, "referenceGain", 3);
-        setControl(plugin, "referenceBypass", 1);
-        setControl(plugin, "outputMute", 1);
-        REQUIRE(plugin.loadFactoryPreset(index));
-        REQUIRE(parameter(plugin, "referenceGain").convertFrom0to1(parameter(plugin, "referenceGain").getValue()) == Catch::Approx(1));
-        REQUIRE(parameter(plugin, "referenceBypass").getValue() == 0);
-        REQUIRE(parameter(plugin, "outputMute").getValue() == 1);
-        const auto saved = savedState(plugin);
-        PluginProcessor reopened;
-        restoreState(reopened, *saved);
-        REQUIRE(reopened.matchingFactoryPreset() == index);
-        REQUIRE_FALSE(reopened.isLegacyMode());
-        REQUIRE(savedState(reopened)->isEquivalentTo(saved.get(), true));
-        REQUIRE(reopened.loadFactoryPreset(0));
-        REQUIRE(plugin.matchingFactoryPreset() == index);
-        REQUIRE(parameter(plugin, "outputMute").getValue() == 1);
-    }
-    const auto beforeReset = savedState(plugin);
-    plugin.prepareToPlay(48000, 32);
-    plugin.reset();
-    REQUIRE(savedState(plugin)->isEquivalentTo(beforeReset.get(), true));
-    REQUIRE(plugin.loadFactoryPreset(0));
-    PluginProcessor defaults;
-    REQUIRE(savedState(plugin)->isEquivalentTo(savedState(defaults).get(), true));
-    REQUIRE(plugin.matchingFactoryPreset() == 0);
-}
-
-TEST_CASE("Preset recall exits each legacy schema at the next audio boundary", "[adapter][preset][state][realtime]")
-{
-    for (const int version : {1, 2, 3})
-    {
-        CAPTURE(version);
-        PluginProcessor plugin;
-        plugin.prepareToPlay(48000, 32);
-        const auto fullLatency = plugin.getLatencySamples();
-        REQUIRE(fullLatency > 0);
-        juce::MidiBuffer midi;
-        juce::AudioBuffer<float> audio(2, 617);
-        fillSignal(audio);
-        plugin.processBlock(audio, midi);
-        restoreState(plugin, legacyState(version, plugin));
-        REQUIRE(plugin.isLegacyMode());
-        REQUIRE(plugin.getLatencySamples() == 0);
-        fillSignal(audio);
-        plugin.processBlock(audio, midi);
-        REQUIRE(plugin.loadFactoryPreset(0));
-        REQUIRE_FALSE(plugin.isLegacyMode());
-        REQUIRE(plugin.getLatencySamples() == fullLatency);
-        audio.clear();
-        {
-            disdorktion::test::ScopedAllocationTracking tracking;
-            plugin.processBlock(audio, midi);
-        }
-        const auto counts = disdorktion::test::getAllocationCounts();
-        REQUIRE(counts.allocations == 0);
-        REQUIRE(counts.deallocations == 0);
-        REQUIRE(audio.getMagnitude(0, audio.getNumSamples()) == 0);
-    }
-}
-
 TEST_CASE("Restored presets reproduce deterministic offline rendering", "[adapter][preset][state][offline]")
 {
     for (const double rate : {44100.0, 48000.0, 88200.0, 96000.0, 192000.0})
@@ -240,63 +133,6 @@ TEST_CASE("Restored presets reproduce deterministic offline rendering", "[adapte
                     offset += frames;
                 }
             }
-}
-
-TEST_CASE("Meters retain raw input and actual host bypass output peaks between polls", "[adapter][meters]")
-{
-    PluginProcessor plugin;
-    plugin.prepareToPlay(48000, 32);
-    requireClear(plugin.readMeters());
-    setControl(plugin, "inputMute", 1);
-    setControl(plugin, "outputMute", 1);
-    setControl(plugin, "referenceGain", 4);
-    juce::MidiBuffer midi;
-    juce::AudioBuffer<float> audio(2, 1024);
-    audio.clear();
-    audio.setSample(0, 0, 1.25f);
-    audio.setSample(1, 0, -1.5f);
-    plugin.processBlockBypassed(audio, midi);
-    const auto actualOutput = audio.getMagnitude(0, audio.getNumSamples());
-    REQUIRE(actualOutput == 1.5f);
-    for (int block = 0; block < 3; ++block)
-    {
-        audio.clear();
-        plugin.processBlockBypassed(audio, midi);
-    }
-    auto meters = plugin.readMeters();
-    REQUIRE(meters.inputPeak == 1.5f);
-    REQUIRE(meters.outputPeak == actualOutput);
-    REQUIRE(meters.inputOverload);
-    REQUIRE(meters.outputOverload);
-    meters = plugin.readMeters();
-    REQUIRE(meters.inputPeak == 0);
-    REQUIRE(meters.outputPeak == 0);
-    REQUIRE(meters.inputOverload);
-    REQUIRE(meters.outputOverload);
-    plugin.clearMeterOverloads();
-    REQUIRE(plugin.readMeters().inputOverload);
-    audio.clear();
-    plugin.processBlockBypassed(audio, midi);
-    requireClear(plugin.readMeters());
-    // Normal processing meters input before mute, and output after final mute.
-    audio.clear();
-    plugin.processBlock(audio, midi); // Allow the production mute ramps to settle.
-    plugin.readMeters();
-    audio.clear(); audio.setSample(0, 0, 0.75f);
-    plugin.processBlock(audio, midi);
-    meters = plugin.readMeters();
-    REQUIRE(meters.inputPeak == 0.75f);
-    REQUIRE(meters.outputPeak == 0);
-    juce::AudioBuffer<float> zero(2, 0);
-    plugin.processBlock(zero, midi);
-    requireClear(plugin.readMeters());
-    for (const bool release : {false, true})
-    {
-        audio.clear(); audio.setSample(0, 0, 2);
-        plugin.processBlockBypassed(audio, midi);
-        if (release) plugin.releaseResources(); else plugin.reset();
-        requireClear(plugin.readMeters());
-    }
 }
 
 TEST_CASE("Preset processing with active meters is allocation free for varying blocks", "[adapter][preset][meters][realtime]")
@@ -362,63 +198,6 @@ TEST_CASE("Message thread preset publication renders finite audio without audio 
     REQUIRE(counts.deallocations == 0);
 }
 
-TEST_CASE("Concurrent preset requests leave each legacy schema on the audio thread", "[adapter][preset][state][realtime][concurrency]")
-{
-    for (const int version : {1, 2, 3})
-    {
-        CAPTURE(version);
-        PluginProcessor plugin;
-        plugin.prepareToPlay(48000, 32);
-        const auto expectedLatency = plugin.getLatencySamples();
-        restoreState(plugin, legacyState(version, plugin));
-        REQUIRE(plugin.isLegacyMode());
-        REQUIRE(plugin.getLatencySamples() == 0);
-        std::atomic<bool> legacyRendered {false}, recallPublished {false};
-        bool finite = true;
-        std::uint64_t legacyBlocks = 0, afterRequestBlocks = 0;
-        disdorktion::test::AllocationCounts counts;
-        std::thread renderer([&]
-        {
-            juce::MidiBuffer midi;
-            juce::AudioBuffer<float> audio(2, 127);
-            const auto render = [&]
-            {
-                fillSignal(audio);
-                plugin.processBlock(audio, midi);
-                for (int channel = 0; channel < 2; ++channel)
-                    for (int frame = 0; frame < audio.getNumSamples(); ++frame)
-                        finite = finite && std::isfinite(audio.getSample(channel, frame));
-            };
-            {
-                disdorktion::test::ScopedAllocationTracking tracking;
-                // Main cannot publish recall until several old-mode callbacks
-                // have completed, and this thread continues through publication.
-                for (int block = 0; block < 4; ++block) { render(); ++legacyBlocks; }
-                legacyRendered.store(true, std::memory_order_release);
-                while (!recallPublished.load(std::memory_order_acquire)) render();
-                // Acquiring publication before these callbacks ensures the mode
-                // request is observed at an audio boundary before thread exit.
-                for (int block = 0; block < 8; ++block) { render(); ++afterRequestBlocks; }
-            }
-            counts = disdorktion::test::getAllocationCounts();
-        });
-        while (!legacyRendered.load(std::memory_order_acquire)) std::this_thread::yield();
-        const auto loaded = plugin.loadFactoryPreset(0);
-        recallPublished.store(true, std::memory_order_release);
-        renderer.join();
-        REQUIRE(loaded);
-        REQUIRE(legacyBlocks == 4);
-        REQUIRE(afterRequestBlocks == 8);
-        REQUIRE(finite);
-        REQUIRE(counts.allocations == 0);
-        REQUIRE(counts.deallocations == 0);
-        REQUIRE_FALSE(plugin.isLegacyMode());
-        REQUIRE(plugin.getLatencySamples() == expectedLatency);
-        REQUIRE(plugin.matchingFactoryPreset() == 0);
-        REQUIRE(savedState(plugin)->getStringAttribute("mode") == "fullChain");
-    }
-}
-
 TEST_CASE("Unread meter impulses survive zero length callbacks", "[adapter][meters]")
 {
     PluginProcessor plugin;
@@ -442,4 +221,83 @@ TEST_CASE("Unread meter impulses survive zero length callbacks", "[adapter][mete
     REQUIRE(consumed.outputPeak == 0);
     REQUIRE(consumed.inputOverload);
     REQUIRE(consumed.outputOverload);
+}
+
+TEST_CASE("Presets reset Driver and section controls and roundtrip independently", "[adapter][preset][state]")
+{
+    PluginProcessor plugin;
+    for (int index = 0; index < 5; ++index)
+    {
+        setControl(plugin, "driver", 4);
+        setControl(plugin, "waveshaperMix", 0.25f);
+        REQUIRE(plugin.loadFactoryPreset(index));
+        REQUIRE(parameter(plugin, "driver").convertFrom0to1(parameter(plugin, "driver").getValue()) == 1.0f);
+        const auto saved = savedState(plugin);
+        PluginProcessor reopened;
+        restoreState(reopened, *saved);
+        REQUIRE(reopened.matchingFactoryPreset() == index);
+        INFO("Saved: " << saved->toString().toStdString());
+        INFO("Restored: " << savedState(reopened)->toString().toStdString());
+        REQUIRE(savedState(reopened)->isEquivalentTo(saved.get(), true));
+        setControl(reopened, "driver", 2);
+        REQUIRE(reopened.matchingFactoryPreset() == -1);
+        REQUIRE(plugin.matchingFactoryPreset() == index);
+    }
+    REQUIRE(plugin.loadFactoryPreset(0));
+    PluginProcessor defaults;
+    REQUIRE(savedState(plugin)->isEquivalentTo(savedState(defaults).get(), true));
+}
+
+TEST_CASE("Meters capture raw input and actual delayed host bypass output", "[adapter][meters]")
+{
+    PluginProcessor plugin;
+    setControl(plugin, "driver", 4);
+    setControl(plugin, "outputGainDb", -60);
+    plugin.prepareToPlay(48000, 32);
+    requireClear(plugin.readMeters());
+    juce::MidiBuffer midi;
+    juce::AudioBuffer<float> audio(2, 1024);
+    audio.clear(); audio.setSample(0, 0, 1.5f);
+    plugin.processBlockBypassed(audio, midi);
+    REQUIRE(audio.getMagnitude(0, audio.getNumSamples()) == 1.5f);
+    const auto meters = plugin.readMeters();
+    REQUIRE(meters.inputPeak == 1.5f);
+    REQUIRE(meters.outputPeak == 1.5f);
+    REQUIRE(meters.inputOverload); REQUIRE(meters.outputOverload);
+    plugin.clearMeterOverloads();
+    audio.clear(); plugin.processBlock(audio, midi);
+    REQUIRE_FALSE(plugin.readMeters().inputOverload);
+    plugin.reset(); requireClear(plugin.readMeters());
+    plugin.releaseResources(); requireClear(plugin.readMeters());
+}
+
+TEST_CASE("Factory preset direct settings agree with parameter mapping", "[adapter][preset][issue38]")
+{
+    for(const auto& preset : disdorktion::factoryPresets)
+    {
+        CAPTURE(preset.key);
+        disdorktion::FullChainSettings mapped;
+        for(const auto& item : disdorktion::fullChainControls)
+            REQUIRE(disdorktion::setFullChainControl(mapped,item.id,disdorktion::getFullChainControl(preset.settings,item.id)));
+        REQUIRE(preset.settings.middle.tanh.bypass==mapped.middle.tanh.bypass);
+        REQUIRE(preset.settings.middle.folder.bypass==mapped.middle.folder.bypass);
+        REQUIRE(preset.settings.output.highPass.bypass==mapped.output.highPass.bypass);
+        REQUIRE(preset.settings.output.lowPass.bypass==mapped.output.lowPass.bypass);
+        REQUIRE(preset.settings.output.comb.dampingEnabled);
+        REQUIRE(preset.settings.middle.tanh.outputDb==0);
+        REQUIRE(preset.settings.middle.folder.outputDb==0);
+        PluginProcessor plugin; disdorktion::FullChain reference;
+        REQUIRE(plugin.loadFactoryPreset(static_cast<int>(&preset-disdorktion::factoryPresets.data())));
+        REQUIRE(reference.setParameters(preset.settings)); REQUIRE(reference.prepare({48000,32,2}));
+        plugin.prepareToPlay(48000,32);
+        juce::MidiBuffer midi;
+        for(const int frames : {1,127,2051})
+        {
+            juce::AudioBuffer<float> actual(2,frames),expected(2,frames);
+            fillSignal(actual); expected.makeCopyOf(actual);
+            plugin.processBlock(actual,midi); REQUIRE(reference.process(juce::dsp::AudioBlock<float>(expected)));
+            for(int c=0;c<2;++c) for(int n=0;n<frames;++n)
+                REQUIRE(actual.getSample(c,n)==Catch::Approx(expected.getSample(c,n)).margin(3e-5f));
+        }
+    }
 }

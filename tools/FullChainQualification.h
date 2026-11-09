@@ -62,6 +62,7 @@ inline juce::var settings(const FullChainSettings& s)
     Q(output.highPass.cutoffHz);Q(output.highPass.bypass);Q(output.lowPass.cutoffHz);Q(output.lowPass.bypass);
     put(o,"output.highPass.response",int(s.output.highPass.response));put(o,"output.lowPass.response",int(s.output.lowPass.response));
     Q(finalGain.gainDb);Q(finalGain.mute);Q(finalGain.bypass);Q(mix);Q(bypass);
+    Q(driver);Q(middle.mix);Q(middle.trimDb);
 #undef Q
     return o;
 }

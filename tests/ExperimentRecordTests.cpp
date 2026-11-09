@@ -4,6 +4,69 @@
 
 using namespace disdorktion::harness;
 
+TEST_CASE("Compensated full chain records preserve Driver and Waveshaper controls", "[experiment][full-chain]")
+{
+    ExperimentRecord record; record.version = 17; record.targetId = "full-chain";
+    record.fullChain.driver = 3.1234567f;
+    record.fullChain.middle.mix = .23456789f;
+    record.fullChain.middle.trimDb = -13.123456f;
+    juce::String error; ExperimentRecord restored;
+    REQUIRE(record.validate(error));
+    REQUIRE(ExperimentRecord::fromJson(juce::JSON::parse(juce::JSON::toString(record.toJson())), restored, error));
+    REQUIRE(restored.version == 17);
+    REQUIRE(restored.fullChain.driver == record.fullChain.driver);
+    REQUIRE(restored.fullChain.middle.mix == record.fullChain.middle.mix);
+    REQUIRE(restored.fullChain.middle.trimDb == record.fullChain.middle.trimDb);
+    const auto retained = juce::JSON::toString(restored.toJson());
+    for (const auto* key : {"driver", "waveshaperMix", "waveshaperTrimDb"})
+    {
+        auto missing = record.toJson(); missing.getDynamicObject()->removeProperty(key);
+        REQUIRE_FALSE(ExperimentRecord::fromJson(missing, restored, error));
+        for (auto invalid : {juce::var(true), juce::var("1"), juce::var(100.), juce::var(std::numeric_limits<double>::quiet_NaN())})
+        {
+            auto malformed = record.toJson(); malformed.getDynamicObject()->setProperty(key, invalid);
+            REQUIRE_FALSE(ExperimentRecord::fromJson(malformed, restored, error));
+            REQUIRE(juce::JSON::toString(restored.toJson()) == retained);
+        }
+    }
+    for (int version : {11, 16})
+    {
+        ExperimentRecord legacy; legacy.version = version; legacy.targetId = "full-chain";
+        if (version == 11) legacy.fullChain.output = disdorktion::OutputSettings{};
+        REQUIRE(ExperimentRecord::fromJson(legacy.toJson(), restored, error));
+        REQUIRE(restored.fullChain.driver == 1.f);
+        REQUIRE(restored.fullChain.middle.mix == 1.f);
+        REQUIRE(restored.fullChain.middle.trimDb == 0.f);
+        legacy.fullChain.driver = 2.f; REQUIRE_FALSE(legacy.validate(error));
+        legacy.fullChain.driver = 1.f; legacy.fullChain.middle.mix = .5f; REQUIRE_FALSE(legacy.validate(error));
+        legacy.fullChain.middle.mix = 1.f; legacy.fullChain.middle.trimDb = -3.f; REQUIRE_FALSE(legacy.validate(error));
+    }
+    ExperimentRecord standalone; standalone.version = 9; standalone.targetId = "middle-section";
+    standalone.middle.mix = .5f; REQUIRE_FALSE(standalone.validate(error));
+    standalone.middle.mix = 1.f; standalone.middle.trimDb = -3.f; REQUIRE_FALSE(standalone.validate(error));
+}
+
+TEST_CASE("Current full chain schema rejects settings omitted from public controls", "[experiment][full-chain]")
+{
+    ExperimentRecord record; record.version=17; record.targetId="full-chain";
+    juce::String error;
+    for (int alteration=0; alteration<7; ++alteration)
+    {
+        auto invalid=record;
+        if(alteration==0)invalid.fullChain.finalGain.mute=true;
+        if(alteration==1)invalid.fullChain.input.gain.bypass=true;
+        if(alteration==2)invalid.fullChain.middle.tanh.outputDb=-12.f;
+        if(alteration==3)invalid.fullChain.middle.folder.outputDb=-6.f;
+        if(alteration==4)invalid.fullChain.middle.tanh.bypass=false; // Minimum drive means Off.
+        if(alteration==5)invalid.fullChain.output.highPass.bypass=false; // Minimum cutoff means Off.
+        if(alteration==6)invalid.fullChain.output.comb.bypass=true;
+        REQUIRE_FALSE(invalid.validate(error));
+        ExperimentRecord destination; destination.observations="retained";
+        REQUIRE_FALSE(ExperimentRecord::fromJson(invalid.toJson(),destination,error));
+        REQUIRE(destination.observations=="retained");
+    }
+}
+
 TEST_CASE("Extended crusher records require all expressive fields and upgrade legacy version", "[experiment][crusher]")
 {
     ExperimentRecord extended;

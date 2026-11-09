@@ -82,7 +82,6 @@ bool BitCrusher::process(juce::dsp::AudioBlock<float> block) noexcept
     return dispatcher.process(block, [this](auto chunk) noexcept
     {
         bool depthChanged = activeDepth != retained.bitDepth;
-        if (depthChanged) updateQuantizer();
         for (std::size_t n = 0; n < chunk.getNumSamples(); ++n)
         {
             const auto captureRate = rate.getNextValue();
@@ -91,6 +90,21 @@ bool BitCrusher::process(juce::dsp::AudioBlock<float> block) noexcept
             const auto crushAmount = crush.getNextValue();
             const auto shapeAmount = shape.getNextValue();
             const auto jitterAmount = jitter.getNextValue();
+            // Keep controls moving, but stop the sampler and quantizer at zero
+            // section mix. A fresh capture on resume cannot expose held audio.
+            if (wetMix == 0.0)
+            {
+                if (!wetIdle)
+                {
+                    heldRaw.fill(0.0f); heldWet.fill(0.0f); heldCode.fill(0);
+                    phase = phaseError = clockRandom = 0.0;
+                    firstFrame = true;
+                    wetIdle = true;
+                }
+                continue;
+            }
+            wetIdle = false;
+            if (depthChanged) updateQuantizer();
             if (activeSeed != retained.jitterSeed)
             {
                 activeSeed = retained.jitterSeed;

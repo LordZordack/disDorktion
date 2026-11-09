@@ -2,10 +2,21 @@
 type: Note
 title: "Expanded Output integration validation"
 description: "Issue 20 integration evidence and remaining qualification for comb, dispersion and tone."
-timestamp: 2026-11-03T20:00:00Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["output-section", "integration", "validation", "compatibility"]
 resource: "https://github.com/LordZordack/disDorktion/issues/20"
 ---
+
+## Historical evidence scope after issue #38
+
+The results below describe the recorded pre-issue-38 implementation and test
+conditions. They do not qualify the revised Driver routing, section mixes,
+nonlinear/filter Off endpoints, inactive history handling, defaults or v5-only
+plugin state. Standalone module/harness controls may retain their own bypasses.
+See the [current contract and focused evidence](./issue38_validation.md) for
+what has actually been checked; no new CPU or listening result is inferred.
+
+## Earlier validation record
 
 # Expanded Output integration
 

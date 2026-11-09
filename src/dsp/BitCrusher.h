@@ -52,7 +52,7 @@ private:
     std::array<float, 2> heldRaw {}, heldWet {};
     std::array<std::int64_t, 2> heldCode {};
     unsigned activeDepth = 64;
-    bool firstFrame = true;
+    bool firstFrame = true, wetIdle = false;
     std::uint32_t randomState = 1, activeSeed = 1;
     double clockRandom = 0.0, previousCrush = 0.0, previousShape = 0.0;
     double enhancedStep = 1.0 / 9223372036854775808.0, exponent = 1.0, inverseExponent = 1.0;

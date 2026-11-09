@@ -10,7 +10,8 @@ using namespace disdorktion;
 using namespace disdorktion::harness;
 TEST_CASE("Expanded full chain render reproduces enabled serialized output controls", "[full-chain][harness][render][expanded]")
 {
-    ExperimentRecord record;record.version=16;record.targetId="full-chain";
+    ExperimentRecord record;record.version=17;record.targetId="full-chain";
+    record.fullChain.driver=2.75f; record.fullChain.middle.mix=.37f; record.fullChain.middle.trimDb=-4.5f;
     record.renderDurationSamples=1031;record.blockSize=31;record.fullChain.mix=.63f;
     record.fullChain.output.comb={2.f,.2f,-.7f,4000.f,.4f,true,false};
     record.fullChain.output.dispersion={300.f,.7f,false};record.fullChain.output.tone={3.f,false};
@@ -40,12 +41,14 @@ TEST_CASE("Full chain controls validate transactionally", "[full-chain][harness]
     }
     REQUIRE_FALSE(setFullChainControl(settings,"bitDepth",9));
     REQUIRE_FALSE(setFullChainControl(settings,"hpResponse",.5f));
-    REQUIRE_FALSE(setFullChainControl(settings,"chainBypass",.5f));
+    for (const auto* obsolete : {"chainBypass", "inputMute", "inputBypass", "crusherBypass", "tanhOutputDb", "folderOutputDb", "finalMute", "finalBypass", "combDampingEnabled"})
+        REQUIRE_FALSE(setFullChainControl(settings, obsolete, 0.f));
     REQUIRE_FALSE(setFullChainControl(settings,"unknown",0));
 }
 TEST_CASE("Full chain record eleven strictly round trips", "[full-chain][experiment]")
 {
     ExperimentRecord record; record.version=11;record.targetId="full-chain";
+    record.fullChain.output=OutputSettings{};
     record.fullChain.input.gain.gainDb=12;record.fullChain.mix=.37f;
     record.fullChain.input.crusher.jitterSeed=0xffffffffu;
     record.fullChain.middle.folder.threshold=.27f;record.fullChain.finalGain.gainDb=-9;
@@ -127,7 +130,7 @@ TEST_CASE("Full chain engine equals shared DSP through live controls and reprepa
 
 TEST_CASE("Full chain offline render retains leading latency and exact frame count", "[full-chain][render]")
 {
-    ExperimentRecord record;record.version=11;record.targetId="full-chain";
+    ExperimentRecord record;record.version=17;record.targetId="full-chain";
     record.renderDurationSamples=1031;record.blockSize=127;
     record.source.kind=SourceKind::impulse;record.source.amplitude=.5;
     record.fullChain.mix=0;record.fullChain.input.gain.gainDb=24;record.fullChain.finalGain.gainDb=-6;

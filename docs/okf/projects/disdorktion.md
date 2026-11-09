@@ -2,90 +2,65 @@
 type: Project
 title: "DisDorktion audio distortion plugin"
 description: "Project record for the modular Windows VST3 distortion plugin and its standalone audition application."
-timestamp: 2026-10-14T03:46:45Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["audio", "distortion", "JUCE", "project"]
 ---
 
 # DisDorktion audio distortion plugin
 
-## Project direction
+The intended first release is a mono/stereo Windows VST3 with a standalone
+audition application. Carrier modulation/demodulation was discarded on
+2026-11-07. The current prototype's production path is Input Gain ->
+global dry/wet split -> crusher/sampler -> Waveshaper -> comb -> dispersion ->
+tone -> HP -> LP -> global mixing ->
+Final Gain. See [full-chain design](../methods/full_chain.md).
 
-The isolated [tone module](../methods/tone.md) adds dark/bright spectral balance
-with a fixed 1 kHz pivot and neutral-centered ±6 dB control. Its
-[qualification record](../notes/tone_validation.md) separates automated evidence
-from pending human listening and reference CPU acceptance; X5 owns integration.
+Input Gain affects both global branches. Driver is 1x to 4x, default 1x, and acts
+after the crusher immediately before tanh/fold inside the nonlinear wet branch.
+Fixed calibrated compensation follows nonlinear output before shared trim and
+section mixing, following the delayed 10 ms Driver trajectory. Global dry and
+Waveshaper dry remain unchanged. Both stages Off, Waveshaper Mix zero or global
+mix zero make Driver inaudible. There is no live tracking or AGC. Input Mix covers
+the complete crusher/sampler. Waveshaper Mix covers both nonlinear stages and
+shared post-stage trim. Both stages Off retain trim on delayed dry; section
+mix zero resets/suspends unnecessary wet work and reactivation warms histories
+before fading in. Production latency remains fixed at 92 samples.
 
-The agreed first release is a mono and stereo Windows VST3 plugin with a standalone audition application. Its serial wet path is input gain, bit crusher, tanh saturation, wave folder, high-pass filter, and low-pass filter. A global dry/wet control follows the output filters, then final output gain. The dry signal is captured before input gain; final output gain affects both paths. See the [overarching project plan](https://github.com/LordZordack/DisDorktion/blob/main/docs/PROJECT_PLAN.md) for architecture, acceptance gates, tests, and release strategy.
+The [interface](../methods/plugin_interface.md) has Input, Waveshaper, Output and
+GLOBAL panels with no visible mute/bypass controls. DAW bypass remains. Hz
+movement is logarithmic; nonlinear minima, HP minimum and LP maximum expose
+Off. Comb damping is always active during processing, and zero mix clears its
+history after fading out. The prototype replaces old automation/state
+compatibility with 27 controls and version-5-only saves.
+The Driver adjustment keeps those parameter IDs and persistence schemas;
+existing saved sounds above Driver 1x intentionally change, while defaults at
+1x retain their prior behavior.
 
-Resonant comb filtering, frequency dispersion, and a dedicated tone module form the experimental expansion. The user discarded carrier modulation/demodulation on 2026-11-07. The integrated expansion's listening check is user-confirmed; stress and reference CPU evidence are tracked in the [expanded Output validation note](../notes/expanded_output_validation.md).
+## Research and evidence
 
-## Research records
+The [Driver adjustment record](../notes/driver_adjustment_validation.md) records
+the approved calibration method and pending verification. The
+[issue #38 validation record](../notes/issue38_validation.md) preserves earlier
+automated passes as historical evidence; they do not qualify the adjusted Driver.
+No revised CPU, host or listening qualification is claimed. Existing
+[input](../notes/input_section_validation.md),
+[Waveshaper predecessor](../notes/middle_section_validation.md),
+[full-chain](../notes/full_chain_validation.md),
+[interface](../notes/plugin_interface_validation.md) and
+[expanded Output](../notes/expanded_output_validation.md) measurements describe
+their historical implementations and conditions. CPU qualification is specific
+to each measured implementation and budget.
 
-- **Processing foundation** (`../methods/processing_contract.md`): implemented real-time module interface, callback rules, and reference gain behavior. See the [DSP contract](https://github.com/LordZordack/DisDorktion/blob/main/docs/DSP_CONTRACT.md), [performance procedure](https://github.com/LordZordack/DisDorktion/blob/main/docs/PERFORMANCE.md), and [foundation validation note](../notes/foundation_validation.md).
-- **Bit crusher** (`../methods/bit_crushing.md`): the legacy depth/capture-rate processor passed Debug, Release, DSP-only Release, render checks, and its three-run CPU baseline. The expressive mix/crush/shape/jitter extension passed VS2026 Debug, Release, headless Release, render checks, and its three-run CPU baseline; new-WAV listening, GUI inspection, VS2022 CI, and graph gate remain open. See the [validation note](../notes/bit_crusher_validation.md).
-- **Tanh saturation** ([design](../methods/tanh_saturation.md)): the native-rate module and version-5 experiment target passed full VS2026 Debug (119/119), Release (119/119), and independent headless Release (93/93) suites. The Release measurement tool passed 18 fixtures; repeated output matched across 46 files, and four experiment examples rendered without overload or reported latency. The revision-2 CPU baseline qualified all 120 rows across three pinned runs under recorded conditions. The full unpinned diagnostic completed all 40 rows with the expected unqualified status. Thermal and ambient conditions were unavailable or unconfirmed. See the [validation note](../notes/tanh_saturation_validation.md). Human listening, GUI/VS2022 checks, Q1 antialiasing, and final documentation graph/OKF refresh remain open.
-- **Methods** (`../methods/`): record each DSP design, its equations or algorithm, parameter ranges and endpoints, expected sound, aliasing and latency concerns, and alternatives. Link supporting papers and experiments.
-- **Papers** (`../papers/`): preserve verified bibliographic details and source links, summarize the relevant finding, and identify the methods it informs. Do not fill gaps in source metadata by guessing.
-- **Notes** (`../notes/`): record experiments and listening evaluations with test signal, sample rate, settings, observations or measurements, and the decision they support. Link the method and paper records where relevant.
-- **Hardware** (`../hardware/`): document source-backed hardware details only when hardware is being studied or emulated.
+The standalone [InputSection](../methods/input_section.md) convenience continues
+to compose Gain -> BitCrusher. FullChain owns its own pre-input Gain and direct
+BitCrusher so gain precedes Driver and both global branches. Isolated modules
+and the development harness may retain test bypass controls that are not plugin
+parameters. Internal FullChainSettings bypass is likewise harness-only.
 
-## Evidence status
-
-The reusable [input section](../methods/input_section.md) composes production
-gain then expressive bit crushing at the host rate, with independent bypasses,
-interstage overload metering, zero added latency and version-8 shared-harness
-records. Its [qualification note](../notes/input_section_validation.md) records
-191-test Debug/Release suites, 160 DSP-only tests, exact interaction measurements,
-user acceptance of the synthetic audition and 270 qualified pinned AC CPU cases
-(worst p99 3.74052% of deadline, 6% limit). Representative music and actual
-GUI/device inspection remain unperformed.
-Full-chain plugin integration remains a later milestone.
-
-The independently selectable [high-pass](../methods/high_pass_filter.md) and
-[low-pass](../methods/low_pass_filter.md) modules implement Butterworth,
-Chebyshev I and Chebyshev II responses with smoothed cutoff/mode/bypass and
-version-7 experiment records. Their numerical and diagnostic CPU evidence,
-plus pending listening and reference-hardware qualification, are recorded in
-[high-pass validation](../notes/high_pass_validation.md) and
-[low-pass validation](../notes/low_pass_validation.md). The assembled
-[output section](../methods/output_section.md) reuses these modules at native
-rate with independent controls, retained common bypass, zero added latency and
-version-10 shared records. Its
-[qualification note](../notes/output_section_validation.md) records passing
-221-test Debug/Release and 187-test DSP-only suites, repeated independent
-numerical evidence, and 600 qualified pinned AC CPU cases with an independent
-audit of 89,408,001 raw timings (worst p99 0.87% of deadline, strict 10% limit).
-The user's functional confidence is recorded separately from structured
-listening, visual inspection and individual filter acceptance gates.
-Finished-plugin chain integration remains a later milestone.
-
-The [wave-folder design](../methods/wave_folding.md) is implemented with smoothed
-controls, version-6 experiment records and native-rate measurement tools. Its
-automated correctness, spectral and three-run CPU evidence, and pending human
-listening, GUI and Q1 gates, are recorded in the [validation note](../notes/wave_folder_validation.md).
-
-The [tanh saturation method](../methods/tanh_saturation.md) passed its automated correctness, spectral, deterministic-render, example-render and revision-2 CPU qualification checks under recorded conditions; see the [validation note](../notes/tanh_saturation_validation.md). The full unpinned diagnostic completed with its expected unqualified status. Thermal/ambient conditions were unavailable or unconfirmed. Generated fixtures are not user listening observations. Human listening, GUI/VS2022 checks, Q1 antialiasing and production integration remain open.
-
-The [reusable gain design](../methods/gain.md) is implemented in the shared harness and independent plugin input/output stages. Debug and Release checks verify correctness; [gain validation](../notes/gain_validation.md) records fixtures and battery diagnostics. Human listening and manual host checks remain pending. The bit crusher's verified legacy sine and transient renders were user-auditioned as “Sounds as intended”; musical-category listening remains pending. Its three-run AC CPU baseline passed for the legacy version. Expressive CPU qualification passed; expressive WAV listening remains open.
-
-Describe unimplemented designs as **proposed behavior**. The reference gain foundation's unit correctness is verified in the [foundation validation note](../notes/foundation_validation.md). Other production distortion modules remain unqualified. CPU qualification is specific to each measured implementation and budget; see the linked validation notes for legacy, expressive and assembled-section evidence. Use **measured behavior** only for results supported by a documented test or listening evaluation; include the test conditions and link its note. Record whether evidence accepts, rejects, or revises the proposal.
-
-## Open research questions
-
-The isolated [frequency dispersion module](../methods/frequency_dispersion.md)
-now provides a 32-stage normalized allpass cascade, harness controls and version-13
-records. [Validation](../notes/frequency_dispersion_validation.md) records passing
-functional/spectral checks and failed CPU budget captures. On 2026-11-03 the user
-chose to defer further sound experiments and stronger nonlinear variants to the
-integrated plugin. This deferral does not qualify the failed CPU gate; production
-integration remains X5 and publication is for draft review.
-
-Q1 now has a [tested evaluation boundary](../methods/middle_oversampling.md) and
-[native/FIR comparison evidence](../notes/middle_oversampling_validation.md).
-Its 4x fractional-delay correction passes the measured phase/blend targets;
-aggressive triangle-folding residuals prevent unconditional 4x quality approval.
-Human listening and the residual-alias decision remain open before S2.
-
-- Choose and qualify the shared anti-aliasing boundary for the nonlinear middle section.
-- Establish parameter ranges, defaults, transitions, and identity behavior for each module before implementation.
-- Determine whether the experimental modules meet their acceptance gates and merit integration.
+Preserve algorithms, endpoints, latency concerns and alternatives in
+[methods](../methods/index.md); verified source metadata and relevant findings
+in [papers](../papers/index.md); and test conditions, measurements and decisions
+in [notes](../notes/index.md). Distinguish implemented behavior from measured
+acceptance. Generated fixtures are not human listening observations. Further
+anti-aliasing, representative-source, host and reference performance acceptance
+must be tied to the revision actually evaluated.

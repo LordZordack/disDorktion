@@ -1,7 +1,9 @@
 #pragma once
 #include "AuditionTarget.h"
 #include "dsp/OutputSection.h"
-#include "dsp/FullChainControls.h"
+#include <array>
+#include <cmath>
+#include <limits>
 
 namespace disdorktion::harness
 {
@@ -33,15 +35,58 @@ inline bool isOutputControl(std::string_view id) noexcept
 }
 inline float getOutputControl(const OutputSettings& settings,std::string_view id) noexcept
 {
-    FullChainSettings chain;chain.output=settings;
-    return getFullChainControl(chain,id);
+    if(id=="hpCutoffHz") return settings.highPass.cutoffHz;
+    if(id=="hpResponse") return static_cast<float>(settings.highPass.response);
+    if(id=="hpBypass") return settings.highPass.bypass;
+    if(id=="lpCutoffHz") return settings.lowPass.cutoffHz;
+    if(id=="lpResponse") return static_cast<float>(settings.lowPass.response);
+    if(id=="lpBypass") return settings.lowPass.bypass;
+    if(id=="combDelayMs") return settings.comb.delayMs;
+    if(id=="combFeedforward") return settings.comb.feedforward;
+    if(id=="combFeedback") return settings.comb.feedback;
+    if(id=="combDampingHz") return settings.comb.dampingHz;
+    if(id=="combMix") return settings.comb.mix;
+    if(id=="combDampingEnabled") return settings.comb.dampingEnabled;
+    if(id=="combBypass") return settings.comb.bypass;
+    if(id=="dispersionFrequencyHz") return settings.dispersion.frequencyHz;
+    if(id=="dispersionMix") return settings.dispersion.mix;
+    if(id=="dispersionBypass") return settings.dispersion.bypass;
+    if(id=="toneDb") return settings.tone.toneDb;
+    if(id=="toneBypass") return settings.tone.bypass;
+    return std::numeric_limits<float>::quiet_NaN();
 }
 inline bool setOutputControl(OutputSettings& settings,std::string_view id,float value) noexcept
 {
-    if(!isOutputControl(id)) return false;
-    FullChainSettings chain;chain.output=settings;
-    if(!setFullChainControl(chain,id,value)) return false;
-    settings=chain.output;return true;
+    for(const auto& control:outputSectionControls)
+    {
+        if(control.id!=id) continue;
+        const bool discrete=id=="hpResponse" || id=="lpResponse" || id=="hpBypass" || id=="lpBypass"
+            || id=="combDampingEnabled" || id=="combBypass" || id=="dispersionBypass" || id=="toneBypass";
+        if(!std::isfinite(value) || value<control.minimum || value>control.maximum
+            || (discrete && value!=std::floor(value))) return false;
+        auto next=settings;
+        if(id=="hpCutoffHz") next.highPass.cutoffHz=value;
+        else if(id=="hpResponse") next.highPass.response=static_cast<FilterResponse>(static_cast<unsigned>(value));
+        else if(id=="hpBypass") next.highPass.bypass=value!=0.f;
+        else if(id=="lpCutoffHz") next.lowPass.cutoffHz=value;
+        else if(id=="lpResponse") next.lowPass.response=static_cast<FilterResponse>(static_cast<unsigned>(value));
+        else if(id=="lpBypass") next.lowPass.bypass=value!=0.f;
+        else if(id=="combDelayMs") next.comb.delayMs=value;
+        else if(id=="combFeedforward") next.comb.feedforward=value;
+        else if(id=="combFeedback") next.comb.feedback=value;
+        else if(id=="combDampingHz") next.comb.dampingHz=value;
+        else if(id=="combMix") next.comb.mix=value;
+        else if(id=="combDampingEnabled") next.comb.dampingEnabled=value!=0.f;
+        else if(id=="combBypass") next.comb.bypass=value!=0.f;
+        else if(id=="dispersionFrequencyHz") next.dispersion.frequencyHz=value;
+        else if(id=="dispersionMix") next.dispersion.mix=value;
+        else if(id=="dispersionBypass") next.dispersion.bypass=value!=0.f;
+        else if(id=="toneDb") next.tone.toneDb=value;
+        else if(id=="toneBypass") next.tone.bypass=value!=0.f;
+        if(!isValidOutputSettings(next)) return false;
+        settings=next;return true;
+    }
+    return false;
 }
 class OutputSectionTarget final : public AuditionTarget
 {

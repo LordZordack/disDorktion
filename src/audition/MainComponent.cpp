@@ -96,20 +96,20 @@ MainComponent::MainComponent()
     }
     fullViewport.setViewedComponent(&fullPanel,false);
     addChildComponent(fullViewport);
-    for(std::size_t i=0;i<fullChainControls.size();++i)
+    for(std::size_t i=0;i<auditionPanelControls.size();++i)
     {
-        const auto& c=fullChainControls[i];
+        const auto& c=auditionPanelControls[i];
         auto publish=[this,i](float value)
         {
             if(record.version==15)
             {
-                if(harness::setOutputControl(record.output,fullChainControls[i].id,value))
-                    audio.engine().setOutputControl(fullChainControls[i].id,value);
+                if(harness::setOutputControl(record.output,auditionPanelControls[i].id,value))
+                    audio.engine().setOutputControl(auditionPanelControls[i].id,value);
                 return;
             }
-            if(record.version!=16) return;
-            if(disdorktion::setFullChainControl(record.fullChain,fullChainControls[i].id,value))
-                audio.engine().setFullChainControl(fullChainControls[i].id,value);
+            if(record.version!=17) return;
+            if(disdorktion::setFullChainControl(record.fullChain,auditionPanelControls[i].id,value))
+                audio.engine().setFullChainControl(auditionPanelControls[i].id,value);
         };
         auto& label=fullLabels[i];label.setText(c.name,juce::dontSendNotification);fullPanel.addAndMakeVisible(label);
         if(c.discrete && c.maximum==1.f)
@@ -141,7 +141,7 @@ MainComponent::MainComponent()
     fullPanel.addAndMakeVisible(fullSeedLabel);fullPanel.addAndMakeVisible(fullSeed);
     fullSeed.setInputRestrictions(10,"0123456789");fullSeed.setText("1",false);
     fullSeed.onTextChange=[this] {
-        if(record.version!=16) return;
+        if(record.version!=17) return;
         std::uint32_t seedValue=0;
         if(readCrusherSeed(seedValue)){record.fullChain.input.crusher.jitterSeed=seedValue;audio.engine().setFullChainJitterSeed(seedValue);}
     };
@@ -246,7 +246,7 @@ MainComponent::MainComponent()
     target.onChange = [this] {
         auto next = snapshot();
         const auto selected = target.getSelectedId();
-        next.version = selected == 14 ? 14 : selected == 13 ? 13 : selected == 12 ? 12 : selected == 11 ? 16 : selected == 10 ? 15 : selected == 9 ? 9 : selected == 8 ? 8 : selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
+        next.version = selected == 14 ? 14 : selected == 13 ? 13 : selected == 12 ? 12 : selected == 11 ? 17 : selected == 10 ? 15 : selected == 9 ? 9 : selected == 8 ? 8 : selected >= 6 ? 7 : selected == 5 ? 6 : selected == 4 ? 5 : selected == 3 ? 4 : selected;
         next.targetId = selected == 1 ? "reference-gain" : selected == 2 ? "gain" : selected == 3 ? "bit-crusher"
             : selected == 4 ? "tanh-saturation" : selected == 5 ? "wave-folder" : selected == 6 ? "high-pass" : selected == 7 ? "low-pass" : selected == 8 ? "input-section" : selected == 9 ? "middle-section" : selected==10 ? "output-section" : selected==13 ? "frequency-dispersion" : selected==12 ? "resonant-comb" : "full-chain";
         next.gain = 1.0f; next.gainDb = 0.0f; next.mute = false; next.bypass = false;
@@ -332,7 +332,7 @@ MainComponent::MainComponent()
     load.onClick = [this] {
         chooseFile(false, "*.wav;*.aif;*.aiff", [this](const auto& file) {
             std::uint32_t parsedSeed = 0;
-            if ((record.version == 3 || record.version == 4 || record.version == 8 || record.version == 16) && !readCrusherSeed(parsedSeed))
+            if ((record.version == 3 || record.version == 4 || record.version == 8 || record.version == 17) && !readCrusherSeed(parsedSeed))
             { status("Jitter seed must be an unsigned 32-bit integer."); return; }
             auto next = snapshot(); next.source.kind = SourceKind::file; next.filePath = file.getFullPathName();
             next.fileHash.clear(); loadAudio(file, next, false);
@@ -472,10 +472,10 @@ void MainComponent::resized()
         if(i<5)combSliders[i].setBounds(controlRow);else combToggles[i-5].setBounds(controlRow);
     }
     unsigned visibleRows=0;
-    for(std::size_t i=0;i<fullChainControls.size();++i)
+    for(std::size_t i=0;i<auditionPanelControls.size();++i)
     {
-        const auto& control=fullChainControls[i];
-        const bool visible=record.version!=15 || isOutputControl(control.id);
+        const auto& control=auditionPanelControls[i];
+        const bool visible=record.version==15 ? i>=fullChainControls.size() : i<fullChainControls.size();
         fullLabels[i].setVisible(visible);
         fullSliders[i].setVisible(visible && !control.discrete);
         fullChoices[i].setVisible(visible && control.discrete && control.maximum!=1.f);
@@ -576,7 +576,7 @@ ExperimentRecord MainComponent::snapshot() const
 bool MainComponent::readCrusherSeed(std::uint32_t& result) const
 {
     double value = 0;
-    if (!number(record.version==16 ? fullSeed : jitterSeed, value) || value < 0 || value > 4294967295.0 || std::floor(value) != value)
+    if (!number(record.version==17 ? fullSeed : jitterSeed, value) || value < 0 || value > 4294967295.0 || std::floor(value) != value)
         return false;
     result = static_cast<std::uint32_t>(value);
     return true;
@@ -597,7 +597,7 @@ void MainComponent::updateCaptureRateMapping()
 bool MainComponent::readSourceControls(ExperimentRecord& next)
 {
     std::uint32_t parsedSeed = 0;
-    if ((next.version == 3 || next.version == 4 || next.version == 8 || next.version == 16) && !readCrusherSeed(parsedSeed))
+    if ((next.version == 3 || next.version == 4 || next.version == 8 || next.version == 17) && !readCrusherSeed(parsedSeed))
     { status("Jitter seed must be an unsigned 32-bit integer."); return false; }
     double sourceFrames = 0, renderFrames = 0, seedValue = 0;
     if (!number(frequency, next.source.frequency) || !number(frequency2, next.source.frequency2)
@@ -620,9 +620,18 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
 {
     devices.removeAudioCallback(&audio);
     record = next;
-    // Old records retain their default-bypassed sound and gain access to all controls.
+    // Legacy records gain current controls; full-chain flags follow the new Off endpoints.
     if(record.version==10)record.version=15;
-    if(record.version==11)record.version=16;
+    if(record.version==11 || record.version==16)
+    {
+        FullChainSettings canonical;
+        for(const auto& control:fullChainControls)
+            disdorktion::setFullChainControl(canonical,control.id,getFullChainControl(record.fullChain,control.id));
+        canonical.input.crusher.jitterSeed=record.fullChain.input.crusher.jitterSeed;
+        canonical.bypass=record.fullChain.bypass;
+        record.fullChain=canonical;
+        record.version=17;
+    }
     running = false; play.setButtonText("Play"); keyboardState.reset();
     source.setSelectedId(static_cast<int>(record.source.kind) + 1, juce::dontSendNotification);
     const auto section = record.version == 8;
@@ -634,7 +643,7 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
     const auto filtering = record.version == 7 || outputSection;
     const auto middle = record.version == 9;
     const auto driven = saturation || folder || middle;
-    target.setSelectedId(record.version==15 ? 10 : record.version==13 ? 13 : record.version==12 ? 12 : record.version==16 ? 11 : outputSection ? 10 : middle ? 9 : section ? 8 : filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
+    target.setSelectedId(record.version==15 ? 10 : record.version==13 ? 13 : record.version==12 ? 12 : record.version==17 ? 11 : outputSection ? 10 : middle ? 9 : section ? 8 : filtering ? (record.targetId=="high-pass" ? 6 : 7) : folder ? 5 : saturation ? 4 : crusher ? 3 : record.version, juce::dontSendNotification);
     gain.setRange(production ? -60.0 : 0.0, production ? 24.0 : 4.0, 0.0);
     gainLabel.setText(outputSection ? "Output section: high-pass then low-pass | independent responses and bypasses"
         : middle ? "Middle candidate: tanh then ADAA folder | 4x FIR | 92 samples | sound acceptance pending"
@@ -730,7 +739,7 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
             if(i<5)combSliders[i].setValue(value,juce::dontSendNotification);else combToggles[i-5].setToggleState(value!=0.f,juce::dontSendNotification);
         }
     }
-    fullViewport.setVisible(record.version==16 || record.version==15);
+    fullViewport.setVisible(record.version==17 || record.version==15);
     bypass.setVisible(record.version<11 || record.version==15);
     if(record.version>=11)
     {
@@ -743,9 +752,10 @@ void MainComponent::configureRecord(const ExperimentRecord& next)
         if(record.version==15)gainLabel.setText("Output: comb -> dispersion -> tone -> high-pass -> low-pass | scroll for all controls",juce::dontSendNotification);
         FullChainSettings displayed=record.fullChain;
         if(record.version==15)displayed.output=record.output;
-        for(std::size_t i=0;i<fullChainControls.size();++i)
+        for(std::size_t i=0;i<auditionPanelControls.size();++i)
         {
-            const auto value=getFullChainControl(displayed,fullChainControls[i].id);
+            if(record.version==15 ? i<fullChainControls.size() : i>=fullChainControls.size()) continue;
+            const auto value=record.version==15 ? getOutputControl(record.output,auditionPanelControls[i].id) : getFullChainControl(displayed,auditionPanelControls[i].id);
             fullSliders[i].setValue(value,juce::dontSendNotification);
             fullChoices[i].setSelectedId(static_cast<int>(value)+1,juce::dontSendNotification);
             fullToggles[i].setToggleState(value!=0.f,juce::dontSendNotification);
@@ -874,7 +884,7 @@ void MainComponent::loadAudio(const juce::File& file, ExperimentRecord next, boo
 void MainComponent::saveExperiment()
 {
     std::uint32_t parsedSeed = 0;
-    if ((record.version == 3 || record.version == 4 || record.version == 8 || record.version == 16) && !readCrusherSeed(parsedSeed))
+    if ((record.version == 3 || record.version == 4 || record.version == 8 || record.version == 17) && !readCrusherSeed(parsedSeed))
     { status("Jitter seed must be an unsigned 32-bit integer."); return; }
     auto next = snapshot();
     juce::String error;
@@ -901,7 +911,7 @@ void MainComponent::loadExperiment()
 void MainComponent::renderExperiment()
 {
     std::uint32_t parsedSeed = 0;
-    if ((record.version == 3 || record.version == 4 || record.version == 8 || record.version == 16) && !readCrusherSeed(parsedSeed))
+    if ((record.version == 3 || record.version == 4 || record.version == 8 || record.version == 17) && !readCrusherSeed(parsedSeed))
     { status("Jitter seed must be an unsigned 32-bit integer."); return; }
     auto next = snapshot();
     juce::String error;
@@ -975,8 +985,8 @@ void MainComponent::timerCallback()
     applicationHadFocus = appFocused;
     meterLabel.setText("Input peak " + juce::String(meter.inputPeak, 4) + "   RMS " + juce::String(meter.inputRms, 4)
         + "       Output peak " + juce::String(meter.outputPeak, 4) + "   RMS " + juce::String(meter.outputRms, 4)
-        + (record.version == 8 || record.version==16 ? "   Post-gain " + juce::String(meter.postGainPeak, 4) : juce::String())
-        + (record.version==16 ? " HP " + juce::String(meter.postHighPassPeak,3) + " Wet " + juce::String(meter.wetPeak,3) : juce::String())
+        + (record.version == 8 || record.version==17 ? "   Post-gain " + juce::String(meter.postGainPeak, 4) : juce::String())
+        + (record.version==17 ? " HP " + juce::String(meter.postHighPassPeak,3) + " Wet " + juce::String(meter.wetPeak,3) : juce::String())
         + (now < overloadVisibleUntil ? "   OVERLOAD" : ""), juce::dontSendNotification);
     deviceLabel.setText(juce::String(audio.sampleRate(), 0) + " Hz   " + juce::String(audio.channelCount())
         + " channels   " + juce::String(audio.blockSize()) + " frames   " + (audio.isReady() ? "Ready" : "Stopped / source unavailable"), juce::dontSendNotification);

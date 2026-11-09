@@ -25,11 +25,11 @@ private:
 
     PluginProcessor& processor;
     juce::LookAndFeel_V4 lookAndFeel;
-    juce::Label title, subtitle, presetStatus, compatibilityStatus;
+    juce::Label title, subtitle, presetStatus;
     juce::ComboBox presets;
     juce::TextButton initialize {"Initialize"}, clearOverloads {"Clear overloads"};
-    std::array<juce::Rectangle<int>, 5> sections;
-    std::array<std::vector<std::unique_ptr<ControlRow>>, 5> controls;
+    std::array<juce::Rectangle<int>, 4> sections;
+    std::array<std::vector<std::unique_ptr<ControlRow>>, 4> controls;
     std::unique_ptr<PeakMeter> inputMeter, outputMeter;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };

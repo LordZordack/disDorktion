@@ -166,3 +166,11 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-11-08T00:52:16Z: Record independently qualified 180-case explicit-HighQoS issue20 reference, unchanged budgets, full regression/golden/stress passes and preserved original policy failure
 
 - 2026-11-08T20:27:01Z: Prepare issue20 publication: reconcile current conditional CPU acceptance, cross-link integrated module concepts and describe compact evidence versus local raw artifacts
+
+- 2026-11-08T21:19:24Z: Updated issue 38 prototype routing, compensated Driver, section mixes, Off endpoints, controls/state and focused evidence; marked prior qualification historical.
+
+- 2026-11-08T21:30:58Z: Completed issue 38 controls and compensated Driver; Release build, 309 CTest cases, 84 Python tests and 272 measurement cases validated; host/listening and reference CPU qualification remain pending.
+
+- 2026-11-09T02:40:20Z: Updated nonlinear-wet Driver routing and fixed calibration design; preserved issue-38 validation as historical and added adjustment verification status.
+
+- 2026-11-09T12:26:29Z: Implemented Waveshaper-only Driver with fixed calibrated compensation; Release build, 315 CTest checks (one timeout passed rerun), 84 Python tests and exact calibration reproduction verified. Listening/DAW and reference CPU qualification remain pending.

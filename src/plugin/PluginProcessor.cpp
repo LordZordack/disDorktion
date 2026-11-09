@@ -9,11 +9,6 @@ namespace disdorktion
 static_assert(std::atomic<float>::is_always_lock_free, "Host control reads must be lock free");
 namespace
 {
-bool oldGainControl(std::string_view id) noexcept
-{
-    return id == "inputGainDb" || id == "inputMute" || id == "inputBypass"
-        || id == "outputGainDb" || id == "outputMute" || id == "outputBypass";
-}
 float decodeControl(const FullChainControl& control, float value) noexcept
 {
     if (std::string_view(control.id) != "bitDepth") return value;
@@ -63,20 +58,8 @@ bool read(const juce::XmlElement& xml, const char* id, float minimum, float maxi
 juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::makeParameters()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout result;
-    result.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"referenceGain", 1},
-        "Legacy trim gain", juce::NormalisableRange<float>(0.0f, 4.0f), 1.0f));
-    result.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"referenceBypass", 1}, "Legacy trim bypass", false));
-    // Preserve the original eight IDs and their exact host order.
-    const char* gainIds[] = {"inputGainDb", "inputMute", "inputBypass", "outputGainDb", "outputMute", "outputBypass"};
-    const char* gainNames[] = {"Input gain (dB)", "Input mute", "Input bypass", "Output gain (dB)", "Output mute", "Output bypass"};
-    for (int i = 0; i < 6; ++i)
-        if (i % 3 == 0)
-            result.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{gainIds[i], 1}, gainNames[i],
-                juce::NormalisableRange<float>(-60.0f, 24.0f), 0.0f));
-        else result.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{gainIds[i], 1}, gainNames[i], false));
     for (const auto& control : fullChainControls)
     {
-        if (oldGainControl(control.id)) continue;
         const juce::ParameterID id {control.id, 1};
         if (std::string_view(control.id) == "bitDepth")
         {
@@ -89,8 +72,24 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::makeParamet
         else if (control.discrete)
             result.add(std::make_unique<juce::AudioParameterInt>(id, control.name,
                 static_cast<int>(control.minimum), static_cast<int>(control.maximum), static_cast<int>(control.defaultValue)));
-        else result.add(std::make_unique<juce::AudioParameterFloat>(id, control.name,
-            juce::NormalisableRange<float>(control.minimum, control.maximum), control.defaultValue));
+        else
+        {
+            juce::NormalisableRange<float> range(control.minimum, control.maximum);
+            const auto minimum = control.minimum, maximum = control.maximum;
+            const juce::String name(control.id);
+            auto attributes = juce::AudioParameterFloatAttributes().withStringFromValueFunction(
+                [name, minimum, maximum](float value, int)
+                {
+                    if (((name == "tanhDriveDb" || name == "folderDriveDb" || name == "hpCutoffHz") && value <= minimum)
+                        || (name == "lpCutoffHz" && value >= maximum)) return juce::String("Off");
+                    return juce::String(value, 2);
+                }).withValueFromStringFunction([name, minimum, maximum](const juce::String& text)
+                {
+                    if (text.trim().equalsIgnoreCase("Off")) return name == "lpCutoffHz" ? maximum : minimum;
+                    return text.getFloatValue();
+                });
+            result.add(std::make_unique<juce::AudioParameterFloat>(id, control.name, range, control.defaultValue, attributes));
+        }
     }
     return result;
 }
@@ -98,10 +97,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::makeParamet
 PluginProcessor::PluginProcessor()
     : AudioProcessor(BusesProperties().withInput("Input", juce::AudioChannelSet::stereo(), true)
                                       .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
-      parameters(*this, nullptr, "ReferenceControls", makeParameters())
+      parameters(*this, nullptr, "DisDorktionControls", makeParameters())
 {
-    gainControl = parameters.getRawParameterValue("referenceGain");
-    bypassControl = parameters.getRawParameterValue("referenceBypass");
     for (std::size_t i = 0; i < fullChainControls.size(); ++i)
         chainControls[i] = parameters.getRawParameterValue(fullChainControls[i].id);
 }
@@ -110,31 +107,27 @@ void PluginProcessor::prepareToPlay(double sampleRate, int maximumBlockSize)
 {
     hostReady = false;
     resetMeters();
-    legacyMode = requestedLegacyMode.load(std::memory_order_acquire);
     const auto channels = getTotalNumInputChannels();
     if (maximumBlockSize <= 0 || getTotalNumOutputChannels() != channels) return;
     const juce::dsp::ProcessSpec spec {sampleRate, static_cast<juce::uint32>(maximumBlockSize), static_cast<juce::uint32>(channels)};
     if (!isValidProcessSpec(spec)) return;
     applyControls();
-    if (!gain.prepare(spec) || !inputGain.prepare(spec) || !outputGain.prepare(spec) || !chain.prepare(spec)) return;
+    if (!chain.prepare(spec)) return;
     chunkCapacity = std::min<std::size_t>(static_cast<std::size_t>(maximumBlockSize), 1024);
     bypassDelay.setSize(channels, static_cast<int>(chain.getLatencySamples()));
     bypassScratch.setSize(channels, static_cast<int>(chunkCapacity));
     bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
-    fullLatency.store(static_cast<int>(chain.getLatencySamples()), std::memory_order_relaxed);
     // Static allowance covers maximum comb feedback decay plus dispersion and
     // cutoff-filter histories, including warm bypass and automation transitions.
     fullTailSeconds.store(20.0 + chain.getLatencySamples() / sampleRate, std::memory_order_relaxed);
-    setLatencySamples(legacyMode ? 0 : static_cast<int>(chain.getLatencySamples()));
-    preparedSampleRate = sampleRate;
-    tailSeconds.store(legacyMode ? 0.0 : fullTailSeconds.load(std::memory_order_relaxed), std::memory_order_relaxed);
+    setLatencySamples(static_cast<int>(chain.getLatencySamples()));
+    tailSeconds.store(fullTailSeconds.load(std::memory_order_relaxed), std::memory_order_relaxed);
     hostReady = true;
 }
 void PluginProcessor::releaseResources() { hostReady = false; resetMeters(); }
 void PluginProcessor::reset()
 {
-    applyControls(); gain.reset(); inputGain.reset(); outputGain.reset(); chain.reset();
-    updateProcessingMode();
+    applyControls(); chain.reset();
     resetMeters();
     bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
 }
@@ -146,20 +139,13 @@ bool PluginProcessor::isBusesLayoutSupported(const BusesLayout& layout) const
 }
 bool PluginProcessor::applyControls() noexcept
 {
-    const auto trim = gainControl->load(std::memory_order_relaxed);
-    const auto bypass = bypassControl->load(std::memory_order_relaxed);
-    if (!std::isfinite(trim) || trim < 0 || trim > 4 || (bypass != 0 && bypass != 1)) return false;
     FullChainSettings settings;
     for (std::size_t i = 0; i < chainControls.size(); ++i)
         if (!setFullChainControl(settings, fullChainControls[i].id,
                 decodeControl(fullChainControls[i], chainControls[i]->load(std::memory_order_relaxed)))) return false;
     // Every scalar is read once per outer callback. Independent host atomics
     // are not a transactional snapshot; invalid sets retain ALL last targets.
-    const bool full = chain.setParameters(settings);
-    const bool legacy = gain.setParameters({trim, bypass == 1});
-    const bool input = inputGain.setParameters(settings.input.gain);
-    const bool output = outputGain.setParameters(settings.finalGain);
-    return full && legacy && input && output;
+    return chain.setParameters(settings);
 }
 void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer&) { render(buffer, false); }
 void PluginProcessor::processBlockBypassed(juce::AudioBuffer<float>& buffer, juce::MidiBuffer&) { render(buffer, true); }
@@ -176,10 +162,9 @@ void PluginProcessor::render(juce::AudioBuffer<float>& buffer, bool hostBypassed
     for (int c = inputs; c < buffer.getNumChannels(); ++c) buffer.clear(c, 0, buffer.getNumSamples());
     if (!hostReady || inputs != outputs || buffer.getNumChannels() < outputs) { buffer.clear(); return; }
     applyControls();
-    updateProcessingMode();
     float inputPeak = 0, outputPeak = 0;
     auto active = juce::dsp::AudioBlock<float>(buffer).getSubsetChannelBlock(0, static_cast<std::size_t>(outputs));
-    const auto delay = legacyMode ? 0 : static_cast<std::size_t>(bypassDelay.getNumSamples());
+    const auto delay = static_cast<std::size_t>(bypassDelay.getNumSamples());
     for (std::size_t offset = 0; offset < active.getNumSamples();)
     {
         const auto count = std::min(chunkCapacity, active.getNumSamples() - offset);
@@ -202,9 +187,7 @@ void PluginProcessor::render(juce::AudioBuffer<float>& buffer, bool hostBypassed
             }
             if (delay != 0) bypassPosition = (bypassPosition + 1) % delay;
         }
-        bool ok = gain.process(block);
-        if (legacyMode) ok = inputGain.process(block) && outputGain.process(block) && ok;
-        else ok = chain.process(block) && ok;
+        const bool ok = chain.process(block);
         if (!ok) { buffer.clear(); return; }
         if (hostBypassed)
             for (int c = 0; c < outputs; ++c)
@@ -221,9 +204,7 @@ void PluginProcessor::getStateInformation(juce::MemoryBlock& destination)
 {
     const juce::ScopedLock lock(getCallbackLock());
     juce::XmlElement state("DisDorktionState");
-    state.setAttribute("version", "4"); state.setAttribute("mode", isLegacyMode() ? "legacyGain" : "fullChain");
-    attribute(state, "gain", gainControl->load(std::memory_order_relaxed));
-    attribute(state, "bypass", bypassControl->load(std::memory_order_relaxed));
+    state.setAttribute("version", "5");
     for (std::size_t i = 0; i < fullChainControls.size(); ++i)
         attribute(state, fullChainControls[i].id, decodeControl(fullChainControls[i], chainControls[i]->load(std::memory_order_relaxed)));
     copyXmlToBinary(state, destination);
@@ -241,50 +222,24 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
     if (data == nullptr || sizeInBytes <= 0) return;
     const auto xml = getXmlFromBinary(data, sizeInBytes);
     if (!xml || !xml->hasTagName("DisDorktionState")) return;
-    const auto version = xml->getStringAttribute("version");
-    if (version != "1" && version != "2" && version != "3" && version != "4") return;
-    const auto mode = xml->getStringAttribute("mode");
-    if ((version == "3" || version == "4") && mode != "legacyGain" && mode != "fullChain") return;
-    float trim = 1, bypass = 0;
-    if (!read(*xml,"gain",0,4,false,false,trim) || !read(*xml,"bypass",0,1,true,true,bypass)) return;
+    if (xml->getStringAttribute("version") != "5") return;
     FullChainSettings settings;
     std::array<float, fullChainControls.size()> values {};
     for (std::size_t i = 0; i < fullChainControls.size(); ++i)
     {
         const auto& control = fullChainControls[i];
-        values[i] = control.defaultValue;
-        // Version 3 contained exactly the original 28 production controls.
-        // Ignore future extras on old states and overwrite missing additions
-        // with defaults, even when restoring into an already-enabled session.
-        const bool required = version == "4" || (version == "3" && i < 28)
-            || (version == "2" && oldGainControl(control.id));
-        if (required && !read(*xml,control.id,control.minimum,control.maximum,
-                control.discrete && control.minimum == 0 && control.maximum == 1,control.discrete,values[i])) return;
+        if (!read(*xml, control.id, control.minimum, control.maximum,
+                  control.discrete && control.minimum == 0 && control.maximum == 1, control.discrete, values[i])) return;
         if (!setFullChainControl(settings, control.id, values[i])) return;
     }
-    // Parsing/validation finishes before publication. Notify listeners outside
-    // the callback lock; attachments may synchronously call host/UI listeners.
-    // Restore is a host-serialized lifecycle operation, never an audio callback.
-    publishControl("referenceGain",trim); publishControl("referenceBypass",bypass);
-    for (std::size_t i = 0; i < fullChainControls.size(); ++i) publishControl(fullChainControls[i].id,values[i]);
-    const bool nextLegacy = version == "1" || version == "2" || mode == "legacyGain";
-    {
-        const juce::ScopedLock lock(getCallbackLock());
-        requestedLegacyMode.store(nextLegacy, std::memory_order_release);
-        applyControls();
-        updateProcessingMode();
-        // Flush the full-chain path even for same-mode restores. Legacy gain
-        // restores retain their historical ramp behavior; those scalar gains
-        // contain no delay/filter history and must not be snapped here.
-        chain.reset();
-        bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
-        if (!nextLegacy) { gain.reset(); inputGain.reset(); outputGain.reset(); }
-        resetMeters();
-    }
-    // Conservative static decay allowance plus the fixed FIR/delay latency.
-    tailSeconds.store(nextLegacy ? 0.0 : fullTailSeconds.load(std::memory_order_relaxed),
-                      std::memory_order_relaxed);
-    setLatencySamples(nextLegacy ? 0 : fullLatency.load(std::memory_order_relaxed));
+    if (!isValidFullChainSettings(settings)) return;
+    // Validate the complete transaction before notifying host/UI listeners.
+    for (std::size_t i = 0; i < fullChainControls.size(); ++i) publishControl(fullChainControls[i].id, values[i]);
+    const juce::ScopedLock lock(getCallbackLock());
+    applyControls();
+    chain.reset();
+    bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
+    resetMeters();
 }
 }
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new disdorktion::PluginProcessor(); }

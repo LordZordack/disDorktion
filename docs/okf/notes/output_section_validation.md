@@ -2,9 +2,20 @@
 type: Note
 title: "Output Section Qualification"
 description: "Implementation and reproducible qualification evidence for high-pass followed by low-pass; manual acceptance remains separate."
-timestamp: 2026-10-14T03:46:45Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["output-section", "validation", "filter", "realtime"]
 ---
+
+## Historical evidence scope after issue #38
+
+The results below describe the recorded pre-issue-38 implementation and test
+conditions. They do not qualify the revised Driver routing, section mixes,
+nonlinear/filter Off endpoints, inactive history handling, defaults or v5-only
+plugin state. Standalone module/harness controls may retain their own bypasses.
+See the [current contract and focused evidence](./issue38_validation.md) for
+what has actually been checked; no new CPU or listening result is inferred.
+
+## Earlier validation record
 
 # Output section qualification
 

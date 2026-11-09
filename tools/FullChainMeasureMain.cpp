@@ -9,7 +9,7 @@ int main(int argc,char** argv)
         if(argc!=2)throw std::runtime_error("usage: disdorktion_full_chain_measurements NEW_DIRECTORY");
         const std::filesystem::path root(argv[1]);require(!std::filesystem::exists(root));require(std::filesystem::create_directories(root));
         juce::ScopedNoDenormals noDenormals;
-        auto report=object();put(report,"schema",1);put(report,"kind","full-chain-measurements");put(report,"quality","4x-fir-adaa-v1");
+        auto report=object();put(report,"schema",2);put(report,"kind","full-chain-measurements");put(report,"quality","4x-fir-adaa-v1");
         put(report,"provenance",provenance(argv[0]));put(report,"listening","pending human audition");
         put(report,"sample_format","little-endian IEEE754 float32 planar lane/channel/frame");
         put(report,"policy","fixed duration; leading latency retained; no tail flush; captures include burst silence");
@@ -35,8 +35,8 @@ int main(int argc,char** argv)
             put(row,"peak_all_lanes",peak);put(row,"sample_count",juce::int64(11*channels*frames));
             auto headroom=object();put(headroom,"postInputGain",peaks.postInputGain);put(headroom,"postHighPass",peaks.postHighPass);put(headroom,"wet",peaks.wet);put(headroom,"output",peaks.output);put(row,"wet_endpoint_peaks",headroom);cases.add(row);
         }
-        // The bypassed wet FIR/ADAA path measures actual delay independently of
-        // both the reported integer and the dry delay line using that integer.
+        // Both stages Off selects the latency-aligned trimmed dry path.
+        // Verify the resulting impulse delay independently from captured audio.
         juce::Array<juce::var> latencyChecks;
         for(double rate:{48000.,96000.})for(int channels:{1,2})
         {

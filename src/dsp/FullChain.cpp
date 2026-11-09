@@ -6,7 +6,8 @@ namespace disdorktion
 struct FullChain::State
 {
     BlockDispatcher dispatcher;
-    InputSection input;
+    Gain inputGain;
+    BitCrusher input;
     MiddleSection middle;
     OutputSection output;
     Gain gain;
@@ -24,11 +25,13 @@ bool FullChain::prepare(const juce::dsp::ProcessSpec& spec)
     auto replacement = std::make_unique<State>();
     auto internal = spec;
     internal.maximumBlockSize = std::min(spec.maximumBlockSize, juce::uint32{1024});
-    (void) replacement->input.setParameters(retained.input);
+    (void) replacement->inputGain.setParameters(retained.input.gain);
+    (void) replacement->input.setParameters(retained.input.crusher);
     (void) replacement->middle.setParameters(retained.middle);
+    (void) replacement->middle.setDriver(retained.driver);
     (void) replacement->output.setParameters(retained.output);
     (void) replacement->gain.setParameters(retained.finalGain);
-    if (!replacement->dispatcher.prepare(internal) || !replacement->input.prepare(internal)
+    if (!replacement->dispatcher.prepare(internal) || !replacement->inputGain.prepare(internal) || !replacement->input.prepare(internal)
         || !replacement->middle.prepare(internal,4,MiddleLatencyCorrection::fir,MiddleFoldAlgorithm::adaaTriangle)
         || !replacement->output.prepare(internal) || !replacement->gain.prepare(internal)) return false;
     replacement->latency = replacement->middle.getLatencySamples();
@@ -44,7 +47,7 @@ void FullChain::reset() noexcept
 {
     peaks = {};
     if (!state) return;
-    state->input.reset(); state->middle.reset(); state->output.reset(); state->gain.reset();
+    state->inputGain.reset(); state->input.reset(); state->middle.reset(); state->output.reset(); state->gain.reset();
     state->dry.clear(); state->delay.clear(); state->position=0;
     state->mix.setCurrentAndTargetValue(retained.mix);
     state->bypass.setCurrentAndTargetValue(retained.bypass ? 1.f : 0.f);
@@ -54,9 +57,11 @@ bool FullChain::setParameters(const FullChainSettings& s) noexcept
     if (!isValidFullChainSettings(s)) return false;
     if (state)
     {
-        (void) state->input.setParameters(s.input); (void) state->middle.setParameters(s.middle);
+        (void) state->inputGain.setParameters(s.input.gain);
+        (void) state->input.setParameters(s.input.crusher); (void) state->middle.setParameters(s.middle);
         (void) state->output.setParameters(s.output); (void) state->gain.setParameters(s.finalGain);
         state->mix.setTargetValue(s.mix); state->bypass.setTargetValue(s.bypass ? 1.f : 0.f);
+        (void) state->middle.setDriver(s.driver);
     }
     retained = s;
     return true;
@@ -72,13 +77,16 @@ bool FullChain::process(juce::dsp::AudioBlock<float> block) noexcept
     const auto valid=state->dispatcher.process(block,[this,&current,&good](auto chunk) noexcept
     {
         auto dry=juce::dsp::AudioBlock<float>(state->dry).getSubBlock(0,chunk.getNumSamples());
+        good &= state->inputGain.process(chunk);
         // Read before writing the same ring slot: exactly latency frames, with
         // independent channel history and one shared frame cursor.
         for(std::size_t n=0;n<chunk.getNumSamples();++n)
         {
             for(std::size_t c=0;c<chunk.getNumChannels();++c)
             {
-                const auto x=chunk.getChannelPointer(c)[n];
+                auto& sample=chunk.getChannelPointer(c)[n];
+                current.postInputGain=std::max(current.postInputGain,std::abs(sample));
+                const auto x=sample;
                 auto* history=state->delay.getWritePointer(static_cast<int>(c));
                 dry.getChannelPointer(c)[n]=state->latency ? history[state->position] : x;
                 history[state->position]=x;
@@ -86,7 +94,6 @@ bool FullChain::process(juce::dsp::AudioBlock<float> block) noexcept
             if (++state->position >= std::max(1u,state->latency)) state->position=0;
         }
         good &= state->input.process(chunk);
-        current.postInputGain=std::max(current.postInputGain,state->input.getPostGainPeak());
         good &= state->middle.process(chunk);
         good &= state->output.process(chunk);
         current.postHighPass=std::max(current.postHighPass,state->output.getPostHighPassPeak());

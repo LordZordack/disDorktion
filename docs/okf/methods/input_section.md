@@ -2,10 +2,24 @@
 type: Method
 title: "Reusable input section"
 description: "Native-rate composition of production gain and expressive bit crushing, with section acceptance limits and independent bypass semantics."
-timestamp: 2026-10-13T00:00:00Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["gain", "bit-crushing", "integration", "real-time-audio"]
 resource: "https://github.com/LordZordack/disDorktion/issues/10"
 ---
+
+## Current production ownership (issue #38)
+
+The standalone `InputSection` convenience still owns Gain -> BitCrusher and
+retains its isolated harness controls. Production [FullChain](./full_chain.md)
+owns a separate Input Gain and direct BitCrusher, with Input Gain before the
+global split and Driver after the crusher inside the nonlinear wet branch.
+Its Input Mix controls only the complete
+crusher/sampler. Input Gain is active at every mix setting. Settled zero
+crusher mix suspends unnecessary wet work and clears stale hold/history state.
+See [Driver adjustment status](../notes/driver_adjustment_validation.md) and
+[historical issue #38 validation](../notes/issue38_validation.md).
+
+## Standalone design and historical qualification scope
 
 # Reusable input section
 

@@ -228,8 +228,11 @@ TEST_CASE("Resonant comb automation matches independent absolute-time recurrence
         const double delayed=memory[static_cast<std::size_t>(i)]*(1-fraction)+memory[static_cast<std::size_t>((i+1)%size)]*fraction;
         low=(1-a)*delayed+a*low;
         const double v=input+gain*low; memory[static_cast<std::size_t>(write)]=v; write=(write+1)%size;
+        // Zero mix discards the recurrence state and stops feeding dry input.
+        if(m==0) { std::fill(memory.begin(),memory.end(),0.); low=0; write=0; }
         const double weight=m*(1-b), expected=weight==0?input:input+weight*(v+forward*delayed-input);
         sample.setSample(0,0,input); sample.setSample(1,0,input); REQUIRE(comb.process(juce::dsp::AudioBlock<float>(sample)));
+        CAPTURE(n,m);
         REQUIRE(sample.getSample(0,0)==Catch::Approx(expected).margin(2e-5)); REQUIRE(sample.getSample(1,0)==sample.getSample(0,0));
         if(n>=4000) REQUIRE(sample.getSample(0,0)==input);
     }
@@ -261,5 +264,25 @@ TEST_CASE("Resonant comb extremes and conservative static tail remain finite", "
             for(int n=0;n<1024;++n) if(offset+static_cast<std::size_t>(n)>static_cast<std::size_t>(std::ceil(tail*rate))) REQUIRE(std::abs(b.getSample(0,n))<=1e-6f);
             offset+=1024; b.clear();
         }
+    }
+}
+
+TEST_CASE("Comb zero mix discards its tail and ignores dry-only input", "[resonant-comb][inactive]")
+{
+    for (unsigned capacity : {1u, 37u, 256u})
+    {
+        ResonantComb comb; ResonantCombSettings s;
+        s.delayMs=40; s.feedback=.95f; s.feedforward=1; s.mix=1; s.dampingHz=20;
+        REQUIRE(comb.setParameters(s)); REQUIRE(comb.prepare({8000,capacity,2}));
+        juce::AudioBuffer<float> audio(2,400); audio.clear(); audio.setSample(0,0,1);
+        REQUIRE(comb.process(juce::dsp::AudioBlock<float>(audio)));
+        s.mix=0; REQUIRE(comb.setParameters(s));
+        for(int c=0;c<2;++c) for(int n=0;n<400;++n) audio.setSample(c,n,.25f);
+        REQUIRE(comb.process(juce::dsp::AudioBlock<float>(audio)));
+        for(int c=0;c<2;++c) for(int n=80;n<400;++n) REQUIRE(audio.getSample(c,n)==.25f);
+        s.mix=1; REQUIRE(comb.setParameters(s)); audio.clear();
+        REQUIRE(comb.process(juce::dsp::AudioBlock<float>(audio)));
+        REQUIRE(audio.getMagnitude(0,400)==0);
+        REQUIRE(comb.getLatencySamples()==0);
     }
 }

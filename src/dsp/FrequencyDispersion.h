@@ -65,8 +65,19 @@ public:
             for(std::size_t n=0;n<chunk.getNumSamples();++n)
             {
                 const double a=coefficient.getNextValue();
+                const double wetMix=mix.getNextValue();
+                const double wetWeight=wetMix*(1.-bypass.getNextValue());
+                if(wetMix==0.)
+                {
+                    if(!wetIdle)
+                    {
+                        for(auto& channel:history) channel.fill(0.);
+                        wetIdle=true;
+                    }
+                    continue;
+                }
+                wetIdle=false;
                 const double g=std::sqrt(std::max(0.,1.-a*a));
-                const double wetWeight=mix.getNextValue()*(1.-bypass.getNextValue());
                 for(std::size_t c=0;c<chunk.getNumChannels();++c)
                 {
                     auto* samples=chunk.getChannelPointer(c);
@@ -117,6 +128,6 @@ private:
     std::array<std::array<double,stages>,2> history{};
     Smoother coefficient{0.},mix{1.},bypass{0.};
     double sampleRate=48000.;
-    bool prepared=false;
+    bool prepared=false,wetIdle=false;
 };
 }

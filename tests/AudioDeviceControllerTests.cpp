@@ -1,4 +1,5 @@
 #include "audition/AudioDeviceController.h"
+#include "audition/MainComponent.h"
 #include "AllocationTracking.h"
 #include "audition/CaptureRateMapping.h"
 #include <catch2/catch_test_macros.hpp>
@@ -57,6 +58,22 @@ ExperimentRecord callbackRecord(SourceKind kind = SourceKind::sine)
     record.monitorDb = 0.0f;
     record.muted = false;
     return record;
+}
+
+TEST_CASE("Audition panel retains complete standalone output descriptor rows", "[audition][output-section]")
+{
+    using namespace disdorktion;
+    const auto& panel=audition::auditionPanelControls;
+    REQUIRE(panel.size()==fullChainControls.size()+harness::outputSectionControls.size());
+    for(std::size_t i=0;i<harness::outputSectionControls.size();++i)
+    {
+        const auto& actual=panel[fullChainControls.size()+i];
+        const auto& expected=harness::outputSectionControls[i];
+        REQUIRE(std::string_view(actual.id)==expected.id);
+        REQUIRE(actual.defaultValue==expected.defaultValue);
+        if(expected.id=="combBypass" || expected.id=="dispersionBypass" || expected.id=="toneBypass")
+            REQUIRE(actual.discrete);
+    }
 }
 
 TEST_CASE("Capture rate knob is logarithmic and preserves legal requests above device rate", "[audition][crusher]")
@@ -175,6 +192,40 @@ TEST_CASE("Device restoration selects crusher and clamps capture to device rate"
     REQUIRE(fast.engine().selectedTargetId() == "gain");
     fast.configure(record); fast.audioDeviceAboutToStart(&device);
     REQUIRE(fast.engine().selectedTargetId() == "bit-crusher");
+}
+
+TEST_CASE("Device restores current and legacy full chain records through the audio callback", "[controller][full-chain]")
+{
+    using namespace disdorktion;
+    for (int version : {11, 16, 17})
+    {
+        auto record = callbackRecord(); record.version = version; record.targetId = "full-chain";
+        record.fullChain.input.gain.gainDb = 9.f; record.fullChain.finalGain.gainDb = -3.f;
+        record.fullChain.mix = .61f;
+        record.fullChain.input.crusher = {4, 7319.f, false, .73f, .4f, -.2f, .8f, 0xabcdefu};
+        if (version == 17)
+        {
+            record.fullChain.driver = 3.25f;
+            record.fullChain.middle.mix = .41f; record.fullChain.middle.trimDb = -7.25f;
+            record.fullChain.middle.tanh = {12.f, 0.f, false};
+            record.fullChain.middle.folder = {6.f, .43f, 0.f, false};
+        }
+        AudioDeviceController controller; CallbackDevice device(48000., 31);
+        controller.configure(record); controller.audioDeviceAboutToStart(&device);
+        REQUIRE(controller.isReady()); controller.setPlaying(true);
+        FullChain reference; REQUIRE(reference.setParameters(record.fullChain)); REQUIRE(reference.prepare({48000., 31, 2}));
+        harness::SignalSource source; REQUIRE(source.prepare(record.source, 48000., 2));
+        juce::AudioBuffer<float> audio(2, 1031), expected(2, 1031);
+        for (int block = 0; block < 3; ++block)
+        {
+            source.process(juce::dsp::AudioBlock<float>(expected));
+            REQUIRE(reference.process(juce::dsp::AudioBlock<float>(expected)));
+            callback(controller, audio);
+            for (int c = 0; c < 2; ++c) for (int n = 0; n < 1031; ++n)
+                REQUIRE(audio.getSample(c, n) == expected.getSample(c, n));
+        }
+        controller.audioDeviceStopped();
+    }
 }
 
 TEST_CASE("Device restores expressive crusher settings across rate reprepare", "[controller][crusher]")

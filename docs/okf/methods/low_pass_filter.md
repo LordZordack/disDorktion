@@ -2,10 +2,17 @@
 type: Method
 title: "Selectable Second-Order Low-Pass Filter"
 description: "Design for a zero-latency low-pass module with selectable Butterworth, Chebyshev I, and Chebyshev II responses and smoothed transitions."
-timestamp: 2026-10-12T00:00:00Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["low-pass", "filter", "tpt", "chebyshev"]
 resource: "https://docs.juce.com/master/classjuce_1_1dsp_1_1StateVariableTPTFilter.html"
 ---
+
+## Production usage update (issue #38)
+
+Production issue #38 maps the 20000 Hz maximum to Off and uses logarithmic host/knob movement with numeric entry. The isolated filter API and earlier measurements below have their own bypass controls.
+See the [current contract and evidence](../notes/issue38_validation.md).
+
+## Module design and earlier evidence
 
 # Low-Pass Filter
 

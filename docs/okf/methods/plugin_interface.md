@@ -1,85 +1,51 @@
 ---
 type: Method
 title: "Plugin interface, presets and host state"
-description: "Presentation and lifecycle rules for the shared production chain without changing the host parameter schema."
-timestamp: 2026-10-17T18:00:00Z
+description: "Current prototype controls, logarithmic frequency movement and version-5-only persistence."
+timestamp: 2026-11-08T00:00:00Z
 tags: ["audio-plugin", "automation", "state", "presets", "metering"]
 resource: "https://github.com/LordZordack/disDorktion/issues/14"
 ---
 
 # Plugin interface, presets and host state
 
-The custom editor exposes the [full chain](./full_chain.md) in three visible
-processing panels, with global mix/final gain and compatibility controls.
-Continuous controls use rotary knobs with editable values below them. The
-default editor is 1120x740, with a 1000x680 minimum; Global and Compatibility
-share a row to preserve screen space. This replaces the initial 1120x850
-slider layout without changing parameter ranges or host normalization.
-The repository guide `docs/PLUGIN_INTERFACE.md` records ranges, defaults,
-host ordering, bypass semantics and versioned restore policy. The UI reuses
-production DSP; it introduces no limiter, normalization or alternative quality
-path. The [validation note](../notes/plugin_interface_validation.md) separates
-implementation rules from measured acceptance.
+The editor has Input, Waveshaper, Output and GLOBAL panels. Input Gain, Driver,
+global mix and Final Gain live in GLOBAL. There are no visible mute/bypass or
+legacy compatibility controls; DAW host bypass remains. Waveshaper controls run
+Tanh Drive -> Fold Drive -> Threshold -> Waveshaper Trim -> Waveshaper Mix.
 
-## Stable sound representation
+The [full chain](./full_chain.md) applies Input Gain before both global branches
+and Final Gain after global mixing. GLOBAL Driver remains 1x to 4x, default 1x,
+but acts after the crusher immediately before tanh/fold inside the nonlinear
+wet branch. Fixed calibrated compensation follows nonlinear output before
+shared trim and section mixing, following the delayed 10 ms Driver trajectory.
+It uses no live level tracking or AGC. Global and Waveshaper dry are unchanged;
+Driver is inaudible with both stages Off, section mix zero or global mix zero.
+Input Mix covers the crusher/sampler. Waveshaper Mix
+covers both nonlinear stages and their shared trim with an aligned dry blend.
+Both stages Off retain trim on delayed dry. Production latency remains 92
+samples at all mix and Off endpoints.
 
-The original 30 APVTS parameters remain at their original indices; 12
-Output parameters append. IDs, ordering and normalized mappings retain host session meaning.
-Readable units, percent formatting, response names and frequency slider skew
-belong to presentation. In particular, host bit-depth indices are decoded to
-the actual permitted DSP bit values before validation or serialization.
+Capture rate and filter cutoff use logarithmic knob movement and editable
+numeric values. Tanh/Fold minima, HP minimum and LP maximum display Off. Comb
+damping is always enabled. Section zero-mix states suspend/reset unnecessary
+wet work; reactivation warms histories before the wet contribution fades in.
 
-The five factory settings are complete production settings. Preset names are
-derived by comparing quantized normalized controls within 2e-6, excluding only
-output mute and requiring unity/unbypassed legacy trim. Derived identity
-survives editor reconstruction and state round trips without new metadata.
-Ordinary presets preserve output mute; Initialize restores all defaults.
+The prototype intentionally replaces prior automation/state compatibility:
+27 parameters, version-5-only state, no gain-only mode or Legacy Trim.
+Complete ranges, defaults, state rejection rules and host bypass behavior are
+in the repository guide `docs/PLUGIN_INTERFACE.md`. Factory presets reuse
+production settings and shared trim; identity is derived from control values.
+The Driver adjustment preserves parameter IDs and persistence schemas. Existing
+saved sounds with Driver above 1x intentionally change; default 1x behavior
+remains unchanged.
 
-## Thread ownership and transitions
+Raw input/final output meters retain peaks and overloads between UI polls.
+Controls publish independent scalar atomics, not a whole-state bank. Serialized
+host lifecycle ownership governs state restore/reset. The editor starts at
+1120x740, with limits 1000x680 to 1400x1000.
 
-Host controls are independent atomic scalars latched once per callback, not
-an atomic bank. Recall uses ordinary host gestures on the message thread.
-It publishes a requested full-chain mode without taking the callback lock;
-the audio owner applies the mode and clears histories at the next callback.
-Host latency metadata updates belong to message/lifecycle operations. No
-callback means the requested mode has not yet reached DSP. Existing 10 ms
-ramps do not promise a seamless latency-path transition.
-
-Host restore remains serialized with processor lifecycle. It fully validates
-the candidate before changing parameters, notifies listeners outside the
-callback lock and synchronizes mode/DSP ownership. State saving takes the
-callback lock. Version 1/2 migrations retain gain-only mode; version 3 records
-the mode and all chain fields. Malformed, incomplete required, invalid and
-future state is rejected as a whole. Unknown extra attributes are ignored.
-
-## Observable levels
-
-Raw bus input and actual returned output are scanned with bounded audio work,
-including the exact delayed raw output selected by host bypass. Atomic peak
-maximums retain transients between editor polls and overload latches retain
-amplitudes above unity. One producer and one exchanging consumer can repeat
-an earlier peak for one callback without losing a new peak. Visual decay runs
-on the editor timer. Zero-length blocks retain unread peaks; reset/release
-clear processor meter history. These final meters complement the chain's
-internal diagnostic taps; dry selection can conceal wet-path overload from
-the final output meter.
-
-See [full-chain qualification](../notes/full_chain_validation.md) for inherited
-DSP evidence and its pending human listening, CPU and host gates.
-
-
-## Issue #20 integration update
-
-The [Output section](output_section.md) now runs comb -> frequency dispersion
--> tone -> HP -> LP at native rate. All additions default to bypass. Original
-30 host parameters keep their order and meanings; 12 new controls append.
-Plugin state v4 restores old v1/v2 gain-only sessions and v3 modes with the
-new effects bypassed. Successful restore clears full-chain histories and snaps its targets; legacy
-gain-only scalar ramps retain their original behavior.
-Full-chain latency remains 92 samples; partial dry/wet can color phase-shaped
-wet audio. Full mode reports a conservative 20-second tail plus FIR latency,
-even while bypassed. Existing five factory sounds are retained.
-
-The editor defaults to 1120x740 with a 1000x680 minimum and 1400x1000 maximum,
-providing more space for Output controls. Old evidence below describes the
-prior interface; see the current `docs/PLUGIN_INTERFACE.md`.
+See [Driver adjustment status](../notes/driver_adjustment_validation.md),
+[historical issue #38 evidence](../notes/issue38_validation.md) and the explicitly
+historical [interface validation record](../notes/plugin_interface_validation.md).
+No revised CPU, listening or host qualification is inferred from older results.

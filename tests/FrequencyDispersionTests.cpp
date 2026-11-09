@@ -204,3 +204,17 @@ TEST_CASE("Frequency dispersion follows independent interrupted frame ramp oracl
         }
     }
 }
+
+TEST_CASE("Dispersion zero mix forgets dry-only excitation before resuming", "[frequency-dispersion][inactive]")
+{
+    FrequencyDispersion m; FrequencyDispersionSettings s; s.frequencyHz=20; s.mix=0;
+    REQUIRE(m.setParameters(s)); REQUIRE(m.prepare({48000,17,2}));
+    juce::AudioBuffer<float> audio(2,600);
+    for(int c=0;c<2;++c) for(int n=0;n<600;++n) audio.setSample(c,n,.5f);
+    REQUIRE(m.process(juce::dsp::AudioBlock<float>(audio)));
+    for(int c=0;c<2;++c) for(int n=0;n<600;++n) REQUIRE(audio.getSample(c,n)==.5f);
+    s.mix=1; REQUIRE(m.setParameters(s)); audio.clear();
+    REQUIRE(m.process(juce::dsp::AudioBlock<float>(audio)));
+    REQUIRE(audio.getMagnitude(0,600)==0);
+    REQUIRE(m.getLatencySamples()==0);
+}

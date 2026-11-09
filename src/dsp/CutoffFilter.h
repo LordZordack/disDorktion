@@ -21,7 +21,7 @@ inline bool isValidCutoffSettings(const CutoffSettings& value) noexcept
 }
 
 // Separate template instantiations give HP and LP independent storage and defaults.
-// All three banks stay warm, including during full bypass and mode transitions.
+// All three banks stay warm during mode transitions. Off clears and suspends them.
 template<bool High>
 class CutoffFilter
 {
@@ -100,9 +100,20 @@ public:
                 for (unsigned i = 0; i < banks.size(); ++i)
                 {
                     gs[i] = banks[i].g.getNextValue();
-                    hs[i] = 1.0 / (1.0 + gs[i] * (gs[i] + banks[i].damping));
                 }
                 const double blend = bypass.getNextValue();
+                if (blend == 1.0)
+                {
+                    if (!wetIdle)
+                    {
+                        for (auto& bank : banks) { bank.s1.fill(0.0); bank.s2.fill(0.0); }
+                        wetIdle = true;
+                    }
+                    continue;
+                }
+                wetIdle = false;
+                for (unsigned i = 0; i < banks.size(); ++i)
+                    hs[i] = 1.0 / (1.0 + gs[i] * (gs[i] + banks[i].damping));
                 for (std::size_t channel = 0; channel < chunk.getNumChannels(); ++channel)
                 {
                     auto& sample = chunk.getChannelPointer(channel)[frame];
@@ -145,5 +156,6 @@ private:
     juce::SmoothedValue<double,juce::ValueSmoothingTypes::Linear> bypass {0.0};
     double sampleRate = 48000.0;
     unsigned rampFrames = 480, modeRemaining = 0;
+    bool wetIdle = false;
 };
 }

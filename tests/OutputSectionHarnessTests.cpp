@@ -7,6 +7,29 @@
 using namespace disdorktion;
 using namespace disdorktion::harness;
 
+TEST_CASE("Standalone output control mapping retains explicit bypass and endpoint semantics", "[output-section][harness]")
+{
+    OutputSettings settings;
+    for (const auto& control : outputSectionControls)
+    {
+        REQUIRE(setOutputControl(settings, control.id, control.defaultValue));
+        REQUIRE(getOutputControl(settings, control.id) == control.defaultValue);
+        REQUIRE_FALSE(setOutputControl(settings, control.id, std::numeric_limits<float>::quiet_NaN()));
+        REQUIRE(getOutputControl(settings, control.id) == control.defaultValue);
+    }
+    REQUIRE(setOutputControl(settings, "hpBypass", 0.f));
+    REQUIRE(setOutputControl(settings, "hpCutoffHz", 20.f));
+    REQUIRE_FALSE(settings.highPass.bypass);
+    REQUIRE(setOutputControl(settings, "lpBypass", 0.f));
+    REQUIRE(setOutputControl(settings, "lpCutoffHz", 20000.f));
+    REQUIRE_FALSE(settings.lowPass.bypass);
+    REQUIRE(setOutputControl(settings, "combDampingEnabled", 0.f));
+    REQUIRE_FALSE(settings.comb.dampingEnabled); // Retained historical setting; OutputSection always enables it for DSP.
+    for (const auto* id : {"hpBypass", "lpBypass", "combDampingEnabled", "combBypass", "dispersionBypass", "toneBypass", "hpResponse", "lpResponse"})
+        REQUIRE_FALSE(setOutputControl(settings, id, .5f));
+    REQUIRE_FALSE(setOutputControl(settings, "driver", 2.f));
+}
+
 TEST_CASE("Expanded output records reject flat controls mixed with nested module schemas", "[output-section][experiment][expanded][schema-strictness]")
 {
     ExperimentRecord record;record.version=15;record.targetId="output-section";

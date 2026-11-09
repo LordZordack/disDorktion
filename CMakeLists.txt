@@ -60,6 +60,7 @@ if(BUILD_TESTING)
         tests/GainTests.cpp
         tests/InputSectionTests.cpp
         tests/FullChainTests.cpp
+        tests/DriverRoutingTests.cpp
         tests/OutputSectionTests.cpp
         tests/OutputSectionQualificationTests.cpp
         tests/OutputBenchmarkTests.cpp
@@ -148,6 +149,8 @@ add_executable(disdorktion_reference_gain_benchmark
 )
 target_link_libraries(disdorktion_reference_gain_benchmark PRIVATE disdorktion_dsp)
 add_executable(disdorktion_gain_benchmark benchmarks/ReferenceGainBenchmark.cpp)
+add_executable(disdorktion_driver_calibration tools/DriverCalibrationMain.cpp)
+target_link_libraries(disdorktion_driver_calibration PRIVATE disdorktion_dsp)
 target_link_libraries(disdorktion_gain_benchmark PRIVATE disdorktion_dsp)
 target_compile_definitions(disdorktion_gain_benchmark PRIVATE DISDORKTION_PRODUCTION_GAIN_BENCHMARK=1)
 add_executable(disdorktion_input_benchmark benchmarks/ReferenceGainBenchmark.cpp)

@@ -30,8 +30,6 @@ void requireVisibleControls(disdorktion::PluginEditor& editor)
         if (const auto* knob = dynamic_cast<juce::Slider*>(control))
             REQUIRE(knob->getSliderStyle() == juce::Slider::RotaryHorizontalVerticalDrag);
     };
-    requireControl("referenceGain");
-    requireControl("referenceBypass");
     for (const auto& parameter : disdorktion::fullChainControls) requireControl(parameter.id);
 }
 }
@@ -75,14 +73,11 @@ TEST_CASE("Editor attachments synchronize sliders choices buttons and active res
     disdorktion::PluginEditor editor(processor);
     auto& state = processor.parameterState();
     auto* gain = dynamic_cast<juce::Slider*>(findControl(editor, "inputGainDb"));
-    auto* mute = dynamic_cast<juce::ToggleButton*>(findControl(editor, "outputMute"));
     auto* depth = dynamic_cast<juce::ComboBox*>(findControl(editor, "bitDepth"));
     auto* response = dynamic_cast<juce::ComboBox*>(findControl(editor, "hpResponse"));
-    REQUIRE(gain != nullptr); REQUIRE(mute != nullptr); REQUIRE(depth != nullptr); REQUIRE(response != nullptr);
+    REQUIRE(gain != nullptr); REQUIRE(depth != nullptr); REQUIRE(response != nullptr);
     gain->setValue(6.0, juce::sendNotificationSync);
     REQUIRE(state.getRawParameterValue("inputGainDb")->load() == Catch::Approx(6.0f));
-    mute->setToggleState(true, juce::sendNotificationSync);
-    REQUIRE(state.getRawParameterValue("outputMute")->load() == 1.0f);
     depth->setSelectedItemIndex(2, juce::sendNotificationSync);
     REQUIRE(state.getRawParameterValue("bitDepth")->load() == 2.0f);
     response->setSelectedItemIndex(1, juce::sendNotificationSync);
@@ -95,7 +90,6 @@ TEST_CASE("Editor attachments synchronize sliders choices buttons and active res
     REQUIRE(gain->getValue() == Catch::Approx(-12.0f));
     processor.setStateInformation(saved.getData(), static_cast<int>(saved.getSize()));
     REQUIRE(gain->getValue() == Catch::Approx(6.0f));
-    REQUIRE(mute->getToggleState());
     REQUIRE(depth->getSelectedItemIndex() == 2);
 
     disdorktion::PluginProcessor independent;
@@ -105,53 +99,6 @@ TEST_CASE("Editor attachments synchronize sliders choices buttons and active res
     REQUIRE(independentGain->getValue() == 0.0);
     gain->setValue(9.0, juce::sendNotificationSync);
     REQUIRE(independentGain->getValue() == 0.0);
-}
-
-TEST_CASE("Active editor follows every supported state mode and rejects malformed restore", "[adapter][editor][state]")
-{
-    juce::ScopedJuceInitialiser_GUI gui;
-    for (const auto version : {1, 2, 3, 4})
-        for (const bool legacy : {false, true})
-        {
-            if (version < 3 && !legacy) continue;
-            CAPTURE(version, legacy);
-            disdorktion::PluginProcessor processor;
-            disdorktion::PluginEditor editor(processor);
-            juce::MemoryBlock defaults;
-            processor.getStateInformation(defaults);
-            auto xml = juce::AudioProcessor::getXmlFromBinary(defaults.getData(), static_cast<int>(defaults.getSize()));
-            REQUIRE(xml != nullptr);
-            xml->setAttribute("version", juce::String(version));
-            xml->setAttribute("mode", legacy ? "legacyGain" : "fullChain");
-            xml->setAttribute("gain", "2");
-            xml->setAttribute("bypass", "1");
-            xml->setAttribute("inputGainDb", "6");
-            juce::MemoryBlock saved;
-            juce::AudioProcessor::copyXmlToBinary(*xml, saved);
-            processor.setStateInformation(saved.getData(), static_cast<int>(saved.getSize()));
-            auto* trim = dynamic_cast<juce::Slider*>(findControl(editor, "referenceGain"));
-            auto* bypass = dynamic_cast<juce::ToggleButton*>(findControl(editor, "referenceBypass"));
-            auto* input = dynamic_cast<juce::Slider*>(findControl(editor, "inputGainDb"));
-            REQUIRE(trim != nullptr); REQUIRE(bypass != nullptr); REQUIRE(input != nullptr);
-            REQUIRE(trim->getValue() == Catch::Approx(2.0));
-            REQUIRE(bypass->getToggleState());
-            REQUIRE(input->getValue() == Catch::Approx(version == 1 ? 0.0 : 6.0));
-            REQUIRE(processor.isLegacyMode() == legacy);
-
-            // Invalid trim rejects the complete transaction, including later valid controls.
-            xml->setAttribute("gain", "NaN");
-            xml->setAttribute("inputGainDb", "-12");
-            juce::AudioProcessor::copyXmlToBinary(*xml, saved);
-            processor.setStateInformation(saved.getData(), static_cast<int>(saved.getSize()));
-            REQUIRE(trim->getValue() == Catch::Approx(2.0));
-            REQUIRE(input->getValue() == Catch::Approx(version == 1 ? 0.0 : 6.0));
-            REQUIRE(processor.isLegacyMode() == legacy);
-            processor.setStateInformation(nullptr, 0);
-            const char malformed[] = "invalid state";
-            processor.setStateInformation(malformed, sizeof(malformed));
-            REQUIRE(trim->getValue() == Catch::Approx(2.0));
-            REQUIRE(input->getValue() == Catch::Approx(version == 1 ? 0.0 : 6.0));
-        }
 }
 
 TEST_CASE("Editor numeric entry preserves readable Hz dB and percent units", "[adapter][editor]")
@@ -195,7 +142,6 @@ TEST_CASE("Editor preset actions recall initialize and derive modified status on
         presets->setSelectedItemIndex(3, juce::sendNotificationSync);
         REQUIRE(processor.matchingFactoryPreset() == 3);
         REQUIRE(presets->getSelectedItemIndex() == 3);
-        REQUIRE_FALSE(processor.isLegacyMode());
         gain->setValue(6.0, juce::sendNotificationSync);
         REQUIRE(processor.matchingFactoryPreset() == -1);
         REQUIRE(static_cast<bool>(initialize->onClick));
@@ -218,4 +164,52 @@ TEST_CASE("Editor preset actions recall initialize and derive modified status on
     auto* presets = dynamic_cast<juce::ComboBox*>(findControl(reopened, "factoryPreset"));
     REQUIRE(presets != nullptr);
     REQUIRE(presets->getSelectedItemIndex() == 1);
+}
+
+TEST_CASE("Editor has no mute bypass or damping enable and displays Off endpoints", "[adapter][editor][issue38]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor; disdorktion::PluginEditor editor(processor);
+    for(const auto* id : {"inputMute","outputMute","inputBypass","chainBypass","referenceGain","referenceBypass","combDampingEnabled"})
+        REQUIRE(findControl(editor,id)==nullptr);
+    for(const auto* id : {"tanhDriveDb","folderDriveDb","hpCutoffHz","lpCutoffHz"})
+    {
+        auto* slider=dynamic_cast<juce::Slider*>(findControl(editor,id)); REQUIRE(slider);
+        const auto off=juce::String(id)=="lpCutoffHz" ? slider->getMaximum() : slider->getMinimum();
+        REQUIRE(slider->getTextFromValue(off)=="Off");
+        REQUIRE(slider->getValueFromText("Off")==off);
+    }
+    for(const auto* id : {"captureRateHz","hpCutoffHz","lpCutoffHz"})
+    {
+        auto* slider=dynamic_cast<juce::Slider*>(findControl(editor,id)); REQUIRE(slider);
+        const auto lo=slider->getMinimum(), hi=slider->getMaximum();
+        for(const double fraction : {0.25,0.5,0.75})
+            REQUIRE(slider->proportionOfLengthToValue(fraction)==Catch::Approx(lo*std::pow(hi/lo,fraction)).epsilon(2e-6));
+        REQUIRE(slider->getValueFromText("1234 Hz")==1234.0);
+    }
+    const auto input=editor.getLocalArea(findControl(editor,"inputGainDb"),findControl(editor,"inputGainDb")->getLocalBounds());
+    const auto driver=editor.getLocalArea(findControl(editor,"driver"),findControl(editor,"driver")->getLocalBounds());
+    REQUIRE(input.getY()==driver.getY()); REQUIRE(input.getX()<driver.getX());
+}
+
+TEST_CASE("Editor Waveshaper controls follow processing order and new controls accept numeric entry", "[adapter][editor][issue38]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor; disdorktion::PluginEditor editor(processor);
+    juce::Rectangle<int> previous;
+    for(const auto* id : {"tanhDriveDb","folderDriveDb","folderThreshold","waveshaperTrimDb","waveshaperMix"})
+    {
+        auto* control=findControl(editor,id); REQUIRE(control);
+        const auto bounds=editor.getLocalArea(control,control->getLocalBounds());
+        if(!previous.isEmpty()) REQUIRE((bounds.getY()>previous.getY() || (bounds.getY()==previous.getY() && bounds.getX()>previous.getX())));
+        previous=bounds;
+    }
+    struct Entry {const char* id; const char* text; double value;};
+    for(const auto& entry : {Entry{"driver","2.5 x",2.5},Entry{"waveshaperTrimDb","-3 dB",-3},Entry{"waveshaperMix","25 %",0.25}})
+    {
+        auto* slider=dynamic_cast<juce::Slider*>(findControl(editor,entry.id)); REQUIRE(slider);
+        REQUIRE(slider->getValueFromText(entry.text)==entry.value);
+        slider->setValue(slider->getValueFromText(entry.text),juce::sendNotificationSync);
+        REQUIRE(processor.parameterState().getRawParameterValue(entry.id)->load()==Catch::Approx(entry.value));
+    }
 }

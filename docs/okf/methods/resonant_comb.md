@@ -2,10 +2,17 @@
 type: Method
 title: "Resonant comb filtering"
 description: "Reviewed isolated feedforward and damped feedback comb design and acceptance limits for issue 17."
-timestamp: 2026-11-01T00:00:00Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["comb", "delay", "feedback", "dsp"]
 resource: "https://www.dsprelated.com/freebooks/pasp/Comb_Filters.html"
 ---
+
+## Production usage update (issue #38)
+
+Production issue #38 always enables comb damping, exposes no damping/bypass button, and clears history after its mix fade reaches zero before suspending wet work. Isolated harness settings below retain their own controls.
+See the [current contract and evidence](../notes/issue38_validation.md).
+
+## Module design and earlier evidence
 
 # Resonant comb filtering
 

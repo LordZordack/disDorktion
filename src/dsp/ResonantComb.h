@@ -26,7 +26,7 @@ inline bool isValidResonantCombSettings(const ResonantCombSettings& s) noexcept
 }
 
 // Exclusive processing ownership is required. Only preparation allocates.
-// Histories remain warm during dry mix and bypass; reset snaps retained targets.
+// Zero mix clears and suspends histories; standalone bypass keeps them warm.
 class ResonantComb
 {
 public:
@@ -90,13 +90,26 @@ public:
             for (std::size_t n = 0; n < chunk.getNumSamples(); ++n)
             {
                 const double d = delay.getNextValue();
+                const double g = feedback.getNextValue(), ff = feedforward.getNextValue();
+                const double a = damping.getNextValue();
+                const double wetMix = mix.getNextValue();
+                const double wetWeight = wetMix * (1. - bypass.getNextValue());
+                if (wetMix == 0.)
+                {
+                    if (!wetIdle)
+                    {
+                        for (auto& channel : history) std::fill(channel.begin(), channel.end(), 0.);
+                        lowPass.fill(0.);
+                        write = 0;
+                        wetIdle = true;
+                    }
+                    continue;
+                }
+                wetIdle = false;
                 const auto integer = static_cast<std::size_t>(d);
                 const double fraction = d - static_cast<double>(integer);
                 const auto newer = (write + length - integer) % length;
                 const auto older = newer == 0 ? length - 1 : newer - 1;
-                const double g = feedback.getNextValue(), ff = feedforward.getNextValue();
-                const double a = damping.getNextValue();
-                const double wetWeight = mix.getNextValue() * (1. - bypass.getNextValue());
                 for (std::size_t c = 0; c < chunk.getNumChannels(); ++c)
                 {
                     auto* samples = chunk.getChannelPointer(c);
@@ -157,6 +170,6 @@ private:
     Smoother delay {240.}, feedback {.7}, feedforward {0.}, damping {0.}, mix {.5}, bypass {0.};
     double sampleRate = 48000.;
     std::size_t length = 0, write = 0;
-    bool prepared = false;
+    bool prepared = false, wetIdle = false;
 };
 }

@@ -53,10 +53,22 @@ public:
             slider.setDoubleClickReturnValue(true, parameter->convertFrom0to1(parameter->getDefaultValue()));
             addAndMakeVisible(slider);
             sliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(state, id, slider);
-            // This affects only mouse travel in the editor; the host range stays linear.
             if (parameterId.endsWith("Hz"))
             {
-                slider.setSkewFactorFromMidPoint(std::sqrt(slider.getMinimum() * slider.getMaximum()));
+                // Mouse movement is logarithmic; host plain-value conversion
+                // stays linear so repeated state restores do not accumulate
+                // float log/pow roundoff. Attachments exchange plain values.
+                slider.setNormalisableRange(juce::NormalisableRange<double>(slider.getMinimum(), slider.getMaximum(),
+                    [](double lo, double hi, double t)
+                    {
+                        if (t <= 0) return lo;
+                        if (t >= 1) return hi;
+                        return lo * std::pow(hi / lo, t);
+                    },
+                    [](double lo, double hi, double value)
+                    {
+                        return std::log(value / lo) / std::log(hi / lo);
+                    }));
                 slider.textFromValueFunction = [](double value) { return juce::String(value, 0) + " Hz"; };
                 slider.valueFromTextFunction = [](const juce::String& value) { return value.getDoubleValue(); };
             }
@@ -65,7 +77,7 @@ public:
                 slider.textFromValueFunction = [](double value) { return juce::String(value, 1) + " dB"; };
                 slider.valueFromTextFunction = [](const juce::String& value) { return value.getDoubleValue(); };
             }
-            else if (parameterId == "referenceGain")
+            else if (parameterId == "driver")
             {
                 slider.textFromValueFunction = [](double value) { return juce::String(value, 2) + " x"; };
                 slider.valueFromTextFunction = [](const juce::String& value) { return value.getDoubleValue(); };
@@ -85,6 +97,24 @@ public:
                 slider.textFromValueFunction = [](double value) { return juce::String(value * 100.0, 1) + " %"; };
                 slider.valueFromTextFunction = [](const juce::String& value) { return value.getDoubleValue() / 100.0; };
             }
+            const auto minimum = slider.getMinimum(), maximum = slider.getMaximum();
+            if (parameterId == "tanhDriveDb" || parameterId == "folderDriveDb" || parameterId == "hpCutoffHz" || parameterId == "lpCutoffHz")
+            {
+                const auto previousFormatter = slider.textFromValueFunction;
+                slider.textFromValueFunction = [parameterId, minimum, maximum, previousFormatter](double value)
+                {
+                    if ((parameterId == "lpCutoffHz" && value >= maximum) || (parameterId != "lpCutoffHz" && value <= minimum))
+                        return juce::String("Off");
+                    return previousFormatter(value);
+                };
+                slider.valueFromTextFunction = [parameterId, minimum, maximum](const juce::String& value)
+                {
+                    if (value.trim().equalsIgnoreCase("Off")) return parameterId == "lpCutoffHz" ? maximum : minimum;
+                    return value.getDoubleValue();
+                };
+            }
+            if (parameterId == "driver")
+                slider.setTooltip("Drive tanh and folding from 1x to 4x, with gentle fixed compensation. Dry and crusher levels stay unchanged; use Waveshaper Trim for manual level matching.");
             slider.updateText();
         }
     }
@@ -158,8 +188,7 @@ PluginEditor::PluginEditor(PluginProcessor& owner) : AudioProcessorEditor(owner)
     title.setFont(juce::Font(24.0f, juce::Font::bold));
     subtitle.setText("CRUSH / FOLD / RESONATE / DISPERSE", juce::dontSendNotification);
     subtitle.setFont(juce::Font(11.0f));
-    compatibilityStatus.setFont(juce::Font(11.0f));
-    for (auto* label : {&title, &subtitle, &presetStatus, &compatibilityStatus})
+    for (auto* label : {&title, &subtitle, &presetStatus})
     {
         label->setColour(juce::Label::textColourId, text);
         addAndMakeVisible(*label);
@@ -178,48 +207,33 @@ PluginEditor::PluginEditor(PluginProcessor& owner) : AudioProcessorEditor(owner)
     addAndMakeVisible(initialize);
     addAndMakeVisible(clearOverloads);
 
-    addControl(0, "inputGainDb", "Input gain");
-    addControl(0, "inputMute", "Mute input");
-    addControl(0, "inputBypass", "Bypass input gain");
     addControl(0, "bitDepth", "Bit depth");
     addControl(0, "captureRateHz", "Capture rate");
-    addControl(0, "crusherMix", "Crush mix");
+    addControl(0, "crusherMix", "Input mix");
     addControl(0, "crush", "Crush");
     addControl(0, "shape", "Shape");
     addControl(0, "jitter", "Jitter");
-    addControl(0, "crusherBypass", "Bypass crusher");
     addControl(1, "tanhDriveDb", "Tanh drive");
-    addControl(1, "tanhOutputDb", "Tanh trim");
-    addControl(1, "tanhBypass", "Bypass tanh");
     addControl(1, "folderDriveDb", "Fold drive");
-    addControl(1, "folderOutputDb", "Fold trim");
     addControl(1, "folderThreshold", "Threshold");
-    addControl(1, "folderBypass", "Bypass folder");
+    addControl(1, "waveshaperTrimDb", "Waveshaper trim");
+    addControl(1, "waveshaperMix", "Waveshaper mix");
     addControl(2, "combDelayMs", "Comb delay");
     addControl(2, "combFeedforward", "Feedforward");
     addControl(2, "combFeedback", "Feedback");
     addControl(2, "combDampingHz", "Comb damping");
     addControl(2, "combMix", "Comb mix");
-    addControl(2, "combDampingEnabled", "Enable comb damping");
-    addControl(2, "combBypass", "Bypass comb");
     addControl(2, "dispersionFrequencyHz", "Dispersion frequency");
     addControl(2, "dispersionMix", "Dispersion mix");
-    addControl(2, "dispersionBypass", "Bypass dispersion");
     addControl(2, "toneDb", "Tone");
-    addControl(2, "toneBypass", "Bypass tone");
     addControl(2, "hpCutoffHz", "High-pass");
     addControl(2, "hpResponse", "High-pass response");
-    addControl(2, "hpBypass", "Bypass high-pass");
     addControl(2, "lpCutoffHz", "Low-pass");
     addControl(2, "lpResponse", "Low-pass response");
-    addControl(2, "lpBypass", "Bypass low-pass");
+    addControl(3, "inputGainDb", "Input gain");
+    addControl(3, "driver", "Driver");
     addControl(3, "globalMix", "Dry/wet");
     addControl(3, "outputGainDb", "Final gain");
-    addControl(3, "outputMute", "Mute output");
-    addControl(3, "outputBypass", "Bypass final gain");
-    addControl(3, "chainBypass", "Bypass chain");
-    addControl(4, "referenceGain", "Legacy trim");
-    addControl(4, "referenceBypass", "Bypass trim");
     inputMeter = std::make_unique<PeakMeter>("Raw input");
     outputMeter = std::make_unique<PeakMeter>("Final output");
     addAndMakeVisible(*inputMeter);
@@ -247,7 +261,7 @@ void PluginEditor::addControl(int section, const char* id, const char* caption)
 void PluginEditor::paint(juce::Graphics& g)
 {
     g.fillAll(background);
-    const char* names[] = {"01  INPUT", "02  MIDDLE", "03  OUTPUT", "GLOBAL", "COMPATIBILITY"};
+    const char* names[] = {"01  INPUT", "02  WAVESHAPER", "03  OUTPUT", "GLOBAL"};
     for (std::size_t i = 0; i < sections.size(); ++i)
     {
         g.setColour(panel);
@@ -275,8 +289,6 @@ void PluginEditor::resized()
     outputMeter->setBounds(meterArea.reduced(7, 4));
     area.removeFromBottom(8);
     auto bottom = area.removeFromBottom(112);
-    sections[4] = bottom.removeFromRight(juce::jmax(240, bottom.getWidth() / 3));
-    bottom.removeFromRight(8);
     sections[3] = bottom;
     area.removeFromBottom(8);
     // Output carries five effects; give it half the available width.
@@ -326,12 +338,7 @@ void PluginEditor::resized()
     global.removeFromLeft(8);
     for (auto& control : controls[3])
         if (control->isSwitch()) control->setBounds(global.removeFromTop(23));
-    compatibilityStatus.setBounds(sections[4].getRight() - 100, sections[4].getY() + 7, 92, 21);
-    auto compatibility = sections[4].reduced(8);
-    compatibility.removeFromTop(22);
-    controls[4][0]->setBounds(compatibility.removeFromLeft(88));
-    compatibility.removeFromLeft(8);
-    controls[4][1]->setBounds(compatibility.withHeight(23));
+
 }
 
 void PluginEditor::refreshPresetAndMode()
@@ -339,11 +346,7 @@ void PluginEditor::refreshPresetAndMode()
     const auto matched = processor.matchingFactoryPreset();
     presets.setSelectedId(matched + 1, juce::dontSendNotification);
     presetStatus.setText(matched < 0 ? "Modified" : "Factory preset", juce::dontSendNotification);
-    const auto legacy = processor.isLegacyMode();
-    compatibilityStatus.setText(legacy ? "Legacy gain" : "Full chain", juce::dontSendNotification);
-    compatibilityStatus.setTooltip(legacy
-        ? "Effects are inactive. Select a factory preset or Initialize to enter the full chain."
-        : "Legacy trim is applied before the dry/wet split.");
+
 }
 
 void PluginEditor::timerCallback()

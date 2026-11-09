@@ -2,10 +2,21 @@
 type: Note
 title: "Input section qualification"
 description: "Recorded correctness, realtime, interaction, CPU and listening evidence for issue 10, with unresolved gates kept explicit."
-timestamp: 2026-10-13T00:00:00Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["input-section", "validation", "performance", "audition"]
 resource: "https://github.com/LordZordack/disDorktion/issues/10"
 ---
+
+## Historical evidence scope after issue #38
+
+The results below describe the recorded pre-issue-38 implementation and test
+conditions. They do not qualify the revised Driver routing, section mixes,
+nonlinear/filter Off endpoints, inactive history handling, defaults or v5-only
+plugin state. Standalone module/harness controls may retain their own bypasses.
+See the [current contract and focused evidence](./issue38_validation.md) for
+what has actually been checked; no new CPU or listening result is inferred.
+
+## Earlier validation record
 
 # Input section qualification
 

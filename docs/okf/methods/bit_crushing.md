@@ -2,10 +2,17 @@
 type: Method
 title: Bit crushing
 description: Signed PCM amplitude quantization and sample holding for bit-crushing effects.
-timestamp: 2026-10-10T00:00:00Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["audio-dsp", "quantization", "bit-crushing"]
 resource: https://github.com/LordZordack/DisDorktion/issues/5
 ---
+
+## Production usage update (issue #38)
+
+Production issue #38 names the complete crusher/sampler blend Input Mix, outside Input Gain. Capture rate uses logarithmic movement with numeric entry. Settled zero mix resets/suspends wet processing; isolated harness controls below remain separate.
+See the [current contract and evidence](../notes/issue38_validation.md).
+
+## Module design and earlier evidence
 
 # Bit crushing
 

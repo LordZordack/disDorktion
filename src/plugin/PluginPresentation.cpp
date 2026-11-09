@@ -28,37 +28,26 @@ bool PluginProcessor::loadFactoryPreset(int index)
         publishControl(id, value);
         parameter->endChangeGesture();
     };
-    gesture("referenceGain", 1);
-    gesture("referenceBypass", 0);
     for (const auto& control : fullChainControls)
     {
-        if (index != 0 && std::string_view(control.id) == "outputMute") continue;
         gesture(control.id, getFullChainControl(preset.settings, control.id));
     }
-    // Only the audio/lifecycle owner touches legacyMode and DSP histories.
-    // This message-thread action never takes the callback lock or resets DSP.
-    requestedLegacyMode.store(false, std::memory_order_release);
-    tailSeconds.store(fullTailSeconds.load(std::memory_order_relaxed), std::memory_order_relaxed);
-    setLatencySamples(fullLatency.load(std::memory_order_relaxed));
     if (index == 0) { readMeters(); clearMeterOverloads(); }
     return true;
 }
 
 int PluginProcessor::matchingFactoryPreset() const
 {
-    if (isLegacyMode()) return -1;
     const auto matches = [this](const char* id, float plain)
     {
         const auto* parameter = parameters.getParameter(id);
         return std::abs(parameter->getValue() - parameter->convertTo0to1(plain)) <= 2.0e-6f;
     };
-    if (!matches("referenceGain", 1) || !matches("referenceBypass", 0)) return -1;
     for (std::size_t preset = 0; preset < factoryPresets.size(); ++preset)
     {
         bool match = true;
         for (const auto& control : fullChainControls)
         {
-            if (std::string_view(control.id) == "outputMute") continue;
             const auto value = getFullChainControl(factoryPresets[preset].settings, control.id);
             if (!matches(control.id, hostValue(control, value))) { match = false; break; }
         }
@@ -94,13 +83,4 @@ void PluginProcessor::accumulateMeters(float input, float output) noexcept
     if (output > 1) outputClip.store(true, std::memory_order_relaxed);
 }
 
-void PluginProcessor::updateProcessingMode() noexcept
-{
-    const auto requested = requestedLegacyMode.load(std::memory_order_acquire);
-    if (legacyMode == requested) return;
-    legacyMode = requested;
-    // Controls have already been applied before resetting the inactive path.
-    chain.reset(); inputGain.reset(); outputGain.reset();
-    bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
-}
 }

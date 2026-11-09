@@ -2,10 +2,23 @@
 type: Method
 title: "Reusable input and output gain"
 description: "Reviewed production gain design, parameter semantics, transition rules, and acceptance limits for DisDorktion M1."
-timestamp: 2026-10-10T00:00:00Z
+timestamp: 2026-11-08T00:00:00Z
 tags: ["gain", "dsp", "smoothing", "real-time-audio"]
 resource: "https://github.com/LordZordack/disDorktion/issues/4"
 ---
+
+## Production usage update (issue #38)
+
+Production Input Gain precedes both global branches; Final Gain follows global
+mixing. Driver acts only immediately before tanh/fold, after the crusher and
+inside the nonlinear wet branch. Fixed calibrated compensation follows the
+nonlinear output before shared trim and section mixing. It leaves global and
+Waveshaper dry unchanged and uses no live level tracking or AGC. No gain
+mute/bypass controls are exposed in the plugin. The standalone Gain API below
+retains its own controls. See the [full-chain contract](./full_chain.md) and
+[Driver adjustment status](../notes/driver_adjustment_validation.md).
+
+## Module design and earlier evidence
 
 # Reusable input and output gain
 

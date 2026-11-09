@@ -32,7 +32,7 @@ void AudioDeviceController::configure(const ExperimentRecord& record)
         processor.setMiddleSettings(settings.middle, settings.bypass);
     else if ((settings.version == 10 || settings.version == 15))
         processor.setOutputSettings(settings.output, settings.bypass);
-    else if ((settings.version == 11 || settings.version == 16))
+    else if ((settings.version == 11 || settings.version == 16 || settings.version == 17))
         processor.setFullChainSettings(settings.fullChain);
     else if (settings.version == 12)
         processor.setResonantCombSettings(settings.comb);

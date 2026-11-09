@@ -4,6 +4,35 @@
 #include <limits>
 
 using namespace disdorktion;
+TEST_CASE("Driver automation cancels through aligned neutral global branches and retains input gain", "[full-chain][driver]")
+{
+    for (unsigned channels : {1u,2u})
+    for (float globalMix : {0.f,.5f,1.f})
+    {
+        FullChain chain;
+        FullChainSettings s; s.mix=globalMix; s.input.gain.gainDb=6; s.driver=1;
+        s.input.crusher.mix=0; s.middle.mix=0;
+        REQUIRE(chain.setParameters(s)); REQUIRE(chain.prepare({48000,31,channels}));
+        const auto latency=chain.getLatencySamples();
+        juce::AudioBuffer<float> audio(static_cast<int>(channels),4096);
+        for(int c=0;c<audio.getNumChannels();++c)
+            for(int n=0;n<audio.getNumSamples();++n) audio.setSample(c,n,.1f*(c+1));
+        auto block=juce::dsp::AudioBlock<float>(audio);
+        for(std::size_t n=0;n<4096;)
+        {
+            s.driver=(n/37)%2 ? 4.f : 1.f;
+            REQUIRE(chain.setParameters(s));
+            const auto count=std::min<std::size_t>(37,4096-n);
+            REQUIRE(chain.process(block.getSubBlock(n,count))); n+=count;
+        }
+        for(int c=0;c<audio.getNumChannels();++c)
+            for(int n=0;n<audio.getNumSamples();++n)
+                REQUIRE(audio.getSample(c,n)==Catch::Approx(n<static_cast<int>(latency)?0.f:.1f*(c+1)*std::pow(10.f,.3f)).margin(1e-7));
+        s.driver=.99f; REQUIRE_FALSE(chain.setParameters(s));
+        s.driver=4.01f; REQUIRE_FALSE(chain.setParameters(s));
+        s.driver=std::numeric_limits<float>::quiet_NaN(); REQUIRE_FALSE(chain.setParameters(s));
+    }
+}
 namespace
 {
 void source(juce::AudioBuffer<float>& b)
@@ -13,7 +42,7 @@ void source(juce::AudioBuffer<float>& b)
             b.setSample(c,n,static_cast<float>(.2*std::sin(.071*n+.4*c)));
 }
 }
-TEST_CASE("Full chain dry is delayed before drive and final gain affects both branches", "[full-chain]")
+TEST_CASE("Full chain dry includes input gain and final gain affects both branches", "[full-chain]")
 {
     for (double rate : {8000.,44100.,48000.,96000.,192000.,384000.})
         for (unsigned channels : {1u,2u})
@@ -23,9 +52,9 @@ TEST_CASE("Full chain dry is delayed before drive and final gain affects both br
             const auto delay=chain.getLatencySamples(); REQUIRE(delay>0);
             juce::AudioBuffer<float> audio(static_cast<int>(channels),1031), original(static_cast<int>(channels),1031);
             source(audio); original.makeCopyOf(audio); REQUIRE(chain.process(juce::dsp::AudioBlock<float>(audio)));
-            const auto g=std::pow(10.,-6./20.);
+            const auto g=std::pow(10.,18./20.);
             for(int c=0;c<audio.getNumChannels();++c) for(int n=0;n<audio.getNumSamples();++n)
-                REQUIRE(audio.getSample(c,n)==Catch::Approx(n<static_cast<int>(delay)?0.:original.getSample(c,n-static_cast<int>(delay))*g).margin(2e-8));
+                REQUIRE(audio.getSample(c,n)==Catch::Approx(n<static_cast<int>(delay)?0.:original.getSample(c,n-static_cast<int>(delay))*g).margin(2e-7));
             REQUIRE(chain.getPeaks().postInputGain>1.f);
         }
 }
@@ -104,8 +133,8 @@ TEST_CASE("Full chain active output automation matches independent modules in ac
     for(auto* f:{&comb,&reversedComb}) { REQUIRE(f->setParameters(s.output.comb)); REQUIRE(f->prepare(spec)); }
     for(auto* f:{&dispersion,&reversedDispersion}) { REQUIRE(f->setParameters(s.output.dispersion)); REQUIRE(f->prepare(spec)); }
     for(auto* f:{&tone,&reversedTone}) { REQUIRE(f->setParameters(s.output.tone)); REQUIRE(f->prepare(spec)); }
-    for(auto* f:{&hp,&reversedHp}) REQUIRE(f->prepare(spec));
-    for(auto* f:{&lp,&reversedLp}) REQUIRE(f->prepare(spec));
+    for(auto* f:{&hp,&reversedHp}) { REQUIRE(f->setParameters(s.output.highPass)); REQUIRE(f->prepare(spec)); }
+    for(auto* f:{&lp,&reversedLp}) { REQUIRE(f->setParameters(s.output.lowPass)); REQUIRE(f->prepare(spec)); }
     double error=0.,discrimination=0.; juce::AudioBuffer<float> a(2,127);
     for(unsigned event=0;event<64;++event)
     {
@@ -158,14 +187,15 @@ TEST_CASE("Full chain rejects settings and preparation transactionally and reset
 }
 
 #include "dsp/FullChainControls.h"
-TEST_CASE("Expanded output controls append without changing existing defaults", "[full-chain][expanded-output]")
+TEST_CASE("Simplified controls expose section mixes and compensated Driver", "[full-chain][expanded-output]")
 {
     FullChainSettings settings;
-    REQUIRE(fullChainControls.size() == 40);
-    REQUIRE(std::string_view(fullChainControls[27].id) == "chainBypass");
-    REQUIRE(std::string_view(fullChainControls[28].id) == "combDelayMs");
-    for (const auto* id : {"combBypass", "dispersionBypass", "toneBypass"})
-        REQUIRE(getFullChainControl(settings, id) == 1.f);
+    REQUIRE(fullChainControls.size() == 27);
+    REQUIRE(getFullChainControl(settings,"driver") == 1.f);
+    REQUIRE(getFullChainControl(settings,"combMix") == 0.f);
+    REQUIRE(getFullChainControl(settings,"dispersionMix") == 0.f);
+    for (const auto& control : fullChainControls)
+        REQUIRE(getFullChainControl(settings,control.id) == control.defaultValue);
     REQUIRE(setFullChainControl(settings, "combFeedback", -.95f));
     REQUIRE(getFullChainControl(settings, "combFeedback") == -.95f);
     REQUIRE_FALSE(setFullChainControl(settings, "combFeedback", 1.f));

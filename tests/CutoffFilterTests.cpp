@@ -176,7 +176,7 @@ TEST_CASE("Low pass impulse and warped response match independent biquads", "[cu
 TEST_CASE("Both cutoff modules preserve contract and clamp retained requests", "[cutoff-filter]") { contractCheck<HighPass>(); contractCheck<LowPass>(); }
 TEST_CASE("All response modes tolerate rapid cutoff mode and bypass changes", "[cutoff-filter]") { automationCheck<HighPass>(); automationCheck<LowPass>(); }
 
-TEST_CASE("Cutoff bypass is exact and preserves warm wet histories", "[cutoff-filter]")
+TEST_CASE("Cutoff Off is exact and resumes with fresh wet histories", "[cutoff-filter]")
 {
     for(bool hp:{false,true})
     {
@@ -190,6 +190,7 @@ TEST_CASE("Cutoff bypass is exact and preserves warm wet histories", "[cutoff-fi
             REQUIRE(dsp.process(juce::dsp::AudioBlock<float>(audio))); REQUIRE(wet.process(juce::dsp::AudioBlock<float>(reference)));
             for(int n=0;n<960;++n) REQUIRE(audio.getSample(0,n)==dry.getSample(0,n));
             REQUIRE(dsp.setParameters({1000,false,FilterResponse::chebyshev1}));
+            wet.reset();
             audio=dry; reference=dry; REQUIRE(dsp.process(juce::dsp::AudioBlock<float>(audio))); REQUIRE(wet.process(juce::dsp::AudioBlock<float>(reference)));
             for(int n=480;n<960;++n) REQUIRE(audio.getSample(0,n)==reference.getSample(0,n));
         };
@@ -271,4 +272,22 @@ TEST_CASE("Cutoff smoothing lasts ten milliseconds and unchanged targets do not 
         }
     };
     check.operator()<HighPass>(true);check.operator()<LowPass>(false);
+}
+
+TEST_CASE("Cutoff Off discards dry-only excitation before resuming", "[cutoff-filter][inactive]")
+{
+    auto check=[]<class Filter>()
+    {
+        Filter filter; CutoffSettings s {20,true,FilterResponse::butterworth};
+        REQUIRE(filter.setParameters(s)); REQUIRE(filter.prepare({48000,17,2}));
+        juce::AudioBuffer<float> audio(2,600);
+        for(int c=0;c<2;++c) for(int n=0;n<600;++n) audio.setSample(c,n,.5f);
+        REQUIRE(filter.process(juce::dsp::AudioBlock<float>(audio)));
+        for(int c=0;c<2;++c) for(int n=0;n<600;++n) REQUIRE(audio.getSample(c,n)==.5f);
+        s.bypass=false; REQUIRE(filter.setParameters(s)); audio.clear();
+        REQUIRE(filter.process(juce::dsp::AudioBlock<float>(audio)));
+        REQUIRE(audio.getMagnitude(0,600)==0);
+        REQUIRE(filter.getLatencySamples()==0);
+    };
+    check.operator()<CutoffFilter<true>>(); check.operator()<CutoffFilter<false>>();
 }

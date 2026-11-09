@@ -126,7 +126,7 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
         settingsReady = engine.setMiddleSettings(record.middle, record.bypass);
     else if ((record.version == 10 || record.version == 15))
         settingsReady = engine.setOutputSettings(record.output, record.bypass);
-    else if ((record.version == 11 || record.version == 16))
+    else if ((record.version == 11 || record.version == 16 || record.version == 17))
         settingsReady = engine.setFullChainSettings(record.fullChain);
     if (record.version == 13) settingsReady = engine.setFrequencyDispersionSettings(record.dispersion);
     if (record.version == 14) settingsReady = engine.setToneSettings(record.tone);
@@ -183,15 +183,15 @@ RenderResult renderExperiment(const ExperimentRecord& record, const juce::File& 
     object->setProperty("version", 1); object->setProperty("samples", static_cast<juce::int64>(result.samples));
     object->setProperty("inputPeak", result.inputPeak); object->setProperty("inputRms", result.inputRms);
     object->setProperty("outputPeak", result.outputPeak); object->setProperty("outputRms", result.outputRms);
-    if (record.version == 8 || (record.version == 11 || record.version == 16)) object->setProperty("postGainPeak", result.postGainPeak);
-    if ((record.version == 11 || record.version == 16))
+    if (record.version == 8 || (record.version == 11 || record.version == 16 || record.version == 17)) object->setProperty("postGainPeak", result.postGainPeak);
+    if ((record.version == 11 || record.version == 16 || record.version == 17))
     {
         object->setProperty("postHighPassPeak",postHighPassPeak);
         object->setProperty("wetPeak",wetPeak);
     }
     object->setProperty("overloaded", result.overloaded); object->setProperty("latencySamples", static_cast<int>(result.latencySamples));
     object->setProperty("experiment", record.toJson());
-    if (record.version == 9 || (record.version == 11 || record.version == 16))
+    if (record.version == 9 || (record.version == 11 || record.version == 16 || record.version == 17))
     {
         object->setProperty("renderPolicy", "fixed-duration-uncompensated");
         object->setProperty("tailFlushed", false);
