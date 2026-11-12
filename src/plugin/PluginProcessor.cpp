@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "FactoryPresets.h"
 #include <charconv>
 #include <limits>
 #include <string_view>
@@ -16,48 +17,13 @@ float decodeControl(const FullChainControl& control, float value) noexcept
         return std::numeric_limits<float>::quiet_NaN();
     return static_cast<float>(bitCrusherDepths[static_cast<std::size_t>(value)]);
 }
-void attribute(juce::XmlElement& xml, const char* id, float value)
-{
-    char text[64];
-    const auto result = std::to_chars(text, text + sizeof(text), value, std::chars_format::general,
-                                     std::numeric_limits<float>::max_digits10);
-    xml.setAttribute(id, juce::String::fromUTF8(text, static_cast<int>(result.ptr - text)));
-}
-bool read(const juce::XmlElement& xml, const char* id, float minimum, float maximum, bool boolean, bool discrete, float& value)
-{
-    if (!xml.hasAttribute(id)) return false;
-    const auto text = xml.getStringAttribute(id).toStdString();
-    if (boolean)
-    {
-        if (text != "0" && text != "1") return false;
-        value = text == "1" ? 1.0f : 0.0f;
-        return true;
-    }
-    // Validate source precision before float conversion: e.g. 1.0000000001
-    // must not round into an accepted [0,1] endpoint.
-    // Metadata bounds are floats; compare decimal source bounds in their
-    // shortest roundtrippable form so the documented 0.05 endpoint remains
-    // legal without allowing a source just outside it to round inward.
-    const auto decimalBound = [](float bound)
-    {
-        char text[64];
-        const auto written = std::to_chars(text, text + sizeof(text), bound);
-        double result = 0;
-        std::from_chars(text, written.ptr, result);
-        return result;
-    };
-    double source = 0;
-    const auto parsed = std::from_chars(text.data(), text.data() + text.size(), source);
-    if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() || !std::isfinite(source)
-        || source < decimalBound(minimum) || source > decimalBound(maximum) || (discrete && source != std::floor(source))) return false;
-    const auto narrowed = std::from_chars(text.data(), text.data() + text.size(), value);
-    return narrowed.ec == std::errc{} && narrowed.ptr == text.data() + text.size() && std::isfinite(value);
-}
+
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::makeParameters()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout result;
+    const auto defaults = pluginDefaultSettings();
     for (const auto& control : fullChainControls)
     {
         const juce::ParameterID id {control.id, 1};
@@ -88,7 +54,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::makeParamet
                     if (text.trim().equalsIgnoreCase("Off")) return name == "lpCutoffHz" ? maximum : minimum;
                     return text.getFloatValue();
                 });
-            result.add(std::make_unique<juce::AudioParameterFloat>(id, control.name, range, control.defaultValue, attributes));
+            result.add(std::make_unique<juce::AudioParameterFloat>(id, control.name, range, getFullChainControl(defaults, control.id), attributes));
         }
     }
     return result;
@@ -101,6 +67,7 @@ PluginProcessor::PluginProcessor()
 {
     for (std::size_t i = 0; i < fullChainControls.size(); ++i)
         chainControls[i] = parameters.getRawParameterValue(fullChainControls[i].id);
+    associatePreset(PresetType::factory, factoryPresets[0].name, {}, 0);
 }
 
 void PluginProcessor::prepareToPlay(double sampleRate, int maximumBlockSize)
@@ -202,12 +169,10 @@ void PluginProcessor::render(juce::AudioBuffer<float>& buffer, bool hostBypassed
 juce::AudioProcessorEditor* PluginProcessor::createEditor() { return new PluginEditor(*this); }
 void PluginProcessor::getStateInformation(juce::MemoryBlock& destination)
 {
-    const juce::ScopedLock lock(getCallbackLock());
-    juce::XmlElement state("DisDorktionState");
-    state.setAttribute("version", "5");
-    for (std::size_t i = 0; i < fullChainControls.size(); ++i)
-        attribute(state, fullChainControls[i].id, decodeControl(fullChainControls[i], chainControls[i]->load(std::memory_order_relaxed)));
-    copyXmlToBinary(state, destination);
+    const juce::ScopedLock lock(presetIdentityLock);
+    auto state = PresetManager::encode(capturePresetValues());
+    writePresetIdentity(*state);
+    copyXmlToBinary(*state, destination);
 }
 void PluginProcessor::publishControl(const char* id, float value)
 {
@@ -221,20 +186,15 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     if (data == nullptr || sizeInBytes <= 0) return;
     const auto xml = getXmlFromBinary(data, sizeInBytes);
-    if (!xml || !xml->hasTagName("DisDorktionState")) return;
-    if (xml->getStringAttribute("version") != "5") return;
-    FullChainSettings settings;
-    std::array<float, fullChainControls.size()> values {};
-    for (std::size_t i = 0; i < fullChainControls.size(); ++i)
+    if (!xml) return;
+    PresetValues values;
+    if (PresetManager::decode(*xml, values).failed()) return;
     {
-        const auto& control = fullChainControls[i];
-        if (!read(*xml, control.id, control.minimum, control.maximum,
-                  control.discrete && control.minimum == 0 && control.maximum == 1, control.discrete, values[i])) return;
-        if (!setFullChainControl(settings, control.id, values[i])) return;
+        const juce::ScopedLock identityLock(presetIdentityLock);
+        publishPresetValues(values, false);
+        // Invalid/absent metadata explicitly detaches any previous user target.
+        restorePresetIdentity(*xml);
     }
-    if (!isValidFullChainSettings(settings)) return;
-    // Validate the complete transaction before notifying host/UI listeners.
-    for (std::size_t i = 0; i < fullChainControls.size(); ++i) publishControl(fullChainControls[i].id, values[i]);
     const juce::ScopedLock lock(getCallbackLock());
     applyControls();
     chain.reset();

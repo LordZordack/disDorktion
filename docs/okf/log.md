@@ -174,3 +174,9 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-11-09T02:40:20Z: Updated nonlinear-wet Driver routing and fixed calibration design; preserved issue-38 validation as historical and added adjustment verification status.
 
 - 2026-11-09T12:26:29Z: Implemented Waveshaper-only Driver with fixed calibrated compensation; Release build, 315 CTest checks (one timeout passed rerun), 84 Python tests and exact calibration reproduction verified. Listening/DAW and reference CPU qualification remain pending.
+
+- 2026-11-12T13:44:47Z: Documented issue 43 factory/user preset workflow, plugin-only drive defaults and pending validation evidence.
+
+- 2026-11-12T13:55:47Z: Recorded issue 43 pre-final-fix Debug and controlled editor evidence; native UI/DAW and final backend verification remain pending.
+
+- 2026-11-12T14:03:45Z: Finalized issue 43 preset verification: Debug adapter 40/40 and Release 330/330 passed; native UI/DAW acceptance remains pending.

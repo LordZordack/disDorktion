@@ -1,6 +1,7 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "dsp/FullChainControls.h"
+#include "PresetManager.h"
 #include <atomic>
 #include <array>
 
@@ -36,12 +37,33 @@ public:
     void getStateInformation(juce::MemoryBlock& destination) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
     juce::AudioProcessorValueTreeState& parameterState() noexcept { return parameters; }
-    // Presets/Initialize are message-thread operations.
-    bool loadFactoryPreset(int index);
+    // File/menu operations run off the audio thread. Optional tokens reject stale dialogs.
+    bool loadFactoryPreset(int index, std::uint64_t expectedGeneration = 0);
     int matchingFactoryPreset() const;
+    PresetInfo getPresetInfo() const;
+    std::uint64_t beginPresetOperation();
+    static juce::File defaultUserPresetDirectory();
+    juce::Array<juce::File> listUserPresets(const juce::File& folder = defaultUserPresetDirectory()) const;
+    juce::Result savePreset(const juce::File& folder = defaultUserPresetDirectory(), std::uint64_t expectedGeneration = 0);
+    juce::Result savePresetAs(const juce::File&, std::uint64_t expectedGeneration = 0);
+    juce::Result loadUserPreset(const juce::File&, std::uint64_t expectedGeneration = 0);
+    juce::Result deleteUserPreset(std::uint64_t expectedGeneration = 0);
+    juce::Result resetToDefaults(std::uint64_t expectedGeneration = 0);
     PluginMeters readMeters() noexcept;
     void clearMeterOverloads() noexcept { clearOverloads.store(true, std::memory_order_relaxed); }
 private:
+    PresetValues capturePresetValues() const;
+    void publishPresetValues(const PresetValues&, bool gestures);
+    void associatePreset(PresetType, const juce::String&, const juce::File&, int factoryIndex);
+    bool isPresetOperationCurrent(std::uint64_t) const;
+    void writePresetIdentity(juce::XmlElement&) const;
+    void restorePresetIdentity(const juce::XmlElement&);
+    // Identity/baseline ownership is independent of the DSP callback lock. No audio
+    // callback or parameter listener acquires this lock or accesses strings/files.
+    mutable juce::CriticalSection presetIdentityLock;
+    PresetInfo presetIdentity;
+    PresetValues presetBaseline {};
+    std::uint64_t presetGeneration = 1;
     static juce::AudioProcessorValueTreeState::ParameterLayout makeParameters();
     bool applyControls() noexcept;
     void render(juce::AudioBuffer<float>&, bool hostBypassed) noexcept;

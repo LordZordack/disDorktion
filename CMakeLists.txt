@@ -106,11 +106,13 @@ if(BUILD_TESTING)
             tests/PluginAdapterTests.cpp
             tests/FullChainPluginTests.cpp
             tests/PluginPresetTests.cpp
+            tests/PresetManagerTests.cpp
             tests/PluginPresetMeasurementTests.cpp
             tests/PluginEditorTests.cpp
             tests/AllocationTracking.cpp
             src/plugin/PluginProcessor.cpp
             src/plugin/PluginPresentation.cpp
+            src/plugin/PresetManager.cpp
             src/plugin/PluginEditor.cpp
         )
         target_include_directories(disdorktion_adapter_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -137,7 +139,7 @@ if(DISDORKTION_BUILD_PLUGIN)
         COPY_PLUGIN_AFTER_BUILD FALSE
     )
     target_sources(DisDorktion PRIVATE src/plugin/PluginProcessor.cpp
-        src/plugin/PluginPresentation.cpp src/plugin/PluginEditor.cpp)
+        src/plugin/PluginPresentation.cpp src/plugin/PresetManager.cpp src/plugin/PluginEditor.cpp)
     target_include_directories(DisDorktion PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
     target_link_libraries(DisDorktion PRIVATE disdorktion_dsp juce::juce_audio_utils)
     target_compile_definitions(DisDorktion PRIVATE

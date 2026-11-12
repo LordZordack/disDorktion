@@ -22,11 +22,15 @@ HP/LP movement are logarithmic. Tanh/Fold minima, HP minimum and LP maximum
 show Off. Comb damping is always active during comb processing.
 
 The current 27-control prototype uses state version 5 and intentionally replaces
-old prototype state/automation compatibility. Five factory settings remain,
-using shared trim and stage Off endpoints. See the
+old prototype state/automation compatibility. One preset button opens save, load,
+delete and reset actions plus adjacent Factory presets and User presets submenus.
+Five factory settings remain. New plugin instances, Reset to defaults and the
+Initialize factory preset use 0 dB Tanh/Fold Drive; the Off endpoints remain
+available. User files use `.disdorktionpreset`, normally in the per-user
+application-data `DisDorktion/Presets` folder. See the
 [interface and state guide](docs/PLUGIN_INTERFACE.md),
 [interface design](docs/okf/methods/plugin_interface.md) and
-[current verification status](docs/okf/notes/driver_adjustment_validation.md).
+[preset verification status](docs/okf/notes/preset_management_validation.md).
 
 ### Full chain prototype
 

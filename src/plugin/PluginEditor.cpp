@@ -174,7 +174,43 @@ private:
     bool overload = false;
 };
 
-PluginEditor::PluginEditor(PluginProcessor& owner) : AudioProcessorEditor(owner), processor(owner)
+namespace
+{
+class NativePresetDialogs final : public PresetDialogs
+{
+public:
+    void showMenu(juce::PopupMenu menu, juce::Component& target, std::function<void(int)> done) override
+    {
+        menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&target), std::move(done));
+    }
+    void chooseFile(bool save, const juce::File& suggested, std::function<void(juce::File)> done) override
+    {
+        chooser = std::make_unique<juce::FileChooser>(save ? "Save preset as" : "Load preset", suggested, "*.disdorktionpreset");
+        const auto flags = juce::FileBrowserComponent::canSelectFiles
+            | (save ? juce::FileBrowserComponent::saveMode
+                    : juce::FileBrowserComponent::openMode);
+        chooser->launchAsync(flags, [done = std::move(done)](const juce::FileChooser& browser) { done(browser.getResult()); });
+    }
+    void confirmOverwrite(const juce::File& file, std::function<void(bool)> done) override
+    {
+        juce::AlertWindow::showAsync(juce::MessageBoxOptions()
+            .withIconType(juce::MessageBoxIconType::WarningIcon).withTitle("Replace preset?")
+            .withMessage("Replace " + file.getFileName() + "?").withButton("Replace").withButton("Cancel"),
+            [done = std::move(done)](int result) { done(result == 1); });
+    }
+    void showError(const juce::String& message) override
+    {
+        juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Preset", message);
+    }
+private:
+    std::unique_ptr<juce::FileChooser> chooser;
+};
+constexpr int savePresetAction = 1, saveAsAction = 2, loadAction = 3, deleteAction = 4, resetAction = 5;
+constexpr int factoryAction = 100, userAction = 1000;
+}
+
+PluginEditor::PluginEditor(PluginProcessor& owner, std::shared_ptr<PresetDialogs> dialogs)
+    : AudioProcessorEditor(owner), processor(owner), presetDialogs(dialogs ? std::move(dialogs) : std::make_shared<NativePresetDialogs>())
 {
     lookAndFeel.setColour(juce::ResizableWindow::backgroundColourId, background);
     lookAndFeel.setColour(juce::Slider::thumbColourId, accent);
@@ -193,18 +229,12 @@ PluginEditor::PluginEditor(PluginProcessor& owner) : AudioProcessorEditor(owner)
         label->setColour(juce::Label::textColourId, text);
         addAndMakeVisible(*label);
     }
-    for (std::size_t i = 0; i < factoryPresets.size(); ++i)
-        presets.addItem(factoryPresets[i].name, static_cast<int>(i + 1));
-    presets.setComponentID("factoryPreset");
-    presets.setTitle("Factory preset");
-    presets.setTextWhenNothingSelected("Modified");
-    presets.onChange = [this] { if (presets.getSelectedId() > 0) { processor.loadFactoryPreset(presets.getSelectedId() - 1); refreshPresetAndMode(); } };
-    initialize.setComponentID("initialize");
-    initialize.onClick = [this] { processor.loadFactoryPreset(0); refreshPresetAndMode(); };
+    presets.setComponentID("presetMenu");
+    presets.setTitle("Presets");
+    presets.onClick = [this] { showPresetMenu(); };
     clearOverloads.setComponentID("clearOverloads");
     clearOverloads.onClick = [this] { processor.clearMeterOverloads(); };
     addAndMakeVisible(presets);
-    addAndMakeVisible(initialize);
     addAndMakeVisible(clearOverloads);
 
     addControl(0, "bitDepth", "Bit depth");
@@ -279,8 +309,7 @@ void PluginEditor::resized()
     auto branding = header.removeFromLeft(225);
     title.setBounds(branding.removeFromTop(28));
     subtitle.setBounds(branding.removeFromTop(16));
-    initialize.setBounds(header.removeFromRight(88).withSizeKeepingCentre(84, 28));
-    presetStatus.setBounds(header.removeFromRight(90).withSizeKeepingCentre(88, 28));
+    presetStatus.setBounds(header.removeFromRight(150).withSizeKeepingCentre(148, 28));
     presets.setBounds(header.reduced(8, 10));
     auto meterArea = area.removeFromBottom(40);
     clearOverloads.setBounds(meterArea.removeFromRight(130).reduced(3, 7));
@@ -343,10 +372,98 @@ void PluginEditor::resized()
 
 void PluginEditor::refreshPresetAndMode()
 {
-    const auto matched = processor.matchingFactoryPreset();
-    presets.setSelectedId(matched + 1, juce::dontSendNotification);
-    presetStatus.setText(matched < 0 ? "Modified" : "Factory preset", juce::dontSendNotification);
+    const auto info = processor.getPresetInfo();
+    presets.setButtonText(info.name + (info.modified ? " *" : ""));
+    presetStatus.setText(info.modified ? "Modified" : info.type == PresetType::factory ? "Factory preset"
+        : info.type == PresetType::user ? "User preset" : "Unsaved", juce::dontSendNotification);
+}
 
+void PluginEditor::reportPresetResult(const juce::Result& result)
+{
+    if (result.failed()) presetDialogs->showError(result.getErrorMessage());
+    refreshPresetAndMode();
+}
+
+void PluginEditor::choosePresetFile(bool save, uint64_t generation)
+{
+    presetDialogPending = true;
+    const auto info = processor.getPresetInfo();
+    const auto suggested = save ? processor.defaultUserPresetDirectory().getChildFile(info.name + ".disdorktionpreset")
+                                : processor.defaultUserPresetDirectory();
+    const juce::Component::SafePointer<PluginEditor> safe(this);
+    presetDialogs->chooseFile(save, suggested, [safe, save, generation](juce::File file)
+    {
+        if (!safe) return;
+        if (file == juce::File() || safe->processor.getPresetInfo().generation != generation)
+        {
+            safe->presetDialogPending = false;
+            return;
+        }
+        if (save && file.getFileExtension().isEmpty()) file = file.withFileExtension(".disdorktionpreset");
+        auto complete = [safe, save, file, generation](bool accepted)
+        {
+            if (!safe) return;
+            safe->presetDialogPending = false;
+            if (!accepted || safe->processor.getPresetInfo().generation != generation) return;
+            safe->reportPresetResult(save ? safe->processor.savePresetAs(file, generation)
+                                          : safe->processor.loadUserPreset(file, generation));
+        };
+        // Confirm the final path, including any appended extension. The fallback
+        // chooser's overwrite check applies to its raw selection only.
+        if (save && file.exists()) safe->presetDialogs->confirmOverwrite(file, std::move(complete));
+        else complete(true);
+    });
+}
+
+void PluginEditor::showPresetMenu()
+{
+    if (presetDialogPending) return;
+    const auto generation = processor.beginPresetOperation();
+    const auto info = processor.getPresetInfo();
+    const auto files = processor.listUserPresets();
+    juce::PopupMenu menu, factory, users;
+    menu.addItem(savePresetAction, "Save preset");
+    menu.addItem(saveAsAction, "Save preset as");
+    menu.addItem(loadAction, "Load preset");
+    menu.addItem(deleteAction, "Delete preset", info.type == PresetType::user);
+    menu.addItem(resetAction, "Reset to defaults");
+    menu.addSeparator();
+    for (std::size_t i = 0; i < factoryPresets.size(); ++i)
+        factory.addItem(factoryAction + static_cast<int>(i), factoryPresets[i].name, true,
+                        info.type == PresetType::factory && info.factoryIndex == static_cast<int>(i));
+    for (int i = 0; i < files.size(); ++i)
+        users.addItem(userAction + i, files[i].getFileNameWithoutExtension(), true,
+                      info.type == PresetType::user && info.file == files[i]);
+    if (files.isEmpty()) users.addItem(-1, "No user presets", false);
+    menu.addSubMenu("Factory presets", factory);
+    menu.addSubMenu("User presets", users);
+    const juce::Component::SafePointer<PluginEditor> safe(this);
+    presetDialogPending = true;
+    presetDialogs->showMenu(std::move(menu), presets, [safe, generation, files](int action)
+    {
+        if (!safe) return;
+        safe->presetDialogPending = false;
+        auto& owner = *safe;
+        if (action == 0 || owner.processor.getPresetInfo().generation != generation) return;
+        if (action >= userAction && action < userAction + files.size())
+            owner.reportPresetResult(owner.processor.loadUserPreset(files[action - userAction], generation));
+        else if (action >= factoryAction && action < factoryAction + static_cast<int>(factoryPresets.size()))
+        {
+            if (!owner.processor.loadFactoryPreset(action - factoryAction, generation)) return;
+            owner.refreshPresetAndMode();
+        }
+        else if (action == saveAsAction || action == loadAction) owner.choosePresetFile(action == saveAsAction, generation);
+        else if (action == savePresetAction)
+        {
+            const auto current = owner.processor.getPresetInfo();
+            const auto collision = current.type == PresetType::factory
+                && owner.processor.defaultUserPresetDirectory().getChildFile(current.name + ".disdorktionpreset").exists();
+            if (current.type == PresetType::detached || collision) owner.choosePresetFile(true, generation);
+            else owner.reportPresetResult(owner.processor.savePreset(owner.processor.defaultUserPresetDirectory(), generation));
+        }
+        else if (action == deleteAction) owner.reportPresetResult(owner.processor.deleteUserPreset(generation));
+        else if (action == resetAction) owner.reportPresetResult(owner.processor.resetToDefaults(generation));
+    });
 }
 
 void PluginEditor::timerCallback()

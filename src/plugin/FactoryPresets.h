@@ -3,6 +3,14 @@
 
 namespace disdorktion
 {
+// Plugin startup/reset defaults are intentionally separate from DSP/harness defaults.
+inline FullChainSettings pluginDefaultSettings()
+{
+    FullChainSettings settings;
+    setFullChainControl(settings, "tanhDriveDb", 0);
+    setFullChainControl(settings, "folderDriveDb", 0);
+    return settings;
+}
 struct FactoryPreset
 {
     const char* key;
@@ -20,6 +28,7 @@ inline const std::array<FactoryPreset, 5> factoryPresets = []
         {"folded", "Folded", {}},
         {"digital-destruction", "Digital Destruction", {}}
     }};
+    presets[0].settings = pluginDefaultSettings();
     auto& subtle = presets[1].settings;
     subtle.middle.tanh.driveDb = 3;
     subtle.middle.trimDb = -2;
