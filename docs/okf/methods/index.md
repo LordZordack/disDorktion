@@ -2,7 +2,7 @@
 type: "Index"
 title: "Methods"
 description: "Index of methods research documents."
-timestamp: "2026-11-09T12:26:29Z"
+timestamp: "2026-11-12T14:03:45Z"
 ---
 
 # Methods
@@ -18,7 +18,7 @@ timestamp: "2026-11-09T12:26:29Z"
 - [Middle section oversampling and latency](./middle_oversampling.md) — Q1 evaluation boundary, fractional latency correction, and evidence requirements before production middle-section acceptance.
 - [Middle section qualification candidate](./middle_section.md) — Fixed 4x FIR tanh and ADAA folding integration, independent bypass controls, experiment identity and render policy.
 - [Native-Rate Output Section](./output_section.md) — Native-rate comb, dispersion, tone, high-pass and low-pass composition with independent controls and reproducible qualification.
-- [Plugin interface, presets and host state](./plugin_interface.md) — Current prototype controls, logarithmic frequency movement and version-5-only persistence.
+- [Plugin interface, presets and host state](./plugin_interface.md) — Current prototype controls, factory/user preset workflow and strict version-5 persistence with optional host identity metadata.
 - [Real-time DSP processing contract](./processing_contract.md) — Implemented module interface and callback behavior for DisDorktion's JUCE DSP foundation, including the reference gain processor.
 - [Resonant comb filtering](./resonant_comb.md) — Reviewed isolated feedforward and damped feedback comb design and acceptance limits for issue 17.
 - [Tanh saturation](./tanh_saturation.md) — Approved memoryless tanh saturation design, controls, transition behavior, and pre-implementation acceptance limits for DisDorktion.

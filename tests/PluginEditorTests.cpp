@@ -5,6 +5,45 @@
 
 namespace
 {
+class ControlledPresetDialogs final : public disdorktion::PresetDialogs
+{
+public:
+    juce::PopupMenu menu;
+    std::function<void(int)> menuDone;
+    std::function<void(juce::File)> fileDone;
+    std::function<void(bool)> overwriteDone;
+    juce::String error;
+    juce::File suggested;
+    bool saving = false;
+    void showMenu(juce::PopupMenu value, juce::Component&, std::function<void(int)> done) override
+    { menu = std::move(value); menuDone = std::move(done); }
+    void chooseFile(bool save, const juce::File& path, std::function<void(juce::File)> done) override
+    { saving = save; suggested = path; fileDone = std::move(done); }
+    void showError(const juce::String& value) override { error = value; }
+    void confirmOverwrite(const juce::File&, std::function<void(bool)> done) override
+    { overwriteDone = std::move(done); }
+    int findAction(const juce::String& label) const
+    {
+        for (juce::PopupMenu::MenuItemIterator it(menu, true); it.next();)
+            if (it.getItem().text == label) return it.getItem().itemID;
+        return 0;
+    }
+    bool enabled(const juce::String& label) const
+    {
+        for (juce::PopupMenu::MenuItemIterator it(menu, true); it.next();)
+            if (it.getItem().text == label) return it.getItem().isEnabled;
+        return false;
+    }
+    void select(const juce::String& label)
+    {
+        const auto id = findAction(label);
+        REQUIRE(id != 0);
+        auto done = std::move(menuDone);
+        REQUIRE(static_cast<bool>(done));
+        done(id);
+    }
+};
+
 juce::Component* findControl(juce::Component& root, const juce::String& id)
 {
     if (root.getComponentID() == id) return &root;
@@ -58,8 +97,8 @@ TEST_CASE("Production editor exposes all host controls at minimum and expanded s
                 REQUIRE(png.writeImageToStream(editor.createComponentSnapshot(editor.getLocalBounds()), *stream));
             }
         }
-        REQUIRE(findControl(editor, "factoryPreset") != nullptr);
-        REQUIRE(findControl(editor, "initialize") != nullptr);
+        REQUIRE(findControl(editor, "presetMenu") != nullptr);
+        REQUIRE(findControl(editor, "initialize") == nullptr);
         REQUIRE(findControl(editor, "clearOverloads") != nullptr);
     }
     disdorktion::PluginEditor reopened(processor);
@@ -129,41 +168,179 @@ TEST_CASE("Editor numeric entry preserves readable Hz dB and percent units", "[a
     }
 }
 
-TEST_CASE("Editor preset actions recall initialize and derive modified status on reopening", "[adapter][editor][presets]")
+TEST_CASE("Deferred preset menu selection survives refresh before and after edits", "[adapter][editor][presets][issue43-regression]")
 {
     juce::ScopedJuceInitialiser_GUI gui;
     disdorktion::PluginProcessor processor;
+    auto dialogs = std::make_shared<ControlledPresetDialogs>();
     {
-        disdorktion::PluginEditor editor(processor);
-        auto* presets = dynamic_cast<juce::ComboBox*>(findControl(editor, "factoryPreset"));
-        auto* initialize = dynamic_cast<juce::TextButton*>(findControl(editor, "initialize"));
+        disdorktion::PluginEditor editor(processor, dialogs);
+        auto* presets = dynamic_cast<juce::TextButton*>(findControl(editor, "presetMenu"));
         auto* gain = dynamic_cast<juce::Slider*>(findControl(editor, "inputGainDb"));
-        REQUIRE(presets != nullptr); REQUIRE(initialize != nullptr); REQUIRE(gain != nullptr);
-        presets->setSelectedItemIndex(3, juce::sendNotificationSync);
+        REQUIRE(presets != nullptr); REQUIRE(gain != nullptr);
+        presets->onClick();
+        REQUIRE_FALSE(dialogs->enabled("Delete preset"));
+        // This ordering reproduced the previous ComboBox bug before replacement.
+        juce::Thread::sleep(80);
+        juce::Timer::callPendingTimersSynchronously();
+        dialogs->select("Folded");
         REQUIRE(processor.matchingFactoryPreset() == 3);
-        REQUIRE(presets->getSelectedItemIndex() == 3);
+        REQUIRE(presets->getButtonText() == "Folded");
         gain->setValue(6.0, juce::sendNotificationSync);
         REQUIRE(processor.matchingFactoryPreset() == -1);
-        REQUIRE(static_cast<bool>(initialize->onClick));
-        initialize->onClick();
+        presets->onClick();
+        juce::Thread::sleep(80);
+        juce::Timer::callPendingTimersSynchronously();
+        dialogs->select("Reset to defaults");
         REQUIRE(processor.matchingFactoryPreset() == 0);
-        REQUIRE(presets->getSelectedItemIndex() == 0);
+        REQUIRE(processor.parameterState().getRawParameterValue("tanhDriveDb")->load() == 0.0f);
+        REQUIRE(processor.parameterState().getRawParameterValue("folderDriveDb")->load() == 0.0f);
         REQUIRE(gain->getValue() == Catch::Approx(0.0));
         gain->setValue(9.0, juce::sendNotificationSync);
     }
     {
-        disdorktion::PluginEditor reopened(processor);
-        auto* presets = dynamic_cast<juce::ComboBox*>(findControl(reopened, "factoryPreset"));
+        disdorktion::PluginEditor reopened(processor, dialogs);
+        auto* presets = dynamic_cast<juce::TextButton*>(findControl(reopened, "presetMenu"));
         REQUIRE(presets != nullptr);
-        REQUIRE(presets->getSelectedId() == 0);
-        REQUIRE(presets->getTextWhenNothingSelected() == "Modified");
-        presets->setSelectedItemIndex(1, juce::sendNotificationSync);
+        REQUIRE(presets->getButtonText().contains("*"));
+        presets->onClick();
+        dialogs->select("Subtle Warmth");
         REQUIRE(processor.matchingFactoryPreset() == 1);
     }
-    disdorktion::PluginEditor reopened(processor);
-    auto* presets = dynamic_cast<juce::ComboBox*>(findControl(reopened, "factoryPreset"));
+    disdorktion::PluginEditor reopened(processor, dialogs);
+    auto* presets = dynamic_cast<juce::TextButton*>(findControl(reopened, "presetMenu"));
     REQUIRE(presets != nullptr);
-    REQUIRE(presets->getSelectedItemIndex() == 1);
+    REQUIRE(presets->getButtonText() == "Subtle Warmth");
+}
+
+TEST_CASE("Preset dialogs cancel stale operations and retain user identity across editor reopen", "[adapter][editor][presets][issue43]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor;
+    auto dialogs = std::make_shared<ControlledPresetDialogs>();
+    const auto folder = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("disdorktion-editor-" + juce::Uuid().toString());
+    struct Cleanup { juce::File file; ~Cleanup() { file.deleteRecursively(); } } cleanup {folder};
+    const auto file = folder.getChildFile("My sound.disdorktionpreset");
+    {
+        disdorktion::PluginEditor editor(processor, dialogs);
+        auto* button = dynamic_cast<juce::TextButton*>(findControl(editor, "presetMenu"));
+        REQUIRE(button != nullptr);
+        button->onClick();
+        juce::StringArray labels;
+        for (juce::PopupMenu::MenuItemIterator it(dialogs->menu); it.next();)
+            if (!it.getItem().isSeparator) labels.add(it.getItem().text);
+        REQUIRE(labels.joinIntoString("|") == "Save preset|Save preset as|Load preset|Delete preset|Reset to defaults|Factory presets|User presets");
+        dialogs->select("Save preset as");
+        REQUIRE(dialogs->saving);
+        REQUIRE(dialogs->suggested.getParentDirectory() == processor.defaultUserPresetDirectory());
+        auto cancelled = std::move(dialogs->fileDone);
+        cancelled({});
+        REQUIRE(processor.getPresetInfo().type == disdorktion::PresetType::factory);
+
+        button->onClick(); dialogs->select("Save preset as");
+        auto save = std::move(dialogs->fileDone); save(file);
+        REQUIRE(file.existsAsFile());
+        REQUIRE(processor.getPresetInfo().type == disdorktion::PresetType::user);
+        button->onClick();
+        REQUIRE(dialogs->enabled("Delete preset"));
+        dialogs->select("Save preset as");
+        juce::MemoryBlock restore;
+        disdorktion::PluginProcessor other;
+        REQUIRE(other.loadFactoryPreset(2));
+        other.getStateInformation(restore);
+        processor.setStateInformation(restore.getData(), static_cast<int>(restore.getSize()));
+        auto stale = std::move(dialogs->fileDone);
+        const auto staleFile = folder.getChildFile("stale.disdorktionpreset");
+        stale(staleFile);
+        REQUIRE_FALSE(staleFile.exists());
+        REQUIRE(processor.matchingFactoryPreset() == 2);
+
+        button->onClick(); dialogs->select("Load preset");
+        REQUIRE_FALSE(dialogs->saving);
+        auto load = std::move(dialogs->fileDone); load(file);
+        REQUIRE(processor.getPresetInfo().file == file);
+        button->onClick(); dialogs->select("Load preset");
+        auto failedLoad = std::move(dialogs->fileDone); failedLoad(folder.getChildFile("missing.disdorktionpreset"));
+        REQUIRE(dialogs->error.isNotEmpty());
+        REQUIRE(processor.getPresetInfo().file == file);
+    }
+    {
+        disdorktion::PluginEditor editor(processor, dialogs);
+        auto* button = dynamic_cast<juce::TextButton*>(findControl(editor, "presetMenu"));
+        REQUIRE(button->getButtonText() == "My sound");
+        button->onClick(); dialogs->select("Delete preset");
+        REQUIRE_FALSE(file.exists());
+        REQUIRE(processor.matchingFactoryPreset() == 0);
+        button->onClick();
+        auto pendingMenu = std::move(dialogs->menuDone);
+        REQUIRE(processor.loadFactoryPreset(2));
+        pendingMenu(dialogs->findAction("Folded"));
+        REQUIRE(processor.matchingFactoryPreset() == 2);
+        button->onClick(); dialogs->select("Save preset as");
+    }
+    // A native completion may arrive after the editor has closed.
+    auto afterClose = std::move(dialogs->fileDone);
+    REQUIRE(static_cast<bool>(afterClose));
+    afterClose(file);
+    REQUIRE_FALSE(file.exists());
+}
+
+TEST_CASE("Save as confirms the normalized extension target before replacing it", "[adapter][editor][presets][issue43-overwrite]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor;
+    auto dialogs = std::make_shared<ControlledPresetDialogs>();
+    const auto folder = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("disdorktion-overwrite-" + juce::Uuid().toString());
+    struct Cleanup { juce::File file; ~Cleanup() { file.deleteRecursively(); } } cleanup {folder};
+    const auto file = folder.getChildFile("Existing.disdorktionpreset");
+    REQUIRE(processor.savePresetAs(file).wasOk());
+    const auto original = file.loadFileAsString();
+    REQUIRE(processor.loadFactoryPreset(2));
+    disdorktion::PluginEditor editor(processor, dialogs);
+    auto* button = dynamic_cast<juce::TextButton*>(findControl(editor, "presetMenu"));
+    button->onClick(); dialogs->select("Save preset as");
+    auto choose = std::move(dialogs->fileDone); choose(folder.getChildFile("Existing"));
+    REQUIRE(static_cast<bool>(dialogs->overwriteDone));
+    REQUIRE(file.loadFileAsString() == original);
+    auto cancel = std::move(dialogs->overwriteDone); cancel(false);
+    REQUIRE(file.loadFileAsString() == original);
+    button->onClick(); dialogs->select("Save preset as");
+    choose = std::move(dialogs->fileDone); choose(folder.getChildFile("Existing"));
+    auto confirm = std::move(dialogs->overwriteDone); confirm(true);
+    REQUIRE(file.loadFileAsString() != original);
+    REQUIRE(processor.getPresetInfo().file == file);
+}
+
+TEST_CASE("Overwrite confirmation cannot save after restore or editor closure", "[adapter][editor][presets][issue43-overwrite]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor;
+    auto dialogs = std::make_shared<ControlledPresetDialogs>();
+    const auto file = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("disdorktion-confirm-" + juce::Uuid().toString() + ".disdorktionpreset");
+    struct Cleanup { juce::File file; ~Cleanup() { file.deleteFile(); } } cleanup {file};
+    REQUIRE(processor.savePresetAs(file).wasOk());
+    const auto original = file.loadFileAsString();
+    auto editor = std::make_unique<disdorktion::PluginEditor>(processor, dialogs);
+    auto* button = dynamic_cast<juce::TextButton*>(findControl(*editor, "presetMenu"));
+    button->onClick(); dialogs->select("Save preset as");
+    auto choose = std::move(dialogs->fileDone); choose(file);
+    REQUIRE(static_cast<bool>(dialogs->overwriteDone));
+    juce::MemoryBlock restored;
+    disdorktion::PluginProcessor other;
+    REQUIRE(other.loadFactoryPreset(2)); other.getStateInformation(restored);
+    processor.setStateInformation(restored.getData(), static_cast<int>(restored.getSize()));
+    auto stale = std::move(dialogs->overwriteDone); stale(true);
+    REQUIRE(file.loadFileAsString() == original);
+    REQUIRE(processor.getPresetInfo().factoryIndex == 2);
+    button->onClick(); dialogs->select("Save preset as");
+    choose = std::move(dialogs->fileDone); choose(file);
+    auto afterClose = std::move(dialogs->overwriteDone);
+    REQUIRE(static_cast<bool>(afterClose));
+    editor.reset(); afterClose(true);
+    REQUIRE(file.loadFileAsString() == original);
 }
 
 TEST_CASE("Editor has no mute bypass or damping enable and displays Off endpoints", "[adapter][editor][issue38]")

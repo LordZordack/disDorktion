@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include "plugin/PluginProcessor.h"
+#include "plugin/FactoryPresets.h"
 #include "dsp/FullChainControls.h"
 #include "AllocationTracking.h"
 #include <cmath>
@@ -45,6 +46,7 @@ TEST_CASE("New plugin instances match the shared fixed full chain", "[adapter][f
         layout.inputBuses.add(channels==1?juce::AudioChannelSet::mono():juce::AudioChannelSet::stereo());
         layout.outputBuses.add(layout.inputBuses[0]); REQUIRE(plugin.setBusesLayout(layout));
         disdorktion::FullChain chain;
+        REQUIRE(chain.setParameters(disdorktion::pluginDefaultSettings()));
         REQUIRE(chain.prepare({48000.0,32,static_cast<juce::uint32>(channels)}));
         plugin.prepareToPlay(48000.0,32);
         REQUIRE(plugin.getLatencySamples()==static_cast<int>(chain.getLatencySamples()));
@@ -122,7 +124,8 @@ TEST_CASE("Plugin automation follows shared controls including section mixes and
 {
     PluginProcessor plugin;
     disdorktion::FullChain reference;
-    disdorktion::FullChainSettings settings;
+    auto settings = disdorktion::pluginDefaultSettings();
+    REQUIRE(reference.setParameters(settings));
     plugin.prepareToPlay(48000, 32); REQUIRE(reference.prepare({48000,32,2}));
     juce::MidiBuffer midi;
     juce::AudioBuffer<float> actual(2,617), expected(2,617);

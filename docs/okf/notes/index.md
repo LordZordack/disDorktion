@@ -2,7 +2,7 @@
 type: "Index"
 title: "Notes"
 description: "Index of notes research documents."
-timestamp: "2026-11-09T12:26:29Z"
+timestamp: "2026-11-12T14:03:45Z"
 ---
 
 # Notes
@@ -23,6 +23,7 @@ timestamp: "2026-11-09T12:26:29Z"
 - [Middle section qualification evidence](./middle_section_validation.md) — S2 candidate integration verification and remaining human listening, alias-policy and host timing gates.
 - [Output Section Qualification](./output_section_validation.md) — Implementation and reproducible qualification evidence for high-pass followed by low-pass; manual acceptance remains separate.
 - [Plugin interface qualification](./plugin_interface_validation.md) — Evidence scope and outstanding checks for production controls, presets, meters and host state.
+- [Factory and user preset management validation](./preset_management_validation.md) — Issue 43 preset workflow, persistence contract and evidence ledger, separating automated checks from pending native UI and host acceptance.
 - [Resonant comb validation](./resonant_comb_validation.md) — Issue 17 verification record, measurement provenance, and explicit remaining listening and CPU gates.
 - [Tanh saturation validation](./tanh_saturation_validation.md) — Numerical, realtime, spectral, performance and listening evidence for the native-rate tanh module.
 - [Tone Module Qualification](./tone_validation.md) — Tone implementation evidence and explicit remaining listening and reference-performance gates.

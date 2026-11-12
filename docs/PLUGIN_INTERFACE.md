@@ -38,7 +38,7 @@ never a plugin parameter.
 | Requested capture rate | 100 to 384000 Hz | 384000 Hz |
 | Crush; jitter | 0 to 100% | 0% |
 | Quantizer shape | -100 to +100% | 0% |
-| Tanh Drive; Fold Drive | Off at -24 dB, otherwise up to +36 dB | Off |
+| Tanh Drive; Fold Drive | Off at -24 dB, otherwise up to +36 dB | 0 dB |
 | Threshold | 5 to 100% | 100% |
 | Waveshaper Trim | -60 to +12 dB | 0 dB |
 | High-pass; low-pass | 20 to 20000 Hz | Off at 20 Hz; Off at 20000 Hz |
@@ -85,21 +85,57 @@ including plugin state version 5 and full-chain experiment version 17. Existing
 saved sounds with Driver above 1x intentionally change; default Driver 1x
 retains its prior behavior.
 
-The selector offers Initialize, Subtle Warmth, Crunch, Folded and Digital
-Destruction; [FactoryPresets.h](../src/plugin/FactoryPresets.h) defines every
-setting. Presets use shared Waveshaper Trim and stage Off endpoints. Their names
-describe intended character; no new listening acceptance or loudness matching
-is claimed. Initialize restores defaults. DSP reset retains settings and clears
-histories. Preset identity is derived from controls rather than persisted
-metadata; unmatched settings display Modified. Recall publishes independent
-scalar host parameters, so intermediate combinations may be observed.
+The preset button opens Save preset, Save preset as, Load preset, Delete preset,
+Reset to defaults, and adjacent Factory presets and User presets submenus.
+Factory presets are Initialize, Subtle Warmth, Crunch, Folded and Digital
+Destruction; [FactoryPresets.h](../src/plugin/FactoryPresets.h) defines their
+settings. Their names describe intended character; no new listening acceptance
+or loudness matching is claimed. Preset selection remains available after
+editing controls. The button retains the current preset name and indicates
+modified settings; returning controls to their saved values clears that status.
+
+Save preset overwrites the current user file. Saving a factory preset creates
+a user file with the same name; an existing same-name file directs you to Save
+preset as. Factory definitions stay unchanged. Save preset as chooses a path
+and name, initially under JUCE's per-user application-data directory at
+`DisDorktion/Presets` (`%APPDATA%/DisDorktion/Presets` on Windows).
+Save as adds `.disdorktionpreset` when no extension is supplied and asks before
+replacing an existing file at that final path. Load accepts valid preset XML
+with any extension, including files outside that folder. Such a file becomes the current
+user preset and Save targets it, but User presets lists only
+`.disdorktionpreset` files directly inside the default folder, refreshed when
+the menu opens. Saving outside it does not add a menu entry.
+
+Delete preset is enabled only for the current user preset. Successful deletion
+resets the plugin to defaults. Reset to defaults, a new plugin instance and the
+Initialize factory preset set Tanh Drive and Fold Drive to **0 dB**. Their
+**Off** endpoints at -24 dB remain available. Shared DSP and audition-harness
+defaults retain both stages Off. DSP history reset retains current settings.
+
+User preset files contain XML `DisDorktionState` version 5 scalar snapshots,
+with the same strict parameter validation as host state. Writes use a temporary
+file followed by replacement. Invalid files are rejected before parameters or
+preset identity change. Cancelled dialogs and failed operations retain the
+current sound and identity; errors are displayed. Asynchronous actions are
+discarded if a newer operation, host restore or preset change makes their
+captured target stale. Recall publishes independent scalar host parameters,
+so intermediate combinations may be observed.
 
 New binary JUCE XML saves use `DisDorktionState` **version 5** with every current
 control required. Older versions are rejected. Parsing validates the complete
 candidate before publication; malformed, incomplete, nonfinite, out-of-range
 or unsupported values reject the whole load. Unknown extra attributes are
-ignored. Successful restore resets DSP, bypass delay and meters. Save/restore
-require serialized lifecycle ownership; ordinary controls are independent atomics.
+ignored. Optional host-state preset metadata retains factory/user identity and
+the user save target across editor reopening and host restore. Missing or invalid
+identity metadata, including a missing or invalid user file, detaches the save target while
+valid parameter values still restore. Save then uses Save preset as and Delete
+is disabled. Existing valid version-5 states without metadata remain accepted
+with their stored drive values; they do not inherit a previously loaded user
+file target. Successful restore resets DSP, bypass delay and meters. Host
+save/restore uses synchronized identity snapshots; ordinary controls are
+independent atomics. See the
+[preset validation record](okf/notes/preset_management_validation.md) for the
+automated evidence and remaining native UI/host checks.
 
 ## Host bypass, meters and qualification
 

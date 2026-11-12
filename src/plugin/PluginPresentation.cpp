@@ -16,8 +16,10 @@ float hostValue(const FullChainControl& control, float value)
 }
 }
 
-bool PluginProcessor::loadFactoryPreset(int index)
+bool PluginProcessor::loadFactoryPreset(int index, std::uint64_t expectedGeneration)
 {
+    const juce::ScopedLock lock(presetIdentityLock);
+    if (!isPresetOperationCurrent(expectedGeneration)) return false;
     if (index < 0 || index >= static_cast<int>(factoryPresets.size())) return false;
     const auto& preset = factoryPresets[static_cast<std::size_t>(index)];
     if (!isValidFullChainSettings(preset.settings)) return false;
@@ -32,6 +34,11 @@ bool PluginProcessor::loadFactoryPreset(int index)
     {
         gesture(control.id, getFullChainControl(preset.settings, control.id));
     }
+    associatePreset(PresetType::factory, preset.name, {}, index);
+    // Keep the canonical target as baseline even if host automation interleaves
+    // with the parameter notifications above.
+    for (std::size_t i = 0; i < fullChainControls.size(); ++i)
+        presetBaseline[i] = getFullChainControl(preset.settings, fullChainControls[i].id);
     if (index == 0) { readMeters(); clearMeterOverloads(); }
     return true;
 }
