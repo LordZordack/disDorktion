@@ -180,3 +180,7 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-11-12T13:55:47Z: Recorded issue 43 pre-final-fix Debug and controlled editor evidence; native UI/DAW and final backend verification remain pending.
 
 - 2026-11-12T14:03:45Z: Finalized issue 43 preset verification: Debug adapter 40/40 and Release 330/330 passed; native UI/DAW acceptance remains pending.
+
+- 2026-11-12T18:30:47Z: Recorded owner acceptance of current Waveshaper sound; issue 11 now tracks CPU acceptance.
+
+- 2026-11-14T12:46:23Z: Recorded independently audited current Waveshaper mixed-power CPU diagnostics; AC acceptance remains open.

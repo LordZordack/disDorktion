@@ -2,7 +2,7 @@
 type: "Index"
 title: "Notes"
 description: "Index of notes research documents."
-timestamp: "2026-11-12T14:03:45Z"
+timestamp: "2026-11-14T12:46:23Z"
 ---
 
 # Notes
@@ -20,7 +20,7 @@ timestamp: "2026-11-12T14:03:45Z"
 - [Issue 38 prototype control and routing validation](./issue38_validation.md) — Historical automated validation of the original issue-38 routing, before the nonlinear-wet-only Driver adjustment.
 - [Low-Pass Module Validation](./low_pass_validation.md) — Numerical, realtime and diagnostic CPU evidence for selectable output filtering; human listening and reference CPU qualification remain pending.
 - [Middle section anti-aliasing validation](./middle_oversampling_validation.md) — Q1 measured FIR and ADAA comparisons, equivalent CPU optimization, and pending listening and production acceptance.
-- [Middle section qualification evidence](./middle_section_validation.md) — S2 candidate integration verification and remaining human listening, alias-policy and host timing gates.
+- [Middle section qualification evidence](./middle_section_validation.md) — Current sound acceptance, historical S2 integration evidence and remaining CPU and host timing qualification.
 - [Output Section Qualification](./output_section_validation.md) — Implementation and reproducible qualification evidence for high-pass followed by low-pass; manual acceptance remains separate.
 - [Plugin interface qualification](./plugin_interface_validation.md) — Evidence scope and outstanding checks for production controls, presets, meters and host state.
 - [Factory and user preset management validation](./preset_management_validation.md) — Issue 43 preset workflow, persistence contract and evidence ledger, separating automated checks from pending native UI and host acceptance.
