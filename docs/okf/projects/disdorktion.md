@@ -2,7 +2,7 @@
 type: Project
 title: "DisDorktion audio distortion plugin"
 description: "Project record for the modular Windows VST3 distortion plugin and its standalone audition application."
-timestamp: 2026-11-08T00:00:00Z
+timestamp: 2026-11-14T00:00:00Z
 tags: ["audio", "distortion", "JUCE", "project"]
 ---
 
@@ -26,8 +26,11 @@ shared post-stage trim. Both stages Off retain trim on delayed dry; section
 mix zero resets/suspends unnecessary wet work and reactivation warms histories
 before fading in. Production latency remains fixed at 92 samples.
 
-The [interface](../methods/plugin_interface.md) has Input, Waveshaper, Output and
-GLOBAL panels with no visible mute/bypass controls. DAW bypass remains. Hz
+The [interface](../methods/plugin_interface.md) has Receiver, Waveshaper, Refiner and
+GLOBAL panels with three control columns and no visible mute/bypass controls.
+GLOBAL sits below Receiver; Driver sits in Waveshaper. Raw-input/final-output
+waveform envelopes sit above Receiver/Refiner and dBFS meters below Waveshaper.
+Bit depth and filter responses use stepped knobs. DAW bypass remains. Hz
 movement is logarithmic; nonlinear minima, HP minimum and LP maximum expose
 Off. Comb damping is always active during processing, and zero mix clears its
 history after fading out. The prototype replaces old automation/state

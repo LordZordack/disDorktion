@@ -73,6 +73,7 @@ PluginProcessor::PluginProcessor()
 void PluginProcessor::prepareToPlay(double sampleRate, int maximumBlockSize)
 {
     hostReady = false;
+    inputWaveform.configure(sampleRate); outputWaveform.configure(sampleRate);
     resetMeters();
     const auto channels = getTotalNumInputChannels();
     if (maximumBlockSize <= 0 || getTotalNumOutputChannels() != channels) return;
@@ -91,10 +92,16 @@ void PluginProcessor::prepareToPlay(double sampleRate, int maximumBlockSize)
     tailSeconds.store(fullTailSeconds.load(std::memory_order_relaxed), std::memory_order_relaxed);
     hostReady = true;
 }
-void PluginProcessor::releaseResources() { hostReady = false; resetMeters(); }
+void PluginProcessor::releaseResources()
+{
+    hostReady = false;
+    inputWaveform.resetEpoch(); outputWaveform.resetEpoch();
+    resetMeters();
+}
 void PluginProcessor::reset()
 {
     applyControls(); chain.reset();
+    inputWaveform.resetEpoch(); outputWaveform.resetEpoch();
     resetMeters();
     bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
 }
@@ -128,6 +135,7 @@ void PluginProcessor::render(juce::AudioBuffer<float>& buffer, bool hostBypassed
     const auto outputs = getTotalNumOutputChannels();
     for (int c = inputs; c < buffer.getNumChannels(); ++c) buffer.clear(c, 0, buffer.getNumSamples());
     if (!hostReady || inputs != outputs || buffer.getNumChannels() < outputs) { buffer.clear(); return; }
+    inputWaveform.push(buffer.getArrayOfReadPointers(), inputs, buffer.getNumSamples());
     applyControls();
     float inputPeak = 0, outputPeak = 0;
     auto active = juce::dsp::AudioBlock<float>(buffer).getSubsetChannelBlock(0, static_cast<std::size_t>(outputs));
@@ -165,6 +173,7 @@ void PluginProcessor::render(juce::AudioBuffer<float>& buffer, bool hostBypassed
         offset += count;
     }
     accumulateMeters(inputPeak, outputPeak);
+    outputWaveform.push(buffer.getArrayOfReadPointers(), outputs, buffer.getNumSamples());
 }
 juce::AudioProcessorEditor* PluginProcessor::createEditor() { return new PluginEditor(*this); }
 void PluginProcessor::getStateInformation(juce::MemoryBlock& destination)
@@ -198,6 +207,7 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
     const juce::ScopedLock lock(getCallbackLock());
     applyControls();
     chain.reset();
+    inputWaveform.resetEpoch(); outputWaveform.resetEpoch();
     bypassDelay.clear(); bypassScratch.clear(); bypassPosition = 0;
     resetMeters();
 }

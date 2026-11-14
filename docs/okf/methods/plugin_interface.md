@@ -2,20 +2,21 @@
 type: Method
 title: "Plugin interface, presets and host state"
 description: "Current prototype controls, factory/user preset workflow and strict version-5 persistence with optional host identity metadata."
-timestamp: 2026-11-12T00:00:00Z
-tags: ["audio-plugin", "automation", "state", "presets", "metering"]
-resource: "https://github.com/LordZordack/disDorktion/issues/43"
+timestamp: 2026-11-14T00:00:00Z
+tags: ["audio-plugin", "automation", "state", "presets", "metering", "waveforms"]
+resource: "https://github.com/LordZordack/disDorktion/issues/42"
 ---
 
 # Plugin interface, presets and host state
 
-The editor has Input, Waveshaper, Output and GLOBAL panels. Input Gain, Driver,
-global mix and Final Gain live in GLOBAL. There are no visible mute/bypass or
-legacy compatibility controls; DAW host bypass remains. Waveshaper controls run
-Tanh Drive -> Fold Drive -> Threshold -> Waveshaper Trim -> Waveshaper Mix.
+The editor has Receiver, Waveshaper, Refiner and GLOBAL panels. Input Gain,
+global mix and Final Gain live in GLOBAL beneath Receiver. Driver lives in
+Waveshaper. There are no visible mute/bypass or
+legacy compatibility controls; DAW host bypass remains. Waveshaper signal order is
+Driver -> Tanh drive -> Folder drive -> Folder threshold -> Waveshaper trim -> Waveshaper mix.
 
 The [full chain](./full_chain.md) applies Input Gain before both global branches
-and Final Gain after global mixing. GLOBAL Driver remains 1x to 4x, default 1x,
+and Final Gain after global mixing. Waveshaper Driver remains 1x to 4x, default 1x,
 but acts after the crusher immediately before tanh/fold inside the nonlinear
 wet branch. Fixed calibrated compensation follows nonlinear output before
 shared trim and section mixing, following the delayed 10 ms Driver trajectory.
@@ -39,6 +40,23 @@ production settings and shared trim.
 The Driver adjustment preserves parameter IDs and persistence schemas. Existing
 saved sounds with Driver above 1x intentionally change; default 1x behavior
 remains unchanged.
+
+## Layout and waveform display
+
+Each main section uses three columns: Receiver and Waveshaper have two rows,
+Refiner has four. GLOBAL is one row beneath Receiver. Refiner groups the HP/LP
+cutoffs with their response knobs on a common background. Bit depth and filter
+response are stepped knobs retaining existing host mappings and choice values.
+The exact control tables are in `docs/PLUGIN_INTERFACE.md`.
+
+Signed waveform envelopes above Receiver and Refiner show raw input and final
+output, including host-bypass replacement. Min/max aggregation across stereo
+channels avoids cancellation in the display. Fixed-capacity transport separates
+audio writes from UI history and painting; dropped frames break history and
+lifecycle epochs clear stale traces even when processing has stopped. These
+displays do not add audio latency or change samples. The separate input/output
+histories are not a latency-compensated overlay. Existing dBFS peak meters sit
+below Waveshaper; preset actions remain available in the center branding area.
 
 ## Preset workflow and defaults
 

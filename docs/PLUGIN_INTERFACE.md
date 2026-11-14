@@ -1,6 +1,6 @@
 # Plugin interface, automation and state
 
-The prototype editor exposes Input, Waveshaper, Output and GLOBAL panels.
+The prototype editor exposes Receiver, Waveshaper, Refiner and GLOBAL panels.
 Mono/stereo production processing reports a fixed **92 host samples** of latency,
 including zero section mixes and nonlinear Off states. See the
 [design](okf/methods/full_chain.md) and [Driver adjustment status](okf/notes/driver_adjustment_validation.md).
@@ -10,7 +10,7 @@ including zero section mixes and nonlinear Off states. See the
 Input Gain -> global dry/wet split -> Input crusher/sampler -> Waveshaper ->
 Output -> global mixing -> Final Gain. The dry branch is delayed by 92 samples.
 Input Gain affects both global branches regardless of section/global mixes.
-Driver remains a GLOBAL control, 1x to 4x with default 1x, but acts after the
+Driver appears in Waveshaper, 1x to 4x with default 1x, and acts after the
 crusher immediately before tanh/fold, inside the nonlinear wet branch. Global
 dry and Waveshaper section dry are unchanged by Driver. Driver has no audible
 effect with both nonlinear stages Off, Waveshaper Mix at zero, or global mix at
@@ -32,7 +32,7 @@ never a plugin parameter.
 | Controls | Range | Initialize default |
 | --- | --- | --- |
 | GLOBAL Input Gain; Final Gain | -60 to +24 dB | 0 dB |
-| GLOBAL Driver | 1x to 4x | 1x |
+| Waveshaper Driver | 1x to 4x | 1x |
 | GLOBAL dry/wet; Input Mix; Waveshaper Mix | 0 to 100% | 100% |
 | Bit depth | 1, 2, 3, 4, 5, 6, 7, 8, 16, 32, 64 bits | 64 bits |
 | Requested capture rate | 100 to 384000 Hz | 384000 Hz |
@@ -50,8 +50,8 @@ never a plugin parameter.
 | Tone | -6 to +6 dB, unity pivot at 1 kHz | 0 dB |
 
 Input Mix covers the complete crusher/sample-rate reducer, with Input Gain
-outside the section. Waveshaper controls run Tanh Drive -> Fold Drive ->
-Threshold -> Waveshaper Trim -> Waveshaper Mix. Shared trim follows both
+outside the section. Waveshaper signal order is Driver -> Tanh drive -> Folder drive ->
+Folder threshold -> Waveshaper trim -> Waveshaper mix. Shared trim follows both
 nonlinear stages and precedes the section blend. When both stages settle Off,
 the section uses trimmed delayed dry, blended with untrimmed delayed dry;
 trim remains active. Individual Off transitions preserve effective delay,
@@ -71,6 +71,35 @@ Tanh/Fold minima, HP minimum and LP maximum display
 **Off**. Capture requests are retained while effective rate is host-capped;
 active filter cutoffs are capped at 45% of host rate. The editor starts at
 1120x740 and resizes from 1000x680 to 1400x1000.
+
+### Editor layout
+
+Receiver, Waveshaper and Refiner occupy equal-width panels from left to right.
+Each panel uses three control columns, with these row-major positions:
+
+| Row | Receiver | Waveshaper | Refiner |
+| --- | --- | --- | --- |
+| 1 | Capture rate; Crush; Bit depth | Tanh drive; Folder drive; Folder threshold | Comb delay; Dispersion frequency; Comb damping |
+| 2 | Quantizer shape; Clock jitter; Input mix | Driver; Waveshaper trim; Waveshaper mix | Comb feedforward; Dispersion mix; Tone |
+| 3 | | | Comb feedback; High-pass cutoff; High-pass response |
+| 4 | | | Comb mix; Low-pass cutoff; Low-pass response |
+
+GLOBAL aligns beneath Receiver: Input gain, Global dry/wet and Final gain.
+The four high/low-pass controls share a background. Bit depth and both filter
+responses use stepped rotary knobs with readable choice values; their existing
+host parameter mappings and saved values are unchanged.
+
+Input and output waveform envelopes appear above Receiver and Refiner, with
+plugin branding and preset access between them. Each trace retains signed
+min/max values across channels, so opposite-polarity stereo remains visible.
+The input tap precedes Input Gain and the output tap follows final gain and
+host-bypass replacement. The displays use a fixed amplitude scale and separate
+live histories; they are not aligned to cancel the plugin's processing latency.
+Raw input and final output peak meters in dBFS appear below Waveshaper.
+
+Waveform storage is bounded. If the UI stalls, excess visualization data is
+dropped; display histories clear across dropped-frame gaps and lifecycle changes.
+This visualization does not change audio samples, latency, presets or state.
 
 ## Automation, presets and persistence
 

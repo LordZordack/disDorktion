@@ -20,6 +20,7 @@ public:
 private:
     class ControlRow;
     class PeakMeter;
+    class WaveformDisplay;
     void timerCallback() override;
     void refreshPresetAndMode();
     void addControl(int section, const char* id, const char* label);
@@ -36,6 +37,8 @@ private:
     std::array<juce::Rectangle<int>, 4> sections;
     std::array<std::vector<std::unique_ptr<ControlRow>>, 4> controls;
     std::unique_ptr<PeakMeter> inputMeter, outputMeter;
+    std::unique_ptr<WaveformDisplay> inputWaveform, outputWaveform;
+    juce::Component filterGroup;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };
 }

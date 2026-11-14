@@ -81,14 +81,14 @@ TEST_CASE("Production editor exposes all host controls at minimum and expanded s
         disdorktion::PluginEditor editor(processor);
         REQUIRE(editor.getWidth() == 1120);
         REQUIRE(editor.getHeight() == 740);
-        for (const auto size : {juce::Point<int>(1000, 680), juce::Point<int>(1120, 740), juce::Point<int>(1200, 800)})
+        for (const auto size : {juce::Point<int>(1000, 680), juce::Point<int>(1120, 740), juce::Point<int>(1400, 1000), juce::Point<int>(1000, 1000), juce::Point<int>(1400, 680)})
         {
             editor.setSize(size.x, size.y);
             requireVisibleControls(editor);
             const auto snapshotDirectory = juce::SystemStats::getEnvironmentVariable("DISDORKTION_EDITOR_SNAPSHOT_DIR", {});
             if (snapshotDirectory.isNotEmpty())
             {
-                const auto target = juce::File(snapshotDirectory).getChildFile("issue14-editor-" + juce::String(size.x) + ".png");
+                const auto target = juce::File(snapshotDirectory).getChildFile("issue42-editor-" + juce::String(size.x) + "x" + juce::String(size.y) + ".png");
                 auto stream = target.createOutputStream();
                 REQUIRE(stream != nullptr);
                 REQUIRE(stream->setPosition(0));
@@ -112,14 +112,14 @@ TEST_CASE("Editor attachments synchronize sliders choices buttons and active res
     disdorktion::PluginEditor editor(processor);
     auto& state = processor.parameterState();
     auto* gain = dynamic_cast<juce::Slider*>(findControl(editor, "inputGainDb"));
-    auto* depth = dynamic_cast<juce::ComboBox*>(findControl(editor, "bitDepth"));
-    auto* response = dynamic_cast<juce::ComboBox*>(findControl(editor, "hpResponse"));
+    auto* depth = dynamic_cast<juce::Slider*>(findControl(editor, "bitDepth"));
+    auto* response = dynamic_cast<juce::Slider*>(findControl(editor, "hpResponse"));
     REQUIRE(gain != nullptr); REQUIRE(depth != nullptr); REQUIRE(response != nullptr);
     gain->setValue(6.0, juce::sendNotificationSync);
     REQUIRE(state.getRawParameterValue("inputGainDb")->load() == Catch::Approx(6.0f));
-    depth->setSelectedItemIndex(2, juce::sendNotificationSync);
+    depth->setValue(2, juce::sendNotificationSync);
     REQUIRE(state.getRawParameterValue("bitDepth")->load() == 2.0f);
-    response->setSelectedItemIndex(1, juce::sendNotificationSync);
+    response->setValue(1, juce::sendNotificationSync);
     REQUIRE(state.getRawParameterValue("hpResponse")->load() == 1.0f);
 
     juce::MemoryBlock saved;
@@ -129,7 +129,7 @@ TEST_CASE("Editor attachments synchronize sliders choices buttons and active res
     REQUIRE(gain->getValue() == Catch::Approx(-12.0f));
     processor.setStateInformation(saved.getData(), static_cast<int>(saved.getSize()));
     REQUIRE(gain->getValue() == Catch::Approx(6.0f));
-    REQUIRE(depth->getSelectedItemIndex() == 2);
+    REQUIRE(depth->getValue() == 2);
 
     disdorktion::PluginProcessor independent;
     disdorktion::PluginEditor independentEditor(independent);
@@ -366,7 +366,7 @@ TEST_CASE("Editor has no mute bypass or damping enable and displays Off endpoint
     }
     const auto input=editor.getLocalArea(findControl(editor,"inputGainDb"),findControl(editor,"inputGainDb")->getLocalBounds());
     const auto driver=editor.getLocalArea(findControl(editor,"driver"),findControl(editor,"driver")->getLocalBounds());
-    REQUIRE(input.getY()==driver.getY()); REQUIRE(input.getX()<driver.getX());
+    REQUIRE(input.getY()>driver.getY()); REQUIRE(input.getX()<driver.getX());
 }
 
 TEST_CASE("Editor Waveshaper controls follow processing order and new controls accept numeric entry", "[adapter][editor][issue38]")
@@ -389,4 +389,119 @@ TEST_CASE("Editor Waveshaper controls follow processing order and new controls a
         slider->setValue(slider->getValueFromText(entry.text),juce::sendNotificationSync);
         REQUIRE(processor.parameterState().getRawParameterValue(entry.id)->load()==Catch::Approx(entry.value));
     }
+}
+
+TEST_CASE("Editor three column geometry and stepped choices", "[adapter][editor][issue42]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor; disdorktion::PluginEditor editor(processor);
+    const std::vector<std::vector<const char*>> groups {
+        {"captureRateHz","crush","bitDepth","shape","jitter","crusherMix"},
+        {"tanhDriveDb","folderDriveDb","folderThreshold","driver","waveshaperTrimDb","waveshaperMix"},
+        {"combDelayMs","dispersionFrequencyHz","combDampingHz","combFeedforward","dispersionMix","toneDb","combFeedback","hpCutoffHz","hpResponse","combMix","lpCutoffHz","lpResponse"},
+        {"inputGainDb","globalMix","outputGainDb"}};
+    for (const auto size : {juce::Point<int>(1000,680),juce::Point<int>(1120,740),juce::Point<int>(1400,1000),juce::Point<int>(1000,1000),juce::Point<int>(1400,680)})
+    {
+        editor.setSize(size.x,size.y);
+        for (const auto& group : groups)
+        {
+            std::vector<juce::Rectangle<int>> bounds;
+            for (const auto* id : group)
+            {
+                auto* c=findControl(editor,id); REQUIRE(c);
+                bounds.push_back(editor.getLocalArea(c,c->getLocalBounds())); const auto i=bounds.size()-1;
+                if(i%3) { REQUIRE(bounds[i].getY()==bounds[i-1].getY()); REQUIRE(bounds[i].getX()>bounds[i-1].getRight()); }
+                if(i>=3) { REQUIRE(bounds[i].getX()==bounds[i-3].getX()); REQUIRE(bounds[i].getY()>bounds[i-3].getBottom()); }
+            }
+        }
+        for(const auto* id : {"inputWaveform","outputWaveform","branding","presetMenu","presetStatus","inputMeter","outputMeter","clearOverloads","filterGroup"})
+        {
+            auto* c=findControl(editor,id); REQUIRE(c); REQUIRE(c->isVisible());
+            REQUIRE(editor.getLocalBounds().contains(editor.getLocalArea(c,c->getLocalBounds())));
+        }
+    }
+    for(const auto* id : {"bitDepth","hpResponse","lpResponse"})
+    {
+        auto* slider=dynamic_cast<juce::Slider*>(findControl(editor,id)); REQUIRE(slider);
+        auto* parameter=processor.parameterState().getParameter(id);
+        const juce::StringArray names=juce::String(id)=="bitDepth" ? juce::StringArray{"1","2","3","4","5","6","7","8","16","32","64"} : juce::StringArray{"Butterworth","Chebyshev I","Chebyshev II"};
+        REQUIRE(slider->getInterval()==1.0);
+        for(int i=0;i<names.size();++i)
+        {
+            CAPTURE(id,i); REQUIRE(slider->getTextFromValue(i)==names[i]); REQUIRE(slider->getValueFromText(names[i])==i);
+            slider->setValue(i,juce::sendNotificationSync); REQUIRE(processor.parameterState().getRawParameterValue(id)->load()==i);
+            parameter->setValueNotifyingHost(parameter->convertTo0to1(static_cast<float>(names.size()-1-i))); REQUIRE(slider->getValue()==names.size()-1-i);
+        }
+        slider->setValue(1,juce::sendNotificationSync); juce::MemoryBlock saved; processor.getStateInformation(saved);
+        slider->setValue(0,juce::sendNotificationSync); processor.setStateInformation(saved.getData(),static_cast<int>(saved.getSize())); REQUIRE(slider->getValue()==1);
+        REQUIRE(slider->getDoubleClickReturnValue()==parameter->convertFrom0to1(parameter->getDefaultValue()));
+    }
+}
+
+TEST_CASE("Editor waveform history clears on gaps lifecycle and reopen", "[adapter][editor][issue42]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor;
+    processor.prepareToPlay(48000, 512);
+    auto editor=std::make_unique<disdorktion::PluginEditor>(processor);
+    const auto description=[&](const char* id) { return findControl(*editor,id)->getDescription(); };
+    // The timer thread advances countdowns independently of synchronous dispatch.
+    // Wait for the observable state rather than assuming a sleep made it due.
+    const auto waitFor=[&](const auto& ready)
+    {
+        const auto deadline=juce::Time::getMillisecondCounter()+2000;
+        while(!ready() && juce::Time::getMillisecondCounter()<deadline)
+        {
+            juce::Thread::sleep(5);
+            juce::Timer::callPendingTimersSynchronously();
+        }
+        INFO("Input: " << description("inputWaveform") << "; output: " << description("outputWaveform"));
+        REQUIRE(ready());
+    };
+    juce::AudioBuffer<float> audio(2,512); juce::MidiBuffer midi;
+    for(int block=0;block<40;++block)
+    {
+        for(int n=0;n<audio.getNumSamples();++n)
+        {
+            const auto sample=0.85f*std::sin(static_cast<float>(block*512+n)*0.017f);
+            audio.setSample(0,n,sample); audio.setSample(1,n,-0.5f*sample);
+        }
+        processor.processBlock(audio,midi);
+    }
+    waitFor([&] { return !description("inputWaveform").contains(": 0 frames")
+                        && !description("outputWaveform").contains(": 0 frames"); });
+    REQUIRE_FALSE(description("inputWaveform").contains(": 0 frames"));
+    REQUIRE_FALSE(description("outputWaveform").contains(": 0 frames"));
+    const auto snapshotDirectory=juce::SystemStats::getEnvironmentVariable("DISDORKTION_EDITOR_SNAPSHOT_DIR",{});
+    if(snapshotDirectory.isNotEmpty())
+    {
+        auto stream=juce::File(snapshotDirectory).getChildFile("issue42-editor-waveform.png").createOutputStream();
+        REQUIRE(stream); REQUIRE(stream->setPosition(0)); REQUIRE(stream->truncate().wasOk());
+        juce::PNGImageFormat png; REQUIRE(png.writeImageToStream(editor->createComponentSnapshot(editor->getLocalBounds()),*stream));
+        editor->setSize(1000,680);
+        for(const auto* id : {"hpResponse","lpResponse"})
+            dynamic_cast<juce::Slider*>(findControl(*editor,id))->setValue(2,juce::sendNotificationSync);
+        auto longest=juce::File(snapshotDirectory).getChildFile("issue42-editor-long-response.png").createOutputStream();
+        REQUIRE(longest); REQUIRE(longest->setPosition(0)); REQUIRE(longest->truncate().wasOk());
+        REQUIRE(png.writeImageToStream(editor->createComponentSnapshot(editor->getLocalBounds()),*longest));
+    }
+    // Overflow publishes an initial contiguous window; the next publication has
+    // a sequence gap and must discard all history preceding that gap.
+    auto& history=processor.getInputWaveformHistory();
+    std::array<float,48> samples {}; const float* channels[] {samples.data()};
+    for(int i=0;i<600;++i) history.push(channels,1,48);
+    waitFor([&] { return description("inputWaveform").contains(": 512 frames"); });
+    history.push(channels,1,48);
+    waitFor([&] { return description("inputWaveform").contains(": 1 frames"); });
+    INFO("After overflow and next publication: " << description("inputWaveform"));
+    REQUIRE(description("inputWaveform").contains(": 1 frames"));
+    processor.releaseResources();
+    waitFor([&] { return description("inputWaveform").contains(": 0 frames")
+                        && description("outputWaveform").contains(": 0 frames"); });
+    REQUIRE(description("inputWaveform").contains(": 0 frames"));
+    REQUIRE(description("outputWaveform").contains(": 0 frames"));
+    processor.prepareToPlay(48000,512); history.push(channels,1,48);
+    editor.reset(); editor=std::make_unique<disdorktion::PluginEditor>(processor);
+    waitFor([&] { return description("inputWaveform").contains(": 0 frames"); });
+    REQUIRE(description("inputWaveform").contains(": 0 frames"));
 }

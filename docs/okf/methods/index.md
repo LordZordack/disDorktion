@@ -2,7 +2,7 @@
 type: "Index"
 title: "Methods"
 description: "Index of methods research documents."
-timestamp: "2026-11-14T12:46:23Z"
+timestamp: "2026-11-14T19:11:41Z"
 ---
 
 # Methods
