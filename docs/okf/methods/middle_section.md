@@ -2,7 +2,7 @@
 type: Method
 title: "Middle section qualification candidate"
 description: "Fixed 4x FIR tanh and ADAA folding integration, independent bypass controls, experiment identity and render policy."
-timestamp: 2026-11-08T00:00:00Z
+timestamp: 2026-11-14T00:00:00Z
 tags: ["audio-dsp", "oversampling", "integration", "latency"]
 resource: "https://github.com/LordZordack/disDorktion/issues/11"
 ---
@@ -16,7 +16,7 @@ maximum +36 dB. Production defaults set both Off. Shared trim is -60 to +12 dB,
 default 0 dB; mix is 0 to 100%, default 100%. Tanh Trim is removed; the shared trim
 runs after both nonlinear stages, before the section mix.
 
-The approved Driver adjustment adds the GLOBAL 1x-to-4x Driver (default 1x)
+The approved Driver adjustment adds the Waveshaper 1x-to-4x Driver (default 1x)
 immediately before tanh/fold, after the upstream crusher and inside this wet
 branch. Its 10 ms trajectory also controls delayed fixed calibrated output
 compensation, applied before shared trim and section mixing. The lookup uses

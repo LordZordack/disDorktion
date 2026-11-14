@@ -20,7 +20,8 @@ public:
         jassert(parameter != nullptr);
         label.setText(caption, juce::dontSendNotification);
         label.setColour(juce::Label::textColourId, text);
-        label.setFont(juce::Font(11.0f));
+        label.setFont(juce::Font(12.0f));
+        label.setMinimumHorizontalScale(1.0f);
         addAndMakeVisible(label);
         const juce::String parameterId(id);
         if (dynamic_cast<juce::AudioParameterBool*>(parameter) != nullptr)
@@ -32,28 +33,30 @@ public:
             label.setVisible(false);
             buttonAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(state, id, toggle);
         }
-        else if (parameterId == "bitDepth" || parameterId == "hpResponse" || parameterId == "lpResponse")
-        {
-            if (auto* choice = dynamic_cast<juce::AudioParameterChoice*>(parameter))
-                choiceBox.addItemList(choice->choices, 1);
-            else
-                choiceBox.addItemList({"Butterworth", "Chebyshev I", "Chebyshev II"}, 1);
-            choiceBox.setComponentID(id);
-            choiceBox.setTitle(caption);
-            addAndMakeVisible(choiceBox);
-            choiceAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(state, id, choiceBox);
-        }
         else
         {
             slider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-            slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 68, 18);
+            slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 92, 20);
             slider.setComponentID(id);
             slider.setTitle(caption);
             slider.setScrollWheelEnabled(false);
             slider.setDoubleClickReturnValue(true, parameter->convertFrom0to1(parameter->getDefaultValue()));
             addAndMakeVisible(slider);
             sliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(state, id, slider);
-            if (parameterId.endsWith("Hz"))
+            if (parameterId == "bitDepth" || parameterId == "hpResponse" || parameterId == "lpResponse")
+            {
+                const juce::StringArray values = parameterId == "bitDepth"
+                    ? juce::StringArray{"1", "2", "3", "4", "5", "6", "7", "8", "16", "32", "64"}
+                    : juce::StringArray{"Butterworth", "Chebyshev I", "Chebyshev II"};
+                slider.setRange(0, values.size() - 1, 1);
+                slider.textFromValueFunction = [values](double value) { return values[juce::jlimit(0, values.size()-1, juce::roundToInt(value))]; };
+                slider.valueFromTextFunction = [values, fallback = slider.getDoubleClickReturnValue()](const juce::String& value)
+                {
+                    for (int i=0;i<values.size();++i) if(values[i].equalsIgnoreCase(value.trim())) return static_cast<double>(i);
+                    return fallback;
+                };
+            }
+            else if (parameterId.endsWith("Hz"))
             {
                 // Mouse movement is logarithmic; host plain-value conversion
                 // stays linear so repeated state restores do not accumulate
@@ -127,19 +130,16 @@ public:
         auto area = getLocalBounds();
         if (toggle.isVisible()) { toggle.setBounds(area); return; }
         label.setJustificationType(hasKnob() ? juce::Justification::centred : juce::Justification::centredLeft);
-        label.setBounds(area.removeFromTop(14));
-        slider.setBounds(area.withHeight(juce::jmin(78, area.getHeight())).reduced(1, 0));
-        choiceBox.setBounds(area.reduced(2, 0));
+        label.setBounds(area.removeFromTop(32));
+        slider.setBounds(area.reduced(2, 1));
     }
 
 private:
     juce::Label label;
     juce::Slider slider;
     juce::ToggleButton toggle;
-    juce::ComboBox choiceBox;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> buttonAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> choiceAttachment;
 };
 
 class PluginEditor::PeakMeter final : public juce::Component
@@ -172,6 +172,60 @@ private:
     juce::String name;
     float peak = 0.0f;
     bool overload = false;
+};
+
+// Only the message thread owns the displayed history. Each poll is bounded.
+class PluginEditor::WaveformDisplay final : public juce::Component
+{
+public:
+    WaveformDisplay(WaveformHistory& source, juce::String caption) : history(source), name(std::move(caption)), currentEpoch(source.epoch())
+    {
+        history.discardPending();
+        setTitle(name + " waveform, fixed -1 to +1 amplitude");
+        setDescription(name + " waveform: 0 frames");
+    }
+    void poll()
+    {
+        const auto epoch = history.epoch();
+        if (epoch != currentEpoch) { count = 0; currentEpoch = epoch; }
+        std::array<WaveformHistory::Frame, WaveformHistory::capacity> incoming;
+        const auto received = history.drain(incoming.data(), incoming.size());
+        for (std::size_t i = 0; i < received; ++i)
+        {
+            const auto& frame = incoming[i];
+            if (frame.epoch != currentEpoch) { count = 0; currentEpoch = frame.epoch; }
+            if (count != 0 && frame.sequence != lastSequence + 1) count = 0;
+            frames[write] = frame;
+            write = (write + 1) % frames.size();
+            count = juce::jmin(count + 1, frames.size()); lastSequence = frame.sequence;
+        }
+        if (history.epoch() != currentEpoch) { count = 0; currentEpoch = history.epoch(); }
+        setDescription(name + " waveform: " + juce::String(static_cast<int>(count)) + " frames");
+        repaint();
+    }
+    void paint(juce::Graphics& g) override
+    {
+        auto bounds = getLocalBounds().toFloat();
+        g.setColour(panel); g.fillRoundedRectangle(bounds, 8.0f);
+        g.setColour(text); g.setFont(12.0f);
+        g.drawText(name + "   -1 / +1", getLocalBounds().reduced(10, 5).removeFromTop(18), juce::Justification::centredLeft);
+        auto plot = bounds.reduced(10, 9); plot.removeFromTop(20);
+        g.setColour(text.withAlpha(0.15f)); g.drawHorizontalLine(juce::roundToInt(plot.getCentreY()),plot.getX(),plot.getRight());
+        g.setColour(accent);
+        for (std::size_t i=0;i<count;++i)
+        {
+            const auto& frame=frames[(write+frames.size()-count+i)%frames.size()];
+            const float x=plot.getRight()-static_cast<float>(count-1-i)*plot.getWidth()/static_cast<float>(frames.size()-1);
+            const auto y=[&](float v){ return plot.getCentreY()-juce::jlimit(-1.0f,1.0f,v)*plot.getHeight()*0.5f; };
+            g.drawLine(x,y(frame.maximum),x,y(frame.minimum),1.0f);
+        }
+    }
+private:
+    WaveformHistory& history;
+    juce::String name;
+    std::array<WaveformHistory::Frame, WaveformHistory::capacity> frames {};
+    std::size_t count=0, write=0;
+    std::uint64_t currentEpoch=0, lastSequence=0;
 };
 
 namespace
@@ -220,6 +274,8 @@ PluginEditor::PluginEditor(PluginProcessor& owner, std::shared_ptr<PresetDialogs
     lookAndFeel.setColour(juce::ComboBox::backgroundColourId, background);
     lookAndFeel.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff314357));
     setLookAndFeel(&lookAndFeel);
+    title.setComponentID("branding");
+    presetStatus.setComponentID("presetStatus");
     title.setText("DisDorktion", juce::dontSendNotification);
     title.setFont(juce::Font(24.0f, juce::Font::bold));
     subtitle.setText("CRUSH / FOLD / RESONATE / DISPERSE", juce::dontSendNotification);
@@ -227,6 +283,7 @@ PluginEditor::PluginEditor(PluginProcessor& owner, std::shared_ptr<PresetDialogs
     for (auto* label : {&title, &subtitle, &presetStatus})
     {
         label->setColour(juce::Label::textColourId, text);
+        label->setJustificationType(juce::Justification::centred);
         addAndMakeVisible(*label);
     }
     presets.setComponentID("presetMenu");
@@ -237,35 +294,31 @@ PluginEditor::PluginEditor(PluginProcessor& owner, std::shared_ptr<PresetDialogs
     addAndMakeVisible(presets);
     addAndMakeVisible(clearOverloads);
 
-    addControl(0, "bitDepth", "Bit depth");
-    addControl(0, "captureRateHz", "Capture rate");
-    addControl(0, "crusherMix", "Input mix");
-    addControl(0, "crush", "Crush");
-    addControl(0, "shape", "Shape");
-    addControl(0, "jitter", "Jitter");
-    addControl(1, "tanhDriveDb", "Tanh drive");
-    addControl(1, "folderDriveDb", "Fold drive");
-    addControl(1, "folderThreshold", "Threshold");
-    addControl(1, "waveshaperTrimDb", "Waveshaper trim");
-    addControl(1, "waveshaperMix", "Waveshaper mix");
-    addControl(2, "combDelayMs", "Comb delay");
-    addControl(2, "combFeedforward", "Feedforward");
-    addControl(2, "combFeedback", "Feedback");
-    addControl(2, "combDampingHz", "Comb damping");
-    addControl(2, "combMix", "Comb mix");
-    addControl(2, "dispersionFrequencyHz", "Dispersion frequency");
-    addControl(2, "dispersionMix", "Dispersion mix");
-    addControl(2, "toneDb", "Tone");
-    addControl(2, "hpCutoffHz", "High-pass");
-    addControl(2, "hpResponse", "High-pass response");
-    addControl(2, "lpCutoffHz", "Low-pass");
-    addControl(2, "lpResponse", "Low-pass response");
-    addControl(3, "inputGainDb", "Input gain");
-    addControl(3, "driver", "Driver");
-    addControl(3, "globalMix", "Dry/wet");
-    addControl(3, "outputGainDb", "Final gain");
+    filterGroup.setComponentID("filterGroup");
+    filterGroup.setInterceptsMouseClicks(false, false);
+    addAndMakeVisible(filterGroup);
+    const std::array<std::vector<const char*>,4> layout {{
+        {"captureRateHz","crush","bitDepth","shape","jitter","crusherMix"},
+        {"tanhDriveDb","folderDriveDb","folderThreshold","driver","waveshaperTrimDb","waveshaperMix"},
+        {"combDelayMs","dispersionFrequencyHz","combDampingHz","combFeedforward","dispersionMix","toneDb","combFeedback","hpCutoffHz","hpResponse","combMix","lpCutoffHz","lpResponse"},
+        {"inputGainDb","globalMix","outputGainDb"}
+    }};
+    for (std::size_t group=0;group<layout.size();++group)
+        for (const auto* id : layout[group])
+            for (const auto& control : fullChainControls)
+                if (juce::String(id)==control.id)
+                {
+                    const auto caption=juce::String(control.name).upToFirstOccurrenceOf(" (",false,false);
+                    addControl(static_cast<int>(group),id,caption.toRawUTF8());
+                }
+    inputWaveform=std::make_unique<WaveformDisplay>(processor.getInputWaveformHistory(),"Raw input");
+    outputWaveform=std::make_unique<WaveformDisplay>(processor.getOutputWaveformHistory(),"Final output");
+    inputWaveform->setComponentID("inputWaveform"); outputWaveform->setComponentID("outputWaveform");
+    addAndMakeVisible(*inputWaveform); addAndMakeVisible(*outputWaveform);
     inputMeter = std::make_unique<PeakMeter>("Raw input");
     outputMeter = std::make_unique<PeakMeter>("Final output");
+    inputMeter->setComponentID("inputMeter");
+    outputMeter->setComponentID("outputMeter");
     addAndMakeVisible(*inputMeter);
     addAndMakeVisible(*outputMeter);
     setResizable(true, true);
@@ -291,85 +344,50 @@ void PluginEditor::addControl(int section, const char* id, const char* caption)
 void PluginEditor::paint(juce::Graphics& g)
 {
     g.fillAll(background);
-    const char* names[] = {"01  INPUT", "02  WAVESHAPER", "03  OUTPUT", "GLOBAL"};
-    for (std::size_t i = 0; i < sections.size(); ++i)
+    const char* names[] = {"RECEIVER", "WAVESHAPER", "REFINER", "GLOBAL"};
+    for (std::size_t i=0;i<sections.size();++i)
     {
-        g.setColour(panel);
-        g.fillRoundedRectangle(sections[i].toFloat(), 9.0f);
-        g.setColour(accent);
-        g.setFont(juce::Font(14.0f, juce::Font::bold));
-        g.drawText(names[i], sections[i].reduced(12, 6).removeFromTop(24), juce::Justification::centredLeft);
+        g.setColour(panel); g.fillRoundedRectangle(sections[i].toFloat(),9.0f);
+        g.setColour(accent); g.setFont(juce::Font(14.0f,juce::Font::bold));
+        g.drawText(names[i],sections[i].reduced(12,6).removeFromTop(24),juce::Justification::centredLeft);
     }
+    g.setColour(juce::Colour(0xff263647));
+    g.fillRoundedRectangle(filterGroup.getBounds().toFloat(),6.0f);
 }
 
 void PluginEditor::resized()
 {
-    auto area = getLocalBounds().reduced(12);
-    auto header = area.removeFromTop(48);
-    auto branding = header.removeFromLeft(225);
-    title.setBounds(branding.removeFromTop(28));
-    subtitle.setBounds(branding.removeFromTop(16));
-    presetStatus.setBounds(header.removeFromRight(150).withSizeKeepingCentre(148, 28));
-    presets.setBounds(header.reduced(8, 10));
-    auto meterArea = area.removeFromBottom(40);
-    clearOverloads.setBounds(meterArea.removeFromRight(130).reduced(3, 7));
-    const auto meterWidth = meterArea.getWidth() / 2;
-    inputMeter->setBounds(meterArea.removeFromLeft(meterWidth).reduced(7, 4));
-    outputMeter->setBounds(meterArea.reduced(7, 4));
-    area.removeFromBottom(8);
-    auto bottom = area.removeFromBottom(112);
-    sections[3] = bottom;
-    area.removeFromBottom(8);
-    // Output carries five effects; give it half the available width.
-    const auto columnWidth = (area.getWidth() - 16) / 4;
-    for (int i = 0; i < 3; ++i)
+    auto area=getLocalBounds().reduced(12);
+    const int gap=10, width=(area.getWidth()-2*gap)/3;
+    const int top=110, bodyY=area.getY()+top+gap;
+    const int bodyHeight=area.getBottom()-bodyY;
+    std::array<juce::Rectangle<int>,3> columns;
+    for(int i=0;i<3;++i) columns[i]={area.getX()+i*(width+gap),bodyY,width,bodyHeight};
+    inputWaveform->setBounds(columns[0].withY(area.getY()).withHeight(top));
+    outputWaveform->setBounds(columns[2].withY(area.getY()).withHeight(top));
+    auto branding=columns[1].withY(area.getY()).withHeight(top).reduced(8,0);
+    title.setBounds(branding.removeFromTop(30)); subtitle.setBounds(branding.removeFromTop(18));
+    branding.removeFromTop(4); presets.setBounds(branding.removeFromTop(32)); presetStatus.setBounds(branding.removeFromTop(24));
+    const int rowHeight=(bodyHeight-38)/4;
+    sections[0]=columns[0].withHeight(32+rowHeight*2);
+    sections[1]=columns[1].withHeight(32+rowHeight*2);
+    sections[2]=columns[2];
+    sections[3]=columns[0].withY(sections[0].getBottom()+gap).withHeight(bodyHeight-sections[0].getHeight()-gap);
+    const auto grid=[&](int group,juce::Rectangle<int> bounds,int rows)
     {
-        sections[static_cast<std::size_t>(i)] = area.removeFromLeft(i == 2 ? area.getWidth() : columnWidth);
-        area.removeFromLeft(8);
-        auto cells = sections[static_cast<std::size_t>(i)].reduced(8);
-        cells.removeFromTop(22);
-        auto& group = controls[static_cast<std::size_t>(i)];
-        int knobs = 0, choices = 0, switches = 0;
-        for (const auto& control : group)
-            if (control->hasKnob()) ++knobs;
-            else if (control->isSwitch()) ++switches;
-            else ++choices;
-        const int switchColumns = i == 2 ? 2 : 1;
-        auto switchArea = cells.removeFromBottom(((switches + switchColumns - 1) / switchColumns) * 21);
-        auto choiceArea = cells.removeFromBottom(choices * 38);
-        const int columns = i == 2 ? 4 : 3;
-        const int knobRows = (knobs + columns - 1) / columns;
-        const int cellWidth = cells.getWidth() / columns;
-        const int cellHeight = cells.getHeight() / juce::jmax(1, knobRows);
-        int knob = 0, toggle = 0;
-        for (auto& control : group)
-        {
-            if (control->hasKnob())
-            {
-                control->setBounds(cells.getX() + (knob % columns) * cellWidth,
-                    cells.getY() + (knob / columns) * cellHeight, cellWidth, cellHeight);
-                ++knob;
-            }
-            else if (control->isSwitch())
-            {
-                const auto width = switchArea.getWidth() / switchColumns;
-                control->setBounds(switchArea.getX() + (toggle % switchColumns) * width,
-                    switchArea.getY() + (toggle / switchColumns) * 21, width, 21);
-                ++toggle;
-            }
-            else control->setBounds(choiceArea.removeFromTop(38));
-        }
-    }
-    auto global = sections[3].reduced(8);
-    global.removeFromTop(22);
-    for (auto& control : controls[3])
-        if (control->hasKnob()) control->setBounds(global.removeFromLeft(88));
-    global.removeFromLeft(8);
-    for (auto& control : controls[3])
-        if (control->isSwitch()) control->setBounds(global.removeFromTop(23));
-
+        bounds=bounds.reduced(7,0); bounds.removeFromTop(32);
+        const int cellWidth=bounds.getWidth()/3;
+        const int cellHeight=juce::jmin(rowHeight,bounds.getHeight()/rows);
+        for(std::size_t i=0;i<controls[group].size();++i)
+            controls[group][i]->setBounds(bounds.getX()+static_cast<int>(i%3)*cellWidth+1,bounds.getY()+static_cast<int>(i/3)*cellHeight+1,cellWidth-2,cellHeight-2);
+    };
+    grid(0,sections[0],2); grid(1,sections[1],2); grid(2,sections[2],4); grid(3,sections[3],1);
+    filterGroup.setBounds(controls[2][7]->getBounds().getUnion(controls[2][11]->getBounds()).expanded(1));
+    auto meters=columns[1].withY(sections[1].getBottom()+gap).withHeight(bodyHeight-sections[1].getHeight()-gap).reduced(14,8);
+    inputMeter->setBounds(meters.removeFromTop(44)); meters.removeFromTop(8);
+    outputMeter->setBounds(meters.removeFromTop(44)); meters.removeFromTop(10);
+    clearOverloads.setBounds(meters.removeFromTop(28));
 }
-
 void PluginEditor::refreshPresetAndMode()
 {
     const auto info = processor.getPresetInfo();
@@ -471,6 +489,8 @@ void PluginEditor::timerCallback()
     const auto meters = processor.readMeters();
     inputMeter->update(meters.inputPeak, meters.inputOverload);
     outputMeter->update(meters.outputPeak, meters.outputOverload);
+    inputWaveform->poll();
+    outputWaveform->poll();
     refreshPresetAndMode();
 }
 }

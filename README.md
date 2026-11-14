@@ -13,9 +13,12 @@
 
 ### Plugin interface and presets
 
-The prototype editor has Input, Waveshaper, Output and GLOBAL panels, with
-editable numeric controls and no visible mute/bypass buttons. GLOBAL contains
-Input Gain, Driver (1x to 4x, default 1x), dry/wet and Final Gain. Input Mix covers
+The prototype editor has Receiver, Waveshaper, Refiner and GLOBAL panels, with
+three control columns per section and no visible mute/bypass buttons. GLOBAL
+sits under Receiver with Input Gain, dry/wet and Final Gain. Driver (1x to 4x,
+default 1x) sits in Waveshaper. Bit depth and HP/LP response use stepped knobs.
+Raw-input and final-output waveform envelopes sit above Receiver and Refiner;
+their dBFS peak meters sit below Waveshaper. Input Mix covers
 the entire crusher/sampler. Waveshaper Mix covers tanh, folding and shared
 Waveshaper Trim; trim remains active with both stages Off. Capture rate and
 HP/LP movement are logarithmic. Tanh/Fold minima, HP minimum and LP maximum
@@ -75,7 +78,7 @@ feedback and tone boost can raise peaks. No limiter is inserted. Isolated
 harness modules retain their own test controls and experiment records. See the
 [Output design](docs/okf/methods/output_section.md).
 
-Waveshaper controls run Tanh Drive -> Fold Drive -> Threshold -> Waveshaper Trim
+Waveshaper signal order is Driver -> Tanh Drive -> Fold Drive -> Threshold -> Waveshaper Trim
 -> Waveshaper Mix. Each nonlinear stage has an Off endpoint. The shared trim
 follows both stages and remains active with both Off, using latency-aligned
 delayed dry. Fixed production latency is 92 samples. The reusable class and

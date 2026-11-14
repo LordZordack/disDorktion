@@ -2,6 +2,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "dsp/FullChainControls.h"
 #include "PresetManager.h"
+#include "WaveformHistory.h"
 #include <atomic>
 #include <array>
 
@@ -50,6 +51,8 @@ public:
     juce::Result deleteUserPreset(std::uint64_t expectedGeneration = 0);
     juce::Result resetToDefaults(std::uint64_t expectedGeneration = 0);
     PluginMeters readMeters() noexcept;
+    WaveformHistory& getInputWaveformHistory() noexcept { return inputWaveform; }
+    WaveformHistory& getOutputWaveformHistory() noexcept { return outputWaveform; }
     void clearMeterOverloads() noexcept { clearOverloads.store(true, std::memory_order_relaxed); }
 private:
     PresetValues capturePresetValues() const;
@@ -73,6 +76,7 @@ private:
     juce::AudioProcessorValueTreeState parameters;
     std::array<std::atomic<float>*, fullChainControls.size()> chainControls {};
     FullChain chain;
+    WaveformHistory inputWaveform, outputWaveform;
     juce::AudioBuffer<float> bypassDelay, bypassScratch;
     std::size_t bypassPosition = 0;
     std::size_t chunkCapacity = 0;
