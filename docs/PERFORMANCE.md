@@ -454,6 +454,57 @@ and ambient conditions were unavailable/unconfirmed. The isolated result does
 not qualify the complete wet chain. The separate unpinned diagnostic and human
 listening remain distinct gates.
 
+## Current Waveshaper CPU collection (#11)
+
+`disdorktion_middle_cpu` measures the current fixed 4x FIR/ADAA section,
+including Driver setters/compensation, shared trim/mix and inactive-state
+reactivation. Sound quality was accepted by the owner on 2026-11-12; CPU
+acceptance remains separate. No DSP algorithm is changed by this collector.
+
+The reference matrix is three runs of 48/96 kHz, mono/stereo, capacities
+32/64/127/256/1024 and ten scenarios (600 cases). It retains the section's
+p95 aggregate-batch mean below 10% of incoming callback duration and adds
+individual-callback and applicable transition-class p99 limits below 10%.
+These are distinct gates. The full-chain 25% ceiling does not qualify this
+section allocation. Historical failed middle measurements remain recorded.
+
+The collector uses 2-second warm-up and probe periods and the existing
+10–1200-second equal-wall-time sampling window. Each qualifying distribution
+requires 100,000–200,000 observations and at least 100 per applicable phase,
+fixture and automation residue. The separate 21-by-128 aggregate batch
+protocol requires at least one observation of each applicable phase/fixture;
+it does not establish transition tails. Its timed loop includes input copy,
+current settings/Driver application and processing. Raw data, timer overhead,
+policy and explicit affinity restoration are retained and independently audited.
+
+Build and run correctness checks before timing; stop competing builds/indexing.
+Use fresh output directories. The reference requires AC power, a verified
+performance-core thread affinity and the declared standalone HighQoS method.
+Record actual power/thermal conditions; no host policy is changed by the plugin.
+
+```powershell
+cmake --build --preset windows-vs2026-release --target disdorktion_middle_cpu --parallel 4
+./build/windows-vs2026/Release/disdorktion_middle_cpu.exe --self-test
+./build/windows-vs2026/Release/disdorktion_middle_cpu.exe --quick --conditions 'Record actual conditions; diagnostic only' --output NEW_QUICK_DIRECTORY
+./build/windows-vs2026/Release/disdorktion_middle_cpu.exe --high-qos --conditions 'Record actual AC, power and thermal conditions; no competing jobs' --output NEW_REFERENCE_DIRECTORY
+uv run --no-project --python 3.12 scripts/validate_middle_cpu.py NEW_REFERENCE_DIRECTORY --executable ./build/windows-vs2026/Release/disdorktion_middle_cpu.exe --output NEW_AUDIT_JSON
+```
+
+`--quick`, `--diagnostic`, filtered `--case-id` runs and runs without
+`--high-qos` cannot qualify. Exit 0 requires reference acceptance; exit 1
+preserves failed/unqualified measurements and exit 2 indicates input/I/O failure.
+`--capture-only` writes deterministic sound-regression fixtures independently
+of timing; captures do not imply a new human listening verdict. Actual DAW
+deadline/latency checks remain separate from standalone CPU measurements.
+
+The first complete nonquick diagnostic (collected 2026-11-12 and independently
+audited 2026-11-14) is **unqualified**: unpinned, mixed battery/AC power,
+18 callback/class-tail failures and four insufficient-coverage distributions.
+All 200 aggregate batch timing values were below 10%, with worst p95 mean
+9.48624%; worst aggregate callback p99 was 20.56063%. These observations do
+not establish AC acceptance. See the [current evidence](okf/notes/middle_section_validation.md)
+and [portable summary](measurements/middle_cpu_issue11_current_summary.json).
+
 ## Full chain diagnostics (C1 / #13)
 
 The full-chain ceiling remains 25% of the incoming callback deadline at the

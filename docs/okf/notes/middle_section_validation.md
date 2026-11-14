@@ -1,11 +1,80 @@
 ---
 type: Note
 title: "Middle section qualification evidence"
-description: "S2 candidate integration verification and remaining human listening, alias-policy and host timing gates."
-timestamp: 2026-11-08T00:00:00Z
+description: "Current sound acceptance, historical S2 integration evidence and remaining CPU and host timing qualification."
+timestamp: 2026-11-14T00:00:00Z
 tags: ["audio-dsp", "integration", "validation", "latency"]
 resource: "https://github.com/LordZordack/disDorktion/issues/11"
 ---
+
+## Current acceptance decision (2026-11-12)
+
+The owner accepted the current Waveshaper sound: "Sound quality is already
+good." Issue #11 now tracks CPU acceptance of the current implementation,
+including nonlinear-wet Driver compensation, shared trim/mix, Off endpoints
+and inactive-history handling. Preserve this accepted sound during performance
+work. This decision does not claim the historical stress spectra meet the
+-60 dBc residual goal, or supply a new formal listening experiment.
+
+The [current Driver verification](./driver_adjustment_validation.md) records
+functional and calibration checks. Current-revision CPU qualification and
+actual host timing remain separate, unresolved evidence. The historical
+failures and open decisions below apply to their recorded revisions; this
+dated owner decision supersedes their pending human sound-quality decision
+for the current sound.
+
+## Current CPU diagnostic (collected 2026-11-12, audited 2026-11-14)
+
+The owner selected battery diagnostics only after the controlled reference
+attempt detected battery power. That attempt was stopped; its partial files
+and interruption record remain under `.tools/issue11-cpu-20261112/reference/`.
+It supplies no reference acceptance or final restoration report.
+
+The separate nonquick `middle-cpu-v1` diagnostic completed all 200 cases at
+48/96 kHz, mono/stereo, five capacities and ten scenarios. It was unpinned,
+used the declared standalone HighQoS method, and started on battery. Power
+later changed: 125 cases observed battery at both snapshots, 74 observed AC,
+and case 125 crossed the transition. Thus this is mixed-power diagnostic
+evidence, not an AC reference or a uniform battery baseline.
+
+| Check | Recorded outcome |
+| --- | --- |
+| Independent raw-data/provenance audit | Passed; correctly reports unqualified |
+| Callback aggregate or phase-class p99 below 10% | 18 cases fail; 17 fail the aggregate gate |
+| Aggregate batch p95 mean below 10% | All 200 below the timing limit |
+| Callback observation/endpoint coverage | Four cases insufficient: 29, 48, 82, 198 |
+| Batch phase/fixture coverage | All 200 pass the separate historical coverage check |
+| Processing and untimed finite replay | All 200 pass |
+| Reported section latency | 92 samples throughout |
+| Source/binary identity | Unchanged during collection |
+| Explicit affinity and process-policy restoration | Verified |
+
+Worst aggregate callback p99 was **20.56063%** of incoming deadline in
+96 kHz stereo, 127 frames, tanh-only (case 170). Worst batch p95 mean was
+**9.48624%** in 96 kHz stereo oversized dispatch, capacity 64 and 131 incoming
+frames (case 169). Passing batch timing does not erase callback failures or
+insufficient coverage. The independent auditor returns `policy_ok: false`
+for this unpinned diagnostic environment; this is distinct from its verified
+process-policy restoration. No timer overhead or outliers were subtracted.
+
+A portable summary at `docs/measurements/middle_cpu_issue11_current_summary.json`
+records case IDs, provenance and report/audit hashes. Local raw evidence is
+under `.tools/issue11-cpu-20261112/battery-diagnostic/`, with independent
+`battery-audit.json` alongside it. The earlier complete quick diagnostic and
+its audit remain separate. No source algorithm was optimized from these data.
+
+The reviewed collector/validator implementation passed Release builds and
+its DSP schedule/self-test. Fresh completion checks passed **331/331 CTest**
+cases (35.15 seconds) and **113 Python tests**, including 29 CPU-audit tests.
+All 360 deterministic accepted-sound captures are finite and byte-identical
+to their repeats. These captures are regression evidence, not a new listening
+verdict. DSP source and the accepted sound remain unchanged.
+
+Issue #11 remains open for three controlled AC runs with adequate coverage,
+callback/class-tail and batch acceptance, and actual host timing/latency
+evidence. Preserve failed distributions; investigate measured costs under a
+controlled reference before proposing optimization. Sound-quality acceptance
+already stands.
 
 ## Historical evidence scope after issue #38
 

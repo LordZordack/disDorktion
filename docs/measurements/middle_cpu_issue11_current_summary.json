@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "issue": 11,
+  "collected": "2026-11-12",
+  "audited": "2026-11-14",
+  "status": "Diagnostic only; owner deferred AC qualification; no CPU acceptance",
+  "method_id": "middle-cpu-v1",
+  "environment_method": "windows-explicit-highqos-v1",
+  "complete": true,
+  "reference_qualified": false,
+  "cases": 200,
+  "runs": 1,
+  "quick": false,
+  "diagnostic": true,
+  "power": {
+    "battery_both_snapshots": 125,
+    "ac_both_snapshots": 74,
+    "transition_cases": [
+      125
+    ],
+    "profile": "{381b4222-f694-41f0-9685-ff5bb260df2e}",
+    "pinned": false,
+    "thermal": "sensor unavailable; ambient unconfirmed"
+  },
+  "callback_or_class_budget_failure_ids": [
+    5,
+    8,
+    14,
+    15,
+    84,
+    155,
+    168,
+    169,
+    170,
+    173,
+    183,
+    190,
+    192,
+    193,
+    194,
+    195,
+    198,
+    199
+  ],
+  "aggregate_callback_failure_ids": [
+    5,
+    14,
+    15,
+    84,
+    155,
+    168,
+    169,
+    170,
+    173,
+    183,
+    190,
+    192,
+    193,
+    194,
+    195,
+    198,
+    199
+  ],
+  "batch_budget_failure_ids": [],
+  "insufficient_coverage_ids": [
+    29,
+    48,
+    82,
+    198
+  ],
+  "batch_coverage_failure_ids": [],
+  "processing_or_replay_failure_ids": [],
+  "latency_samples": [
+    92
+  ],
+  "source_unchanged": true,
+  "affinity_restored": true,
+  "process_policy_restored": true,
+  "worst_callback": {
+    "id": 170,
+    "rate": 96000.0,
+    "channels": 2,
+    "capacity": 127,
+    "frames": 127,
+    "scenario_name": "tanh",
+    "coverage_ok": true,
+    "deadline_fraction": 0.205606299212598
+  },
+  "worst_batch": {
+    "id": 169,
+    "rate": 96000.0,
+    "channels": 2,
+    "capacity": 64,
+    "frames": 131,
+    "scenario_name": "oversized",
+    "coverage_ok": true,
+    "deadline_fraction": 0.094862404580153
+  },
+  "provenance": {
+    "git_head": "f898f342c19576694dac0529a89dbe80a234ad7c",
+    "git_dirty": "M CMakeLists.txt\n M docs/PERFORMANCE.md\n M docs/okf/hardware/index.md\n M docs/okf/index.md\n M docs/okf/log.md\n M docs/okf/methods/index.md\n M docs/okf/notes/index.md\n M docs/okf/notes/middle_section_validation.md\n M docs/okf/papers/index.md\n M docs/okf/projects/index.md",
+    "executable_sha256": "1609208011be4b258d336b3e02248fc3ed51598009dc714387a54bb5484fbbaf",
+    "compiler": "MSVC 195136252",
+    "build_configuration": "Release"
+  },
+  "local_raw_root": ".tools\\issue11-cpu-20261112\\battery-diagnostic",
+  "report_sha256": "8b1eae3d8d4470ebbcf6b4d0314cc047a913a85c22b7ab2be8a7848c57e55999",
+  "audit_sha256": "bc0ab955fa022ccdc3e69308943f2df0417cbffd8637e89ce6adad50aa93a9f9",
+  "correctness": {
+    "release_ctest_passed": 331,
+    "python_tests_passed": 113,
+    "sound_repeat_cases": 360,
+    "dsp_source_changed": false
+  },
+  "remaining": [
+    "Three controlled AC reference runs with sufficient coverage",
+    "Actual DAW timing and latency validation"
+  ]
+}
