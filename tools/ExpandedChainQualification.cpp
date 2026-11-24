@@ -40,9 +40,8 @@ void automate(FullChainSettings& s, unsigned iteration, unsigned dwell)
     s.output.comb.dampingEnabled = iteration % 2 != 0;
     s.output.dispersion.frequencyHz = 20.f + 19980.f*t;
     s.output.tone.toneDb = -6.f + 12.f*t;
-    s.output.comb.bypass = (iteration/dwell)%2 != 0;
-    s.output.dispersion.bypass = (iteration/dwell)%3 == 1;
-    s.output.tone.bypass = (iteration/dwell)%5 == 1;
+    s.output.comb.mix = (iteration/dwell)%2 != 0 ? 0.f : 1.f;
+    s.output.dispersion.mix = (iteration/dwell)%3 == 1 ? 0.f : 1.f;
     s.mix = t;
 }
 bool finite(const juce::AudioBuffer<float>& b)
@@ -156,7 +155,7 @@ int main(int argc,char** argv)
         {
             const auto before=combmeasure::observePlatform(true,affinity);
             const auto schedulingBefore=processpolicy::observe();
-            auto s=activeSettings();if(scenario==0)s.output.comb.bypass=s.output.dispersion.bypass=s.output.tone.bypass=true;
+            auto s=activeSettings();if(scenario==0){s.output.comb.mix=0.f;s.output.dispersion.mix=0.f;s.output.tone.toneDb=0.f;}
             const auto initial=allSettings(s);FullChain chain;require(chain.setParameters(s));require(chain.prepare({rate,capacity,2}));
             const bool latencyOk=chain.getLatencySamples()==92;
             const unsigned frames=scenario==4?2*capacity+3:capacity;
@@ -184,10 +183,10 @@ int main(int argc,char** argv)
                 const unsigned decayPhase=cycleFrame<unsigned(rate)?0u:cycleFrame<unsigned(2*rate)?1u:cycleFrame<unsigned(20*rate)?2u:3u;
                 if(scenario==5&&cycleFrame>=unsigned(rate))b.clear();else for(int c=0;c<2;++c)b.copyFrom(c,0,fixture,c,0,int(frames));
                 const unsigned residue=iteration%101;if(scenario==2)automate(s,iteration,dwell);
-                if(scenario==3){s.output.comb.bypass=s.output.dispersion.bypass=s.output.tone.bypass=(iteration/dwell)%2!=0;s.bypass=(iteration/(dwell*2))%2!=0;}
+                if(scenario==3){const bool inactive=(iteration/dwell)%2!=0;s.output.comb.mix=s.output.dispersion.mix=inactive?0.f:1.f;s.output.tone.toneDb=inactive?0.f:6.f;s.bypass=(iteration/(dwell*2))%2!=0;}
                 const auto start=Clock::now();const bool controls=chain.setParameters(s),processed=chain.process(juce::dsp::AudioBlock<float>(b));const auto peaks=chain.getPeaks();const auto stop=Clock::now();
                 ok &= controls&&processed&&finite(b)&&std::isfinite(peaks.output);sink+=peaks.output;
-                if(sample){++residues[residue];if(iteration%dwell>=ramp)++settled[size_t(s.output.comb.bypass)];if(scenario==5)++decayPhases[decayPhase];}
+                if(sample){++residues[residue];if(iteration%dwell>=ramp)++settled[size_t(s.output.comb.mix==0.f)];if(scenario==5)++decayPhases[decayPhase];}
                 ++iteration;return std::chrono::duration_cast<std::chrono::nanoseconds>(stop-start).count();
             };
             const double warm=quick?.02:2.,probe=quick?.02:2.;auto stop=Clock::now()+std::chrono::duration<double>(warm);while(Clock::now()<stop)callback(false);
@@ -195,7 +194,7 @@ int main(int argc,char** argv)
             const double seconds=quick?.05:benchmark::expandedTimingWindowSeconds(probes/probe);
             const auto window=static_cast<long long>(seconds*1e9);benchmark::ExpandedWallTimeSampler sampler(window);
             struct Observation{unsigned iteration;long long ns;bool bypass;};std::vector<Observation> observations;observations.reserve(150000);
-            const auto begin=Clock::now();while(true){const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-begin).count();if(elapsed>=window)break;const bool sample=sampler.shouldSample(elapsed);const auto index=iteration;const auto ns=callback(sample);if(sample)observations.push_back({index,ns,s.output.comb.bypass});}
+            const auto begin=Clock::now();while(true){const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-begin).count();if(elapsed>=window)break;const bool sample=sampler.shouldSample(elapsed);const auto index=iteration;const auto ns=callback(sample);if(sample)observations.push_back({index,ns,s.output.comb.mix==0.f});}
             std::vector<long long> sorted;sorted.reserve(observations.size());for(const auto& o:observations){raw<<id<<','<<o.iteration<<','<<o.ns<<','<<o.iteration%101<<','<<o.bypass<<'\n';sorted.push_back(o.ns);}
             require(!sorted.empty());std::sort(sorted.begin(),sorted.end());const auto p99=sorted[size_t(std::ceil(.99*sorted.size()))-1];const double deadline=frames/rate*1e9;
             const bool budget=p99/deadline<.25,coverage=sorted.size()>=100000&&sorted.size()<=200000&&(scenario!=2||*std::min_element(residues.begin(),residues.end())>=100)&&(scenario!=3||std::min(settled[0],settled[1])>=100)&&(scenario!=5||*std::min_element(decayPhases.begin(),decayPhases.end())>=100);
