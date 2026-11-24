@@ -186,3 +186,5 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-11-14T12:46:23Z: Recorded independently audited current Waveshaper mixed-power CPU diagnostics; AC acceptance remains open.
 
 - 2026-11-14T19:02:45Z: Document issue 42 editor layout and waveforms
+
+- 2026-11-15T03:58:49Z: Document uniform corner scaling and simplified plugin header

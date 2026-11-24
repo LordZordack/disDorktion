@@ -81,7 +81,7 @@ TEST_CASE("Production editor exposes all host controls at minimum and expanded s
         disdorktion::PluginEditor editor(processor);
         REQUIRE(editor.getWidth() == 1120);
         REQUIRE(editor.getHeight() == 740);
-        for (const auto size : {juce::Point<int>(1000, 680), juce::Point<int>(1120, 740), juce::Point<int>(1400, 1000), juce::Point<int>(1000, 1000), juce::Point<int>(1400, 680)})
+        for (const auto size : {juce::Point<int>(672, 444), juce::Point<int>(840, 555), juce::Point<int>(1120, 740), juce::Point<int>(1400, 925), juce::Point<int>(1000, 1000), juce::Point<int>(1400, 680)})
         {
             editor.setSize(size.x, size.y);
             requireVisibleControls(editor);
@@ -400,7 +400,7 @@ TEST_CASE("Editor three column geometry and stepped choices", "[adapter][editor]
         {"tanhDriveDb","folderDriveDb","folderThreshold","driver","waveshaperTrimDb","waveshaperMix"},
         {"combDelayMs","dispersionFrequencyHz","combDampingHz","combFeedforward","dispersionMix","toneDb","combFeedback","hpCutoffHz","hpResponse","combMix","lpCutoffHz","lpResponse"},
         {"inputGainDb","globalMix","outputGainDb"}};
-    for (const auto size : {juce::Point<int>(1000,680),juce::Point<int>(1120,740),juce::Point<int>(1400,1000),juce::Point<int>(1000,1000),juce::Point<int>(1400,680)})
+    for (const auto size : {juce::Point<int>(672,444),juce::Point<int>(840,555),juce::Point<int>(1120,740),juce::Point<int>(1400,925),juce::Point<int>(1000,1000),juce::Point<int>(1400,680)})
     {
         editor.setSize(size.x,size.y);
         for (const auto& group : groups)
@@ -414,7 +414,7 @@ TEST_CASE("Editor three column geometry and stepped choices", "[adapter][editor]
                 if(i>=3) { REQUIRE(bounds[i].getX()==bounds[i-3].getX()); REQUIRE(bounds[i].getY()>bounds[i-3].getBottom()); }
             }
         }
-        for(const auto* id : {"inputWaveform","outputWaveform","branding","presetMenu","presetStatus","inputMeter","outputMeter","clearOverloads","filterGroup"})
+        for(const auto* id : {"inputWaveform","outputWaveform","branding","presetMenu","inputMeter","outputMeter","clearOverloads","filterGroup"})
         {
             auto* c=findControl(editor,id); REQUIRE(c); REQUIRE(c->isVisible());
             REQUIRE(editor.getLocalBounds().contains(editor.getLocalArea(c,c->getLocalBounds())));
@@ -436,6 +436,114 @@ TEST_CASE("Editor three column geometry and stepped choices", "[adapter][editor]
         slider->setValue(0,juce::sendNotificationSync); processor.setStateInformation(saved.getData(),static_cast<int>(saved.getSize())); REQUIRE(slider->getValue()==1);
         REQUIRE(slider->getDoubleClickReturnValue()==parameter->convertFrom0to1(parameter->getDefaultValue()));
     }
+}
+
+TEST_CASE("Editor corner resize preserves aspect ratio from sixty to one hundred twenty five percent", "[adapter][editor][issue42][scaling]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor; disdorktion::PluginEditor editor(processor);
+    auto* limits = editor.getConstrainer();
+    REQUIRE(limits);
+    REQUIRE(limits->getMinimumWidth() == 672);
+    REQUIRE(limits->getMinimumHeight() == 444);
+    REQUIRE(limits->getMaximumWidth() == 1400);
+    REQUIRE(limits->getMaximumHeight() == 925);
+    REQUIRE(limits->getFixedAspectRatio() == Catch::Approx(1120.0 / 740.0));
+    for (const auto requested : {juce::Rectangle<int>(0,0,100,100), juce::Rectangle<int>(0,0,900,700), juce::Rectangle<int>(0,0,2000,2000)})
+    {
+        auto bounds = requested;
+        limits->checkBounds(bounds, editor.getBounds(), {-10000,-10000,20000,20000}, false,false,true,true);
+        REQUIRE(bounds.getWidth() >= 672); REQUIRE(bounds.getHeight() >= 444);
+        REQUIRE(bounds.getWidth() <= 1400); REQUIRE(bounds.getHeight() <= 925);
+        REQUIRE(std::abs(bounds.getWidth() - bounds.getHeight() * 1120.0 / 740.0) <= 1.0);
+    }
+}
+
+TEST_CASE("Editor uniformly scales every content descendant and preserves interaction and parameter values", "[adapter][editor][issue42][scaling]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor; disdorktion::PluginEditor editor(processor);
+    editor.setVisible(true);
+    auto* gain = dynamic_cast<juce::Slider*>(findControl(editor,"inputGainDb")); REQUIRE(gain);
+    gain->setValue(6.0, juce::sendNotificationSync);
+    struct Geometry { juce::Component* component; juce::Point<float> origin, corner; float fontHeight; };
+    std::vector<Geometry> baseline;
+    const auto collect = [&](const auto& self, juce::Component& parent) -> void
+    {
+        for (auto* child : parent.getChildren())
+        {
+            if (!child->isVisible() || dynamic_cast<juce::ResizableCornerComponent*>(child)) continue;
+            const auto* label = dynamic_cast<juce::Label*>(child);
+            baseline.push_back({child, editor.getLocalPoint(child,juce::Point<float>()),
+                editor.getLocalPoint(child,juce::Point<float>(static_cast<float>(child->getWidth()),static_cast<float>(child->getHeight()))),
+                label ? label->getFont().getHeight() : 0.0f});
+            self(self,*child);
+        }
+    };
+    collect(collect,editor);
+    REQUIRE(baseline.size() > 100);
+    for (const auto size : {juce::Point<int>(672,444),juce::Point<int>(840,555),juce::Point<int>(1120,740),juce::Point<int>(1400,925),juce::Point<int>(1000,1000),juce::Point<int>(1400,680)})
+    {
+        CAPTURE(size.x,size.y);
+        editor.setSize(size.x,size.y);
+        const auto scale = juce::jmin(size.x/1120.0f,size.y/740.0f);
+        for (const auto& expected : baseline)
+        {
+            const auto* child = expected.component;
+            CAPTURE(child->getComponentID(),child->getTitle());
+            const auto origin = editor.getLocalPoint(child,juce::Point<float>());
+            const auto corner = editor.getLocalPoint(child,juce::Point<float>(static_cast<float>(child->getWidth()),static_cast<float>(child->getHeight())));
+            REQUIRE(origin.x == Catch::Approx(expected.origin.x*scale).margin(0.001));
+            REQUIRE(origin.y == Catch::Approx(expected.origin.y*scale).margin(0.001));
+            REQUIRE(corner.x == Catch::Approx(expected.corner.x*scale).margin(0.001));
+            REQUIRE(corner.y == Catch::Approx(expected.corner.y*scale).margin(0.001));
+            if (const auto* label = dynamic_cast<const juce::Label*>(child))
+                REQUIRE(label->getFont().getHeight() == Catch::Approx(expected.fontHeight));
+        }
+        for (const auto& control : disdorktion::fullChainControls)
+        {
+            auto* slider = dynamic_cast<juce::Slider*>(findControl(editor,control.id)); REQUIRE(slider);
+            auto* hit = editor.getComponentAt(editor.getLocalPoint(slider,slider->getLocalBounds().getCentre()));
+            REQUIRE((hit == slider || slider->isParentOf(hit)));
+        }
+        REQUIRE(gain->getValue() == Catch::Approx(6.0));
+        REQUIRE(processor.parameterState().getRawParameterValue("inputGainDb")->load() == Catch::Approx(6.0));
+    }
+    editor.setScaleFactor(1.5f);
+    editor.setSize(840,555);
+    REQUIRE(editor.getTransform() == juce::AffineTransform::scale(1.5f));
+    for (const auto& expected : baseline)
+    {
+        const auto origin = editor.getLocalPoint(expected.component,juce::Point<float>());
+        REQUIRE(origin.x == Catch::Approx(expected.origin.x*0.75f).margin(0.001));
+        REQUIRE(origin.y == Catch::Approx(expected.origin.y*0.75f).margin(0.001));
+    }
+    auto* hit = editor.getComponentAt(editor.getLocalPoint(gain,gain->getLocalBounds().getCentre()));
+    REQUIRE((hit == gain || gain->isParentOf(hit)));
+    gain->setValue(9.0,juce::sendNotificationSync);
+    REQUIRE(processor.parameterState().getRawParameterValue("inputGainDb")->load() == Catch::Approx(9.0));
+}
+
+TEST_CASE("Editor header contains centered branding and preset name without status or subtitle", "[adapter][editor][issue42][scaling]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor; disdorktion::PluginEditor editor(processor);
+    REQUIRE(findControl(editor,"presetStatus") == nullptr);
+    const auto checkLabels = [&](const auto& self, juce::Component& parent) -> void
+    {
+        for (auto* child : parent.getChildren())
+        {
+            if (auto* label = dynamic_cast<juce::Label*>(child))
+                for (const auto* obsolete : {"Factory preset","User preset","Modified","Unsaved","CRUSH / FOLD / RESONATE / DISPERSE"})
+                    REQUIRE(label->getText() != obsolete);
+            self(self,*child);
+        }
+    };
+    checkLabels(checkLabels,editor);
+    auto* title = findControl(editor,"branding"); auto* presets = findControl(editor,"presetMenu");
+    REQUIRE(title); REQUIRE(presets);
+    const auto bounds = title->getBounds().getUnion(presets->getBounds());
+    REQUIRE(bounds.getCentreY() == 67);
 }
 
 TEST_CASE("Editor waveform history clears on gaps lifecycle and reopen", "[adapter][editor][issue42]")
@@ -478,7 +586,7 @@ TEST_CASE("Editor waveform history clears on gaps lifecycle and reopen", "[adapt
         auto stream=juce::File(snapshotDirectory).getChildFile("issue42-editor-waveform.png").createOutputStream();
         REQUIRE(stream); REQUIRE(stream->setPosition(0)); REQUIRE(stream->truncate().wasOk());
         juce::PNGImageFormat png; REQUIRE(png.writeImageToStream(editor->createComponentSnapshot(editor->getLocalBounds()),*stream));
-        editor->setSize(1000,680);
+        editor->setSize(672,444);
         for(const auto* id : {"hpResponse","lpResponse"})
             dynamic_cast<juce::Slider*>(findControl(*editor,id))->setValue(2,juce::sendNotificationSync);
         auto longest=juce::File(snapshotDirectory).getChildFile("issue42-editor-long-response.png").createOutputStream();

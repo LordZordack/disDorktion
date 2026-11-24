@@ -24,6 +24,10 @@ Waveshaper Trim; trim remains active with both stages Off. Capture rate and
 HP/LP movement are logarithmic. Tanh/Fold minima, HP minimum and LP maximum
 show Off. Comb damping is always active during comb processing.
 
+Drag the editor's corner to scale the entire interface uniformly from 60% to
+125% (672x444 to 1400x925), with 1120x740 as the 100% default. The header shows
+the plugin name and preset button; a modified preset retains its asterisk.
+
 The current 27-control prototype uses state version 5 and intentionally replaces
 old prototype state/automation compatibility. One preset button opens save, load,
 delete and reset actions plus adjacent Factory presets and User presets submenus.

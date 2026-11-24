@@ -2,7 +2,7 @@
 type: "Index"
 title: "Notes"
 description: "Index of notes research documents."
-timestamp: "2026-11-14T19:11:41Z"
+timestamp: "2026-11-15T03:58:49Z"
 ---
 
 # Notes

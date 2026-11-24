@@ -8,6 +8,7 @@ namespace disdorktion
 namespace
 {
 const juce::Colour background {0xff10161e}, panel {0xff1a2430}, text {0xffe4edf4}, accent {0xff66dfbc};
+constexpr int editorWidth = 1120, editorHeight = 740;
 }
 
 // Components precede attachments so listeners are detached before their controls die.
@@ -274,29 +275,24 @@ PluginEditor::PluginEditor(PluginProcessor& owner, std::shared_ptr<PresetDialogs
     lookAndFeel.setColour(juce::ComboBox::backgroundColourId, background);
     lookAndFeel.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff314357));
     setLookAndFeel(&lookAndFeel);
+    addAndMakeVisible(content);
     title.setComponentID("branding");
-    presetStatus.setComponentID("presetStatus");
     title.setText("DisDorktion", juce::dontSendNotification);
     title.setFont(juce::Font(24.0f, juce::Font::bold));
-    subtitle.setText("CRUSH / FOLD / RESONATE / DISPERSE", juce::dontSendNotification);
-    subtitle.setFont(juce::Font(11.0f));
-    for (auto* label : {&title, &subtitle, &presetStatus})
-    {
-        label->setColour(juce::Label::textColourId, text);
-        label->setJustificationType(juce::Justification::centred);
-        addAndMakeVisible(*label);
-    }
+    title.setColour(juce::Label::textColourId, text);
+    title.setJustificationType(juce::Justification::centred);
+    content.addAndMakeVisible(title);
     presets.setComponentID("presetMenu");
     presets.setTitle("Presets");
     presets.onClick = [this] { showPresetMenu(); };
     clearOverloads.setComponentID("clearOverloads");
     clearOverloads.onClick = [this] { processor.clearMeterOverloads(); };
-    addAndMakeVisible(presets);
-    addAndMakeVisible(clearOverloads);
+    content.addAndMakeVisible(presets);
+    content.addAndMakeVisible(clearOverloads);
 
     filterGroup.setComponentID("filterGroup");
     filterGroup.setInterceptsMouseClicks(false, false);
-    addAndMakeVisible(filterGroup);
+    content.addAndMakeVisible(filterGroup);
     const std::array<std::vector<const char*>,4> layout {{
         {"captureRateHz","crush","bitDepth","shape","jitter","crusherMix"},
         {"tanhDriveDb","folderDriveDb","folderThreshold","driver","waveshaperTrimDb","waveshaperMix"},
@@ -314,16 +310,17 @@ PluginEditor::PluginEditor(PluginProcessor& owner, std::shared_ptr<PresetDialogs
     inputWaveform=std::make_unique<WaveformDisplay>(processor.getInputWaveformHistory(),"Raw input");
     outputWaveform=std::make_unique<WaveformDisplay>(processor.getOutputWaveformHistory(),"Final output");
     inputWaveform->setComponentID("inputWaveform"); outputWaveform->setComponentID("outputWaveform");
-    addAndMakeVisible(*inputWaveform); addAndMakeVisible(*outputWaveform);
+    content.addAndMakeVisible(*inputWaveform); content.addAndMakeVisible(*outputWaveform);
     inputMeter = std::make_unique<PeakMeter>("Raw input");
     outputMeter = std::make_unique<PeakMeter>("Final output");
     inputMeter->setComponentID("inputMeter");
     outputMeter->setComponentID("outputMeter");
-    addAndMakeVisible(*inputMeter);
-    addAndMakeVisible(*outputMeter);
+    content.addAndMakeVisible(*inputMeter);
+    content.addAndMakeVisible(*outputMeter);
     setResizable(true, true);
-    setResizeLimits(1000, 680, 1400, 1000);
-    setSize(1120, 740);
+    setResizeLimits(672, 444, 1400, 925);
+    getConstrainer()->setFixedAspectRatio(static_cast<double>(editorWidth) / editorHeight);
+    setSize(editorWidth, editorHeight);
     refreshPresetAndMode();
     startTimerHz(30);
 }
@@ -337,13 +334,14 @@ PluginEditor::~PluginEditor()
 void PluginEditor::addControl(int section, const char* id, const char* caption)
 {
     auto row = std::make_unique<ControlRow>(processor.parameterState(), id, caption);
-    addAndMakeVisible(*row);
+    content.addAndMakeVisible(*row);
     controls[static_cast<std::size_t>(section)].push_back(std::move(row));
 }
 
 void PluginEditor::paint(juce::Graphics& g)
 {
     g.fillAll(background);
+    g.addTransform(content.getTransform());
     const char* names[] = {"RECEIVER", "WAVESHAPER", "REFINER", "GLOBAL"};
     for (std::size_t i=0;i<sections.size();++i)
     {
@@ -357,7 +355,12 @@ void PluginEditor::paint(juce::Graphics& g)
 
 void PluginEditor::resized()
 {
-    auto area=getLocalBounds().reduced(12);
+    // Host DPI scaling stays on AudioProcessorEditor. User resizing transforms
+    // this fixed canvas, including fonts, text boxes, painting and hit testing.
+    content.setBounds(0, 0, editorWidth, editorHeight);
+    content.setTransform(juce::AffineTransform::scale(juce::jmin(
+        static_cast<float>(getWidth()) / editorWidth, static_cast<float>(getHeight()) / editorHeight)));
+    auto area=content.getLocalBounds().reduced(12);
     const int gap=10, width=(area.getWidth()-2*gap)/3;
     const int top=110, bodyY=area.getY()+top+gap;
     const int bodyHeight=area.getBottom()-bodyY;
@@ -366,8 +369,9 @@ void PluginEditor::resized()
     inputWaveform->setBounds(columns[0].withY(area.getY()).withHeight(top));
     outputWaveform->setBounds(columns[2].withY(area.getY()).withHeight(top));
     auto branding=columns[1].withY(area.getY()).withHeight(top).reduced(8,0);
-    title.setBounds(branding.removeFromTop(30)); subtitle.setBounds(branding.removeFromTop(18));
-    branding.removeFromTop(4); presets.setBounds(branding.removeFromTop(32)); presetStatus.setBounds(branding.removeFromTop(24));
+    branding=branding.withSizeKeepingCentre(branding.getWidth(),70);
+    title.setBounds(branding.removeFromTop(30));
+    branding.removeFromTop(8); presets.setBounds(branding.removeFromTop(32));
     const int rowHeight=(bodyHeight-38)/4;
     sections[0]=columns[0].withHeight(32+rowHeight*2);
     sections[1]=columns[1].withHeight(32+rowHeight*2);
@@ -392,8 +396,6 @@ void PluginEditor::refreshPresetAndMode()
 {
     const auto info = processor.getPresetInfo();
     presets.setButtonText(info.name + (info.modified ? " *" : ""));
-    presetStatus.setText(info.modified ? "Modified" : info.type == PresetType::factory ? "Factory preset"
-        : info.type == PresetType::user ? "User preset" : "Unsaved", juce::dontSendNotification);
 }
 
 void PluginEditor::reportPresetResult(const juce::Result& result)
