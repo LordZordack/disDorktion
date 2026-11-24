@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include "PresetDialogs.h"
+#include "FaceplateControls.h"
 
 namespace disdorktion
 {
@@ -23,24 +24,22 @@ private:
     class WaveformDisplay;
     void timerCallback() override;
     void refreshPresetAndMode();
-    void addControl(int section, const char* id, const char* label);
+    void addControl(const FaceplateLayout::Control&, const juce::String& label);
     void showPresetMenu();
     void choosePresetFile(bool save, uint64_t generation);
     void reportPresetResult(const juce::Result&);
 
     PluginProcessor& processor;
-    juce::LookAndFeel_V4 lookAndFeel;
+    const FaceplateAssets& artwork;
+    faceplate::LookAndFeel lookAndFeel;
     // Keep the logical canvas alive until all its child controls are destroyed.
     juce::Component content;
-    juce::Label title;
-    juce::TextButton presets, clearOverloads {"Clear overloads"};
+    faceplate::PresetButton presets;
     std::shared_ptr<PresetDialogs> presetDialogs;
     bool presetDialogPending = false;
-    std::array<juce::Rectangle<int>, 4> sections;
-    std::array<std::vector<std::unique_ptr<ControlRow>>, 4> controls;
+    std::vector<std::unique_ptr<ControlRow>> controls;
     std::unique_ptr<PeakMeter> inputMeter, outputMeter;
     std::unique_ptr<WaveformDisplay> inputWaveform, outputWaveform;
-    juce::Component filterGroup;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };
 }

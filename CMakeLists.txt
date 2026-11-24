@@ -48,6 +48,13 @@ target_link_libraries(disdorktion_dsp
     PRIVATE juce::juce_dsp juce::juce_core
 )
 
+if(DISDORKTION_BUILD_PLUGIN)
+    juce_add_binary_data(DisDorktionFaceplate
+        HEADER_NAME DisDorktionFaceplateData.h
+        NAMESPACE DisDorktionFaceplateData
+        SOURCES references/faceplate@4x.png references/knob_atlas@4x.png references/layout.json)
+endif()
+
 if(BUILD_TESTING)
     # Discover against the configuration selected by CTest. POST_BUILD shares
     # one test list across VS configurations and can run Debug for Release.
@@ -114,9 +121,10 @@ if(BUILD_TESTING)
             src/plugin/PluginPresentation.cpp
             src/plugin/PresetManager.cpp
             src/plugin/PluginEditor.cpp
+            src/plugin/FaceplateLayout.cpp
         )
         target_include_directories(disdorktion_adapter_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
-        target_link_libraries(disdorktion_adapter_tests PRIVATE disdorktion_dsp Catch2::Catch2WithMain juce::juce_audio_processors)
+        target_link_libraries(disdorktion_adapter_tests PRIVATE disdorktion_dsp DisDorktionFaceplate Catch2::Catch2WithMain juce::juce_audio_processors)
         target_compile_definitions(disdorktion_adapter_tests PRIVATE
             JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
         # Includes the complete deterministic preset/transition measurement grid.
@@ -139,9 +147,10 @@ if(DISDORKTION_BUILD_PLUGIN)
         COPY_PLUGIN_AFTER_BUILD FALSE
     )
     target_sources(DisDorktion PRIVATE src/plugin/PluginProcessor.cpp
-        src/plugin/PluginPresentation.cpp src/plugin/PresetManager.cpp src/plugin/PluginEditor.cpp)
+        src/plugin/PluginPresentation.cpp src/plugin/PresetManager.cpp src/plugin/PluginEditor.cpp
+        src/plugin/FaceplateLayout.cpp)
     target_include_directories(DisDorktion PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
-    target_link_libraries(DisDorktion PRIVATE disdorktion_dsp juce::juce_audio_utils)
+    target_link_libraries(DisDorktion PRIVATE disdorktion_dsp DisDorktionFaceplate juce::juce_audio_utils)
     target_compile_definitions(DisDorktion PRIVATE
         JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
 endif()

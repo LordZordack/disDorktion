@@ -53,7 +53,11 @@ public:
     PluginMeters readMeters() noexcept;
     WaveformHistory& getInputWaveformHistory() noexcept { return inputWaveform; }
     WaveformHistory& getOutputWaveformHistory() noexcept { return outputWaveform; }
-    void clearMeterOverloads() noexcept { clearOverloads.store(true, std::memory_order_relaxed); }
+    enum class MeterOverload : unsigned { input = 1, output = 2, both = 3 };
+    void clearMeterOverloads(MeterOverload meter = MeterOverload::both) noexcept
+    {
+        clearOverloads.fetch_or(static_cast<unsigned>(meter), std::memory_order_relaxed);
+    }
 private:
     PresetValues capturePresetValues() const;
     void publishPresetValues(const PresetValues&, bool gestures);
@@ -82,7 +86,9 @@ private:
     std::size_t chunkCapacity = 0;
     std::atomic<double> fullTailSeconds {20.0};
     std::atomic<float> inputMeter {0}, outputMeter {0};
-    std::atomic<bool> inputClip {false}, outputClip {false}, clearOverloads {false};
+    std::atomic<bool> inputClip {false}, outputClip {false};
+    static_assert(std::atomic<unsigned>::is_always_lock_free);
+    std::atomic<unsigned> clearOverloads {0};
     // Publish host metadata independently: hosts may query tails concurrently.
     std::atomic<double> tailSeconds {20.0};
     // JUCE calls prepare before playback and release after playback stops.

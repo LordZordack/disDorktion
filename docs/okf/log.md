@@ -188,3 +188,7 @@ timestamp: "2026-10-03T00:00:00Z"
 - 2026-11-14T19:02:45Z: Document issue 42 editor layout and waveforms
 
 - 2026-11-15T03:58:49Z: Document uniform corner scaling and simplified plugin header
+
+- 2026-11-24T16:24:56Z: Documented the v009 faceplate and issue 50 Windows adapter and package checks.
+
+- 2026-11-24T16:58:56Z: Moved overload reset into each v009 meter readout.

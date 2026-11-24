@@ -126,11 +126,11 @@ void PluginProcessor::processBlockBypassed(juce::AudioBuffer<float>& buffer, juc
 void PluginProcessor::render(juce::AudioBuffer<float>& buffer, bool hostBypassed) noexcept
 {
     juce::ScopedNoDenormals noDenormals;
-    if (clearOverloads.exchange(false, std::memory_order_relaxed))
-    {
+    const auto metersToClear = clearOverloads.exchange(0, std::memory_order_relaxed);
+    if ((metersToClear & static_cast<unsigned>(MeterOverload::input)) != 0)
         inputClip.store(false, std::memory_order_relaxed);
+    if ((metersToClear & static_cast<unsigned>(MeterOverload::output)) != 0)
         outputClip.store(false, std::memory_order_relaxed);
-    }
     const auto inputs = getTotalNumInputChannels();
     const auto outputs = getTotalNumOutputChannels();
     for (int c = inputs; c < buffer.getNumChannels(); ++c) buffer.clear(c, 0, buffer.getNumSamples());

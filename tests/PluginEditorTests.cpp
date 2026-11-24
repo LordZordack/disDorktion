@@ -1,5 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include "DisDorktionFaceplateData.h"
+#include "plugin/FaceplateDrawing.h"
 #include "plugin/PluginEditor.h"
 #include "plugin/PluginProcessor.h"
 
@@ -79,16 +81,16 @@ TEST_CASE("Production editor exposes all host controls at minimum and expanded s
     disdorktion::PluginProcessor processor;
     {
         disdorktion::PluginEditor editor(processor);
-        REQUIRE(editor.getWidth() == 1120);
-        REQUIRE(editor.getHeight() == 740);
-        for (const auto size : {juce::Point<int>(672, 444), juce::Point<int>(840, 555), juce::Point<int>(1120, 740), juce::Point<int>(1400, 925), juce::Point<int>(1000, 1000), juce::Point<int>(1400, 680)})
+        REQUIRE(editor.getWidth() <= 1040);
+        REQUIRE(editor.getHeight() <= 948);
+        for (const auto size : {juce::Point<int>(624, 569), juce::Point<int>(780, 711), juce::Point<int>(1040, 948), juce::Point<int>(1300, 1185), juce::Point<int>(1000, 1000), juce::Point<int>(1300, 680)})
         {
             editor.setSize(size.x, size.y);
             requireVisibleControls(editor);
             const auto snapshotDirectory = juce::SystemStats::getEnvironmentVariable("DISDORKTION_EDITOR_SNAPSHOT_DIR", {});
             if (snapshotDirectory.isNotEmpty())
             {
-                const auto target = juce::File(snapshotDirectory).getChildFile("issue42-editor-" + juce::String(size.x) + "x" + juce::String(size.y) + ".png");
+                const auto target = juce::File(snapshotDirectory).getChildFile("v009-editor-" + juce::String(size.x) + "x" + juce::String(size.y) + ".png");
                 auto stream = target.createOutputStream();
                 REQUIRE(stream != nullptr);
                 REQUIRE(stream->setPosition(0));
@@ -99,10 +101,134 @@ TEST_CASE("Production editor exposes all host controls at minimum and expanded s
         }
         REQUIRE(findControl(editor, "presetMenu") != nullptr);
         REQUIRE(findControl(editor, "initialize") == nullptr);
-        REQUIRE(findControl(editor, "clearOverloads") != nullptr);
+        REQUIRE(findControl(editor, "clearOverloads") == nullptr);
     }
     disdorktion::PluginEditor reopened(processor);
     requireVisibleControls(reopened);
+}
+
+TEST_CASE("v009 control placement comes from the artwork geometry", "[adapter][editor][v009]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor;
+    disdorktion::PluginEditor editor(processor);
+    editor.setSize(1040, 948);
+
+    auto* capture = dynamic_cast<disdorktion::faceplate::RotarySlider*>(findControl(editor, "captureRateHz"));
+    auto* lowPass = findControl(editor, "lpResponse");
+    auto* highPass = findControl(editor, "hpResponse");
+    REQUIRE(capture);
+    REQUIRE(lowPass);
+    REQUIRE(highPass);
+    const auto captureBounds = editor.getLocalArea(capture, capture->getLocalBounds());
+    REQUIRE(editor.getLocalPoint(capture, capture->knobBounds().getCentre()).x == Catch::Approx(76.96f));
+    REQUIRE(captureBounds.contains(77, 358));
+    REQUIRE(captureBounds.contains(77, 420));
+    REQUIRE(editor.getLocalPoint(lowPass, juce::Point<int>()).y
+        < editor.getLocalPoint(highPass, juce::Point<int>()).y);
+
+    editor.setSize(1200, 948);
+    REQUIRE(editor.getLocalPoint(capture, capture->knobBounds().getCentre()).x == Catch::Approx(156.96f));
+}
+
+TEST_CASE("v009 embedded assets reject malformed placement data", "[adapter][editor][v009]")
+{
+    using disdorktion::FaceplateLayout;
+    using namespace DisDorktionFaceplateData;
+    const auto json = juce::String::fromUTF8(layout_json, layout_jsonSize);
+    const auto layout = FaceplateLayout::parse(json);
+    REQUIRE(layout);
+    REQUIRE(layout->controls.front().pivot.x == Catch::Approx(76.96f));
+    REQUIRE(std::string_view(layout->controls[20].parameter) == "lpResponse");
+    REQUIRE(std::string_view(layout->controls[23].parameter) == "hpResponse");
+    REQUIRE_FALSE(FaceplateLayout::parse("{}"));
+    REQUIRE_FALSE(FaceplateLayout::parse(json.replace("receiver_r1c2", "receiver_r1c1")));
+    REQUIRE_FALSE(FaceplateLayout::parse(json.replace("76.96", "-76.96")));
+    REQUIRE_FALSE(FaceplateLayout::parse(json.replace("\"nameWindow\"", "\"otherWindow\"")));
+
+    const auto& assets = disdorktion::FaceplateAssets::embedded();
+    REQUIRE(assets.layout);
+    REQUIRE(assets.plate.getWidth() == 4160);
+    REQUIRE(assets.knobs.back().getWidth() == 384);
+    REQUIRE(disdorktion::faceplate::presetMask('D') != 0);
+    REQUIRE(disdorktion::faceplate::presetMask('7') == 0x07);
+    REQUIRE(disdorktion::faceplate::presetMask(' ') == 0);
+    REQUIRE(disdorktion::faceplate::presetMask(0x2605) == 0x40);
+}
+
+TEST_CASE("v009 cutoff readout hit opens the attached slider value editor", "[adapter][editor][v009]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor;
+    disdorktion::PluginEditor editor(processor);
+    editor.setSize(1040, 948);
+    editor.setVisible(true);
+    auto* cutoff = dynamic_cast<disdorktion::faceplate::RotarySlider*>(findControl(editor, "hpCutoffHz"));
+    REQUIRE(cutoff);
+    REQUIRE(cutoff->valueToProportionOfLength(std::sqrt(20.0 * 20000.0)) == Catch::Approx(0.5));
+    const auto readoutPoint = editor.getLocalPoint(cutoff, cutoff->valueBounds().getCentre());
+    auto* readout = dynamic_cast<juce::Label*>(editor.getComponentAt(readoutPoint));
+    REQUIRE(readout);
+    REQUIRE(readout->isEditableOnSingleClick());
+    readout->showEditor();
+    REQUIRE(readout->getCurrentTextEditor());
+    readout->getCurrentTextEditor()->setText("500 Hz");
+    readout->hideEditor(false);
+    REQUIRE(cutoff->getValue() == Catch::Approx(500.0));
+    REQUIRE(processor.parameterState().getRawParameterValue("hpCutoffHz")->load() == Catch::Approx(500.0));
+    readout->showEditor();
+    REQUIRE(readout->getCurrentTextEditor());
+    readout->getCurrentTextEditor()->setText("1000 Hz");
+    readout->hideEditor(true);
+    REQUIRE(cutoff->getValue() == Catch::Approx(500.0));
+}
+
+TEST_CASE("v009 dBFS readouts clear their own overload latch", "[adapter][editor][v009]")
+{
+    juce::ScopedJuceInitialiser_GUI gui;
+    disdorktion::PluginProcessor processor;
+    processor.prepareToPlay(48000, 512);
+    disdorktion::PluginEditor editor(processor);
+    editor.setSize(1040, 948);
+    editor.setVisible(true);
+    auto* input = dynamic_cast<juce::Button*>(editor.getComponentAt(juce::Point<int>{625, 658}));
+    auto* output = dynamic_cast<juce::Button*>(editor.getComponentAt(juce::Point<int>{625, 715}));
+    REQUIRE(input);
+    REQUIRE(output);
+    REQUIRE(input != output);
+    REQUIRE_FALSE(input->isEnabled());
+    REQUIRE_FALSE(output->isEnabled());
+
+    juce::AudioBuffer<float> audio(2, 512);
+    juce::MidiBuffer midi;
+    for (int block = 0; block < 3; ++block)
+    {
+        for (int channel = 0; channel < audio.getNumChannels(); ++channel)
+            juce::FloatVectorOperations::fill(audio.getWritePointer(channel), 2.0f, audio.getNumSamples());
+        processor.processBlockBypassed(audio, midi);
+    }
+    const auto deadline = juce::Time::getMillisecondCounter() + 2000;
+    while ((!input->isEnabled() || !output->isEnabled()) && juce::Time::getMillisecondCounter() < deadline)
+    {
+        juce::Thread::sleep(5);
+        juce::Timer::callPendingTimersSynchronously();
+    }
+    REQUIRE(input->isEnabled());
+    REQUIRE(output->isEnabled());
+    REQUIRE(input->getWantsKeyboardFocus());
+    REQUIRE(output->getWantsKeyboardFocus());
+    REQUIRE(input->onClick);
+    REQUIRE(output->onClick);
+
+    juce::AudioBuffer<float> empty(2, 0);
+    input->onClick();
+    processor.processBlock(empty, midi);
+    const auto afterInput = processor.readMeters();
+    REQUIRE_FALSE(afterInput.inputOverload);
+    REQUIRE(afterInput.outputOverload);
+    output->onClick();
+    processor.processBlock(empty, midi);
+    REQUIRE_FALSE(processor.readMeters().outputOverload);
 }
 
 TEST_CASE("Editor attachments synchronize sliders choices buttons and active restore", "[adapter][editor]")
@@ -398,9 +524,9 @@ TEST_CASE("Editor three column geometry and stepped choices", "[adapter][editor]
     const std::vector<std::vector<const char*>> groups {
         {"captureRateHz","crush","bitDepth","shape","jitter","crusherMix"},
         {"tanhDriveDb","folderDriveDb","folderThreshold","driver","waveshaperTrimDb","waveshaperMix"},
-        {"combDelayMs","dispersionFrequencyHz","combDampingHz","combFeedforward","dispersionMix","toneDb","combFeedback","hpCutoffHz","hpResponse","combMix","lpCutoffHz","lpResponse"},
+        {"combDelayMs","dispersionFrequencyHz","combDampingHz","combFeedforward","dispersionMix","toneDb","combFeedback","lpCutoffHz","lpResponse","combMix","hpCutoffHz","hpResponse"},
         {"inputGainDb","globalMix","outputGainDb"}};
-    for (const auto size : {juce::Point<int>(672,444),juce::Point<int>(840,555),juce::Point<int>(1120,740),juce::Point<int>(1400,925),juce::Point<int>(1000,1000),juce::Point<int>(1400,680)})
+    for (const auto size : {juce::Point<int>(624,569),juce::Point<int>(780,711),juce::Point<int>(1040,948),juce::Point<int>(1300,1185),juce::Point<int>(1000,1000),juce::Point<int>(1300,680)})
     {
         editor.setSize(size.x,size.y);
         for (const auto& group : groups)
@@ -410,11 +536,11 @@ TEST_CASE("Editor three column geometry and stepped choices", "[adapter][editor]
             {
                 auto* c=findControl(editor,id); REQUIRE(c);
                 bounds.push_back(editor.getLocalArea(c,c->getLocalBounds())); const auto i=bounds.size()-1;
-                if(i%3) { REQUIRE(bounds[i].getY()==bounds[i-1].getY()); REQUIRE(bounds[i].getX()>bounds[i-1].getRight()); }
-                if(i>=3) { REQUIRE(bounds[i].getX()==bounds[i-3].getX()); REQUIRE(bounds[i].getY()>bounds[i-3].getBottom()); }
+                if(i%3) { REQUIRE(std::abs(bounds[i].getY()-bounds[i-1].getY()) <= 2); REQUIRE(bounds[i].getX()>bounds[i-1].getRight()); }
+                if(i>=3) { REQUIRE(std::abs(bounds[i].getX()-bounds[i-3].getX()) <= 2); REQUIRE(bounds[i].getY()>bounds[i-3].getBottom()); }
             }
         }
-        for(const auto* id : {"inputWaveform","outputWaveform","branding","presetMenu","inputMeter","outputMeter","clearOverloads","filterGroup"})
+        for(const auto* id : {"inputWaveform","outputWaveform","presetMenu","inputMeter","outputMeter"})
         {
             auto* c=findControl(editor,id); REQUIRE(c); REQUIRE(c->isVisible());
             REQUIRE(editor.getLocalBounds().contains(editor.getLocalArea(c,c->getLocalBounds())));
@@ -444,18 +570,18 @@ TEST_CASE("Editor corner resize preserves aspect ratio from sixty to one hundred
     disdorktion::PluginProcessor processor; disdorktion::PluginEditor editor(processor);
     auto* limits = editor.getConstrainer();
     REQUIRE(limits);
-    REQUIRE(limits->getMinimumWidth() == 672);
-    REQUIRE(limits->getMinimumHeight() == 444);
-    REQUIRE(limits->getMaximumWidth() == 1400);
-    REQUIRE(limits->getMaximumHeight() == 925);
-    REQUIRE(limits->getFixedAspectRatio() == Catch::Approx(1120.0 / 740.0));
+    REQUIRE(limits->getMinimumWidth() == 624);
+    REQUIRE(limits->getMinimumHeight() == 569);
+    REQUIRE(limits->getMaximumWidth() == 1300);
+    REQUIRE(limits->getMaximumHeight() == 1185);
+    REQUIRE(limits->getFixedAspectRatio() == Catch::Approx(1040.0 / 948.0));
     for (const auto requested : {juce::Rectangle<int>(0,0,100,100), juce::Rectangle<int>(0,0,900,700), juce::Rectangle<int>(0,0,2000,2000)})
     {
         auto bounds = requested;
         limits->checkBounds(bounds, editor.getBounds(), {-10000,-10000,20000,20000}, false,false,true,true);
-        REQUIRE(bounds.getWidth() >= 672); REQUIRE(bounds.getHeight() >= 444);
-        REQUIRE(bounds.getWidth() <= 1400); REQUIRE(bounds.getHeight() <= 925);
-        REQUIRE(std::abs(bounds.getWidth() - bounds.getHeight() * 1120.0 / 740.0) <= 1.0);
+        REQUIRE(bounds.getWidth() >= 624); REQUIRE(bounds.getHeight() >= 569);
+        REQUIRE(bounds.getWidth() <= 1300); REQUIRE(bounds.getHeight() <= 1185);
+        REQUIRE(std::abs(bounds.getWidth() - bounds.getHeight() * 1040.0 / 948.0) <= 1.0);
     }
 }
 
@@ -464,6 +590,7 @@ TEST_CASE("Editor uniformly scales every content descendant and preserves intera
     juce::ScopedJuceInitialiser_GUI gui;
     disdorktion::PluginProcessor processor; disdorktion::PluginEditor editor(processor);
     editor.setVisible(true);
+    editor.setSize(1040, 948);
     auto* gain = dynamic_cast<juce::Slider*>(findControl(editor,"inputGainDb")); REQUIRE(gain);
     gain->setValue(6.0, juce::sendNotificationSync);
     struct Geometry { juce::Component* component; juce::Point<float> origin, corner; float fontHeight; };
@@ -481,22 +608,24 @@ TEST_CASE("Editor uniformly scales every content descendant and preserves intera
         }
     };
     collect(collect,editor);
-    REQUIRE(baseline.size() > 100);
-    for (const auto size : {juce::Point<int>(672,444),juce::Point<int>(840,555),juce::Point<int>(1120,740),juce::Point<int>(1400,925),juce::Point<int>(1000,1000),juce::Point<int>(1400,680)})
+    REQUIRE(baseline.size() >= 81);
+    for (const auto size : {juce::Point<int>(624,569),juce::Point<int>(780,711),juce::Point<int>(1040,948),juce::Point<int>(1300,1185),juce::Point<int>(1000,1000),juce::Point<int>(1300,680)})
     {
         CAPTURE(size.x,size.y);
         editor.setSize(size.x,size.y);
-        const auto scale = juce::jmin(size.x/1120.0f,size.y/740.0f);
+        const auto scale = juce::jmin(size.x/1040.0f,size.y/948.0f);
+        const auto offsetX = (size.x - 1040 * scale) * 0.5f;
+        const auto offsetY = (size.y - 948 * scale) * 0.5f;
         for (const auto& expected : baseline)
         {
             const auto* child = expected.component;
             CAPTURE(child->getComponentID(),child->getTitle());
             const auto origin = editor.getLocalPoint(child,juce::Point<float>());
             const auto corner = editor.getLocalPoint(child,juce::Point<float>(static_cast<float>(child->getWidth()),static_cast<float>(child->getHeight())));
-            REQUIRE(origin.x == Catch::Approx(expected.origin.x*scale).margin(0.001));
-            REQUIRE(origin.y == Catch::Approx(expected.origin.y*scale).margin(0.001));
-            REQUIRE(corner.x == Catch::Approx(expected.corner.x*scale).margin(0.001));
-            REQUIRE(corner.y == Catch::Approx(expected.corner.y*scale).margin(0.001));
+            REQUIRE(origin.x == Catch::Approx(expected.origin.x*scale + offsetX).margin(0.001));
+            REQUIRE(origin.y == Catch::Approx(expected.origin.y*scale + offsetY).margin(0.001));
+            REQUIRE(corner.x == Catch::Approx(expected.corner.x*scale + offsetX).margin(0.001));
+            REQUIRE(corner.y == Catch::Approx(expected.corner.y*scale + offsetY).margin(0.001));
             if (const auto* label = dynamic_cast<const juce::Label*>(child))
                 REQUIRE(label->getFont().getHeight() == Catch::Approx(expected.fontHeight));
         }
@@ -510,7 +639,7 @@ TEST_CASE("Editor uniformly scales every content descendant and preserves intera
         REQUIRE(processor.parameterState().getRawParameterValue("inputGainDb")->load() == Catch::Approx(6.0));
     }
     editor.setScaleFactor(1.5f);
-    editor.setSize(840,555);
+    editor.setSize(780,711);
     REQUIRE(editor.getTransform() == juce::AffineTransform::scale(1.5f));
     for (const auto& expected : baseline)
     {
@@ -524,26 +653,25 @@ TEST_CASE("Editor uniformly scales every content descendant and preserves intera
     REQUIRE(processor.parameterState().getRawParameterValue("inputGainDb")->load() == Catch::Approx(9.0));
 }
 
-TEST_CASE("Editor header contains centered branding and preset name without status or subtitle", "[adapter][editor][issue42][scaling]")
+TEST_CASE("v009 preset window exposes the full name and an accessible menu action", "[adapter][editor][v009]")
 {
     juce::ScopedJuceInitialiser_GUI gui;
-    disdorktion::PluginProcessor processor; disdorktion::PluginEditor editor(processor);
-    REQUIRE(findControl(editor,"presetStatus") == nullptr);
-    const auto checkLabels = [&](const auto& self, juce::Component& parent) -> void
-    {
-        for (auto* child : parent.getChildren())
-        {
-            if (auto* label = dynamic_cast<juce::Label*>(child))
-                for (const auto* obsolete : {"Factory preset","User preset","Modified","Unsaved","CRUSH / FOLD / RESONATE / DISPERSE"})
-                    REQUIRE(label->getText() != obsolete);
-            self(self,*child);
-        }
-    };
-    checkLabels(checkLabels,editor);
-    auto* title = findControl(editor,"branding"); auto* presets = findControl(editor,"presetMenu");
-    REQUIRE(title); REQUIRE(presets);
-    const auto bounds = title->getBounds().getUnion(presets->getBounds());
-    REQUIRE(bounds.getCentreY() == 67);
+    disdorktion::PluginProcessor processor;
+    auto dialogs = std::make_shared<ControlledPresetDialogs>();
+    disdorktion::PluginEditor editor(processor, dialogs);
+    editor.setSize(1040, 948);
+    editor.setVisible(true);
+    auto* preset = dynamic_cast<juce::TextButton*>(findControl(editor, "presetMenu"));
+    REQUIRE(preset);
+    REQUIRE(preset->getTitle().contains(processor.getPresetInfo().name));
+    REQUIRE(editor.getComponentAt(juce::Point<int>{150, 873}) == preset);
+    editor.setVisible(false);
+    editor.addToDesktop(0);
+    const auto* accessibility = preset->getAccessibilityHandler();
+    REQUIRE(accessibility);
+    REQUIRE(accessibility->getTitle().contains(processor.getPresetInfo().name));
+    REQUIRE(accessibility->getActions().contains(juce::AccessibilityActionType::press));
+    REQUIRE(accessibility->getActions().invoke(juce::AccessibilityActionType::press));
 }
 
 TEST_CASE("Editor waveform history clears on gaps lifecycle and reopen", "[adapter][editor][issue42]")
@@ -583,16 +711,22 @@ TEST_CASE("Editor waveform history clears on gaps lifecycle and reopen", "[adapt
     const auto snapshotDirectory=juce::SystemStats::getEnvironmentVariable("DISDORKTION_EDITOR_SNAPSHOT_DIR",{});
     if(snapshotDirectory.isNotEmpty())
     {
-        auto stream=juce::File(snapshotDirectory).getChildFile("issue42-editor-waveform.png").createOutputStream();
+        auto stream=juce::File(snapshotDirectory).getChildFile("v009-editor-waveform.png").createOutputStream();
         REQUIRE(stream); REQUIRE(stream->setPosition(0)); REQUIRE(stream->truncate().wasOk());
         juce::PNGImageFormat png; REQUIRE(png.writeImageToStream(editor->createComponentSnapshot(editor->getLocalBounds()),*stream));
-        editor->setSize(672,444);
+        editor->setSize(624,569);
         for(const auto* id : {"hpResponse","lpResponse"})
             dynamic_cast<juce::Slider*>(findControl(*editor,id))->setValue(2,juce::sendNotificationSync);
-        auto longest=juce::File(snapshotDirectory).getChildFile("issue42-editor-long-response.png").createOutputStream();
+        auto longest=juce::File(snapshotDirectory).getChildFile("v009-editor-long-response.png").createOutputStream();
         REQUIRE(longest); REQUIRE(longest->setPosition(0)); REQUIRE(longest->truncate().wasOk());
         REQUIRE(png.writeImageToStream(editor->createComponentSnapshot(editor->getLocalBounds()),*longest));
     }
+    waitFor([&] { return description("inputWaveform").contains(": 0 frames")
+                        && description("outputWaveform").contains(": 0 frames"); });
+    audio.clear();
+    processor.processBlock(audio, midi);
+    waitFor([&] { return !description("inputWaveform").contains(": 0 frames")
+                        && !description("outputWaveform").contains(": 0 frames"); });
     // Overflow publishes an initial contiguous window; the next publication has
     // a sequence gap and must discard all history preceding that gap.
     auto& history=processor.getInputWaveformHistory();

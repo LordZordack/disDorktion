@@ -69,10 +69,10 @@ controls use logarithmic mouse movement, including capture
 rate and HP/LP cutoffs. Host-normalized parameter mapping remains linear.
 Tanh/Fold minima, HP minimum and LP maximum display
 **Off**. Capture requests are retained while effective rate is host-capped;
-active filter cutoffs are capped at 45% of host rate. The editor starts at
-1120x740 (100%). Corner dragging locks the aspect ratio and uniformly scales
-the entire interface, including text and numeric fields, from 60% (672x444)
-through 125% (1400x925). Host display/DPI scaling remains independent.
+active filter cutoffs are capped at 45% of host rate. The v009 canvas measures
+1040 × 948 at 100%. The initial viewport fits the primary display when space
+is limited. Corner dragging scales all artwork and controls together from
+60% (624 × 569) through 125% (1300 × 1185). Host DPI scaling is independent.
 
 ### Editor layout
 
@@ -83,27 +83,30 @@ Each panel uses three control columns, with these row-major positions:
 | --- | --- | --- | --- |
 | 1 | Capture rate; Crush; Bit depth | Tanh drive; Folder drive; Folder threshold | Comb delay; Dispersion frequency; Comb damping |
 | 2 | Quantizer shape; Clock jitter; Input mix | Driver; Waveshaper trim; Waveshaper mix | Comb feedforward; Dispersion mix; Tone |
-| 3 | | | Comb feedback; High-pass cutoff; High-pass response |
-| 4 | | | Comb mix; Low-pass cutoff; Low-pass response |
+| 3 | | | Comb feedback; Low-pass cutoff; Low-pass response |
+| 4 | | | Comb mix; High-pass cutoff; High-pass response |
 
-GLOBAL aligns beneath Receiver: Input gain, Global dry/wet and Final gain.
-The four high/low-pass controls share a background. Bit depth and both filter
-responses use stepped rotary knobs with readable choice values; their existing
-host parameter mappings and saved values are unchanged.
+The bottom panel contains Input gain, Global dry/wet, and Final gain. Knob
+sprites follow the slider travel, including logarithmic frequency movement
+and stepped bit depth and filter choices. Click a value window to edit it.
 
-Input and output waveform envelopes appear above Receiver and Refiner, with
-plugin name and preset button between them. The subtitle and separate preset
-source/status line are omitted; the button keeps the preset name and modified
-asterisk. Each trace retains signed
-min/max values across channels, so opposite-polarity stereo remains visible.
+Input and output waveform envelopes appear above Receiver and Refiner. Each
+trace retains signed min/max values across channels, so opposite-polarity
+stereo remains visible.
 The input tap precedes Input Gain and the output tap follows final gain and
 host-bypass replacement. The displays use a fixed amplitude scale and separate
 live histories; they are not aligned to cancel the plugin's processing latency.
-Raw input and final output peak meters in dBFS appear below Waveshaper.
+Raw input and final output peak meters in dBFS appear below Receiver and
+Waveshaper. An overloaded readout turns red and shows an exclamation mark.
+Click it or activate it with the keyboard to clear that meter's latch on the
+next audio callback.
+The lower-left preset window opens preset actions and shows up to 12
+uppercase characters, with an asterisk when modified. The complete name is
+available to assistive technology. The five-pip die is decorative.
 
 Waveform storage is bounded. If the UI stalls, excess visualization data is
-dropped; display histories clear across dropped-frame gaps and lifecycle changes.
-This visualization does not change audio samples, latency, presets or state.
+dropped. Display histories clear across dropped-frame gaps, lifecycle changes,
+or 600 ms without incoming waveform frames.
 
 ## Automation, presets and persistence
 
