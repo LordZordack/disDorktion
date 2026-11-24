@@ -66,8 +66,10 @@ def audit_case(raw, config, summary, session_power=None):
     require(config["frames"] == (2 * config["capacity"] + 3 if scenario == "oversized" else config["capacity"]), "frames mismatch")
     require(config["latency_samples"] == 92, "latency changed")
     controls = config["initial_settings"]
-    for key in ("combBypass", "dispersionBypass", "toneBypass"):
-        require(controls[key] == (1 if scenario == "warm-bypass" else 0), "new effects not configured")
+    inactive = scenario == "warm-bypass"
+    require(controls["combMix"] == (0 if inactive else 1), "comb mix not configured")
+    require(controls["dispersionMix"] == (0 if inactive else 1), "dispersion mix not configured")
+    require(controls["toneDb"] == (0 if inactive else 6), "tone not configured")
     require(controls["combFeedback"] > .94 and controls["combDelayMs"] == 40, "missing resonance")
     return {"id": config["id"], "count": len(samples), "p99_fraction": fraction,
             "budget_ok": fraction < .25, "coverage_ok": coverage, "power_ok": bool(power),
