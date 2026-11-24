@@ -76,7 +76,7 @@ void PluginProcessor::resetMeters() noexcept
     outputMeter.store(0, std::memory_order_relaxed);
     inputClip.store(false, std::memory_order_relaxed);
     outputClip.store(false, std::memory_order_relaxed);
-    clearOverloads.store(false, std::memory_order_relaxed);
+    clearOverloads.store(0, std::memory_order_relaxed);
 }
 
 void PluginProcessor::accumulateMeters(float input, float output) noexcept

@@ -1,0 +1,627 @@
+{
+  "logicalSize": [
+    1040,
+    948
+  ],
+  "coordinateOrigin": "top-left",
+  "imageScale": 2,
+  "faceplate": "faceplate@2x.png",
+  "knobAtlas": {
+    "file": "knob_atlas@2x.png",
+    "tileSize": [
+      192,
+      192
+    ],
+    "pivot": [
+      96,
+      96
+    ],
+    "columns": 11,
+    "rows": 11,
+    "frames": 121,
+    "order": "row-major",
+    "direction": "clockwise",
+    "startDegreesFromNoon": -135,
+    "sweepDegrees": 270
+  },
+  "controls": [
+    {
+      "id": "receiver_r1c1",
+      "label": "Capture rate",
+      "pivot": [
+        76.96,
+        358.176
+      ],
+      "valueWindow": {
+        "rect": [
+          32.032,
+          410.592,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 106,
+      "previewValue": "20 kHz"
+    },
+    {
+      "id": "receiver_r1c2",
+      "label": "Crush",
+      "pivot": [
+        176.8,
+        358.176
+      ],
+      "valueWindow": {
+        "rect": [
+          131.872,
+          410.592,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 120,
+      "previewValue": "100%"
+    },
+    {
+      "id": "receiver_r1c3",
+      "label": "Bit depth",
+      "pivot": [
+        276.64,
+        358.176
+      ],
+      "valueWindow": {
+        "rect": [
+          231.712,
+          410.592,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 90,
+      "previewValue": "1024"
+    },
+    {
+      "id": "receiver_r2c1",
+      "label": "Shape",
+      "pivot": [
+        76.96,
+        516.256
+      ],
+      "valueWindow": {
+        "rect": [
+          32.032,
+          568.672,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 90,
+      "previewValue": "75%"
+    },
+    {
+      "id": "receiver_r2c2",
+      "label": "Jitter",
+      "pivot": [
+        176.8,
+        516.256
+      ],
+      "valueWindow": {
+        "rect": [
+          131.872,
+          568.672,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 120,
+      "previewValue": "100%"
+    },
+    {
+      "id": "receiver_r2c3",
+      "label": "Mix",
+      "pivot": [
+        276.64,
+        516.256
+      ],
+      "valueWindow": {
+        "rect": [
+          231.712,
+          568.672,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 114,
+      "previewValue": "95%"
+    },
+    {
+      "id": "waveshaper_r1c1",
+      "label": "Tanh",
+      "pivot": [
+        420.16,
+        358.176
+      ],
+      "valueWindow": {
+        "rect": [
+          375.232,
+          410.592,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 74,
+      "previewValue": "9.0 dB"
+    },
+    {
+      "id": "waveshaper_r1c2",
+      "label": "Fold",
+      "pivot": [
+        520.0,
+        358.176
+      ],
+      "valueWindow": {
+        "rect": [
+          475.072,
+          410.592,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 0,
+      "previewValue": "Off"
+    },
+    {
+      "id": "waveshaper_r1c3",
+      "label": "Threshold",
+      "pivot": [
+        619.84,
+        358.176
+      ],
+      "valueWindow": {
+        "rect": [
+          574.912,
+          410.592,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 120,
+      "previewValue": "100%"
+    },
+    {
+      "id": "waveshaper_r2c1",
+      "label": "Driver",
+      "pivot": [
+        420.16,
+        516.256
+      ],
+      "valueWindow": {
+        "rect": [
+          375.232,
+          568.672,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 73,
+      "previewValue": "4.0\u00d7"
+    },
+    {
+      "id": "waveshaper_r2c2",
+      "label": "Trim",
+      "pivot": [
+        520.0,
+        516.256
+      ],
+      "valueWindow": {
+        "rect": [
+          475.072,
+          568.672,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 36,
+      "previewValue": "\u22126.0 dB"
+    },
+    {
+      "id": "waveshaper_r2c3",
+      "label": "Mix",
+      "pivot": [
+        619.84,
+        516.256
+      ],
+      "valueWindow": {
+        "rect": [
+          574.912,
+          568.672,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 120,
+      "previewValue": "100%"
+    },
+    {
+      "id": "refiner_r1c1",
+      "label": "Comb delay",
+      "pivot": [
+        763.36,
+        358.176
+      ],
+      "valueWindow": {
+        "rect": [
+          718.432,
+          410.592,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 54,
+      "previewValue": "25.0 ms"
+    },
+    {
+      "id": "refiner_r1c2",
+      "label": "Dispersion frequency",
+      "pivot": [
+        863.2,
+        358.176
+      ],
+      "valueWindow": {
+        "rect": [
+          818.272,
+          410.592,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 43,
+      "previewValue": "500 Hz"
+    },
+    {
+      "id": "refiner_r1c3",
+      "label": "Comb damp",
+      "pivot": [
+        963.04,
+        358.176
+      ],
+      "valueWindow": {
+        "rect": [
+          918.112,
+          410.592,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 76,
+      "previewValue": "6000 Hz"
+    },
+    {
+      "id": "refiner_r2c1",
+      "label": "Feedforward",
+      "pivot": [
+        763.36,
+        516.256
+      ],
+      "valueWindow": {
+        "rect": [
+          718.432,
+          568.672,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 60,
+      "previewValue": "0.0"
+    },
+    {
+      "id": "refiner_r2c2",
+      "label": "Dispersion Mix",
+      "pivot": [
+        863.2,
+        516.256
+      ],
+      "valueWindow": {
+        "rect": [
+          818.272,
+          568.672,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 60,
+      "previewValue": "50%"
+    },
+    {
+      "id": "refiner_r2c3",
+      "label": "Tone",
+      "pivot": [
+        963.04,
+        516.256
+      ],
+      "valueWindow": {
+        "rect": [
+          918.112,
+          568.672,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 60,
+      "previewValue": "0.0 dB"
+    },
+    {
+      "id": "refiner_r3c1",
+      "label": "Feedback",
+      "pivot": [
+        763.36,
+        674.3359
+      ],
+      "valueWindow": {
+        "rect": [
+          718.432,
+          726.752,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 84,
+      "previewValue": "0.70"
+    },
+    {
+      "id": "refiner_r3c2",
+      "label": "Low pass",
+      "pivot": [
+        863.2,
+        674.3359
+      ],
+      "valueWindow": {
+        "rect": [
+          818.272,
+          726.752,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 119,
+      "previewValue": "20 kHz"
+    },
+    {
+      "id": "refiner_r3c3",
+      "label": "Filter type",
+      "pivot": [
+        963.04,
+        674.3359
+      ],
+      "valueWindow": {
+        "rect": [
+          918.112,
+          726.752,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 0,
+      "previewValue": "Butterworth"
+    },
+    {
+      "id": "refiner_r4c1",
+      "label": "Comb Mix",
+      "pivot": [
+        763.36,
+        832.416
+      ],
+      "valueWindow": {
+        "rect": [
+          718.432,
+          884.832,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 120,
+      "previewValue": "100%"
+    },
+    {
+      "id": "refiner_r4c2",
+      "label": "High pass",
+      "pivot": [
+        863.2,
+        832.416
+      ],
+      "valueWindow": {
+        "rect": [
+          818.272,
+          884.832,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 47,
+      "previewValue": "500 Hz"
+    },
+    {
+      "id": "refiner_r4c3",
+      "label": "Filter type",
+      "pivot": [
+        963.04,
+        832.416
+      ],
+      "valueWindow": {
+        "rect": [
+          918.112,
+          884.832,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 90,
+      "previewValue": "Chebyshev II"
+    },
+    {
+      "id": "global_r1c1",
+      "label": "In",
+      "pivot": [
+        416.416,
+        831.584
+      ],
+      "valueWindow": {
+        "rect": [
+          371.488,
+          884.0,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 60,
+      "previewValue": "0.0 dB"
+    },
+    {
+      "id": "global_r1c2",
+      "label": "Dry/wet",
+      "pivot": [
+        516.256,
+        831.584
+      ],
+      "valueWindow": {
+        "rect": [
+          471.328,
+          884.0,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 60,
+      "previewValue": "50%"
+    },
+    {
+      "id": "global_r1c3",
+      "label": "Out",
+      "pivot": [
+        616.096,
+        831.584
+      ],
+      "valueWindow": {
+        "rect": [
+          571.168,
+          884.0,
+          89.856,
+          20.4672
+        ],
+        "cornerRadius": 4.16
+      },
+      "previewFrame": 60,
+      "previewValue": "0.0 dB"
+    }
+  ],
+  "preset": {
+    "nameWindow": {
+      "rect": [
+        40.8512,
+        859.5392,
+        243.6096,
+        29.7856
+      ],
+      "cornerRadius": 4.4928
+    },
+    "maxCharacters": 12,
+    "previewName": "DEFAULT",
+    "diceWindow": {
+      "rect": [
+        299.6032,
+        859.5392,
+        29.7856,
+        29.7856
+      ],
+      "cornerRadius": 5.1584
+    },
+    "previewDiceValue": 5
+  },
+  "waveforms": {
+    "input": {
+      "rect": [
+        22.3808,
+        38.6048,
+        308.8384,
+        184.0384
+      ],
+      "cornerRadius": 10.1504
+    },
+    "output": {
+      "rect": [
+        708.7808,
+        38.6048,
+        308.8384,
+        184.0384
+      ],
+      "cornerRadius": 10.1504
+    }
+  },
+  "meters": {
+    "input": {
+      "track": {
+        "rect": [
+          41.0176,
+          644.4672,
+          519.5008,
+          27.6224
+        ],
+        "cornerRadius": 5.1584
+      },
+      "valueWindow": {
+        "rect": [
+          583.1488,
+          644.1344,
+          83.8656,
+          28.288
+        ],
+        "cornerRadius": 5.1584
+      }
+    },
+    "output": {
+      "track": {
+        "rect": [
+          41.0176,
+          701.7088,
+          519.5008,
+          27.6224
+        ],
+        "cornerRadius": 5.1584
+      },
+      "valueWindow": {
+        "rect": [
+          583.1488,
+          701.376,
+          83.8656,
+          28.288
+        ],
+        "cornerRadius": 5.1584
+      }
+    }
+  }
+}

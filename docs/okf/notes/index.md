@@ -2,7 +2,7 @@
 type: "Index"
 title: "Notes"
 description: "Index of notes research documents."
-timestamp: "2026-11-15T03:58:49Z"
+timestamp: "2026-11-24T16:24:56Z"
 ---
 
 # Notes
@@ -27,4 +27,5 @@ timestamp: "2026-11-15T03:58:49Z"
 - [Resonant comb validation](./resonant_comb_validation.md) — Issue 17 verification record, measurement provenance, and explicit remaining listening and CPU gates.
 - [Tanh saturation validation](./tanh_saturation_validation.md) — Numerical, realtime, spectral, performance and listening evidence for the native-rate tanh module.
 - [Tone Module Qualification](./tone_validation.md) — Tone implementation evidence and explicit remaining listening and reference-performance gates.
+- [v009 faceplate validation](./v009_faceplate_validation.md) — Editor regression tests, rendered comparisons, and Windows package smoke checks for issue 50.
 - [Wave folder validation](./wave_folder_validation.md) — Evidence and outstanding acceptance gates for the isolated native-rate wave folder.

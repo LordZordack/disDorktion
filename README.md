@@ -13,20 +13,20 @@
 
 ### Plugin interface and presets
 
-The prototype editor has Receiver, Waveshaper, Refiner and GLOBAL panels, with
-three control columns per section and no visible mute/bypass buttons. GLOBAL
-sits under Receiver with Input Gain, dry/wet and Final Gain. Driver (1x to 4x,
-default 1x) sits in Waveshaper. Bit depth and HP/LP response use stepped knobs.
-Raw-input and final-output waveform envelopes sit above Receiver and Refiner;
-their dBFS peak meters sit below Waveshaper. Input Mix covers
+The v009 faceplate groups the controls into Receiver, Waveshaper, Refiner and
+global gain/mix. Driver (1x to 4x, default 1x) sits in Waveshaper. Bit depth and
+filter response use stepped knobs. The top scopes show raw input and final
+output, with dBFS peak meters below Receiver and Waveshaper. Input Mix covers
 the entire crusher/sampler. Waveshaper Mix covers tanh, folding and shared
 Waveshaper Trim; trim remains active with both stages Off. Capture rate and
 HP/LP movement are logarithmic. Tanh/Fold minima, HP minimum and LP maximum
 show Off. Comb damping is always active during comb processing.
 
-Drag the editor's corner to scale the entire interface uniformly from 60% to
-125% (672x444 to 1400x925), with 1120x740 as the 100% default. The header shows
-the plugin name and preset button; a modified preset retains its asterisk.
+Drag the editor's corner to scale the faceplate uniformly from 60% to 125%.
+The reference size is 1040 × 948, and the editor opens smaller when the display
+has less room. Click the lower-left preset display for preset actions. The
+display shows up to 12 uppercase characters and marks modified presets with
+an asterisk.
 
 The current 27-control prototype uses state version 5 and intentionally replaces
 old prototype state/automation compatibility. One preset button opens save, load,

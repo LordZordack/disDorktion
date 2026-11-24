@@ -1,10 +1,10 @@
 ---
 type: Method
 title: "Plugin interface, presets and host state"
-description: "Current prototype controls, factory/user preset workflow and strict version-5 persistence with optional host identity metadata."
-timestamp: 2026-11-14T00:00:00Z
+description: "The v009 editor, factory and user preset workflow, and version-5 host state with optional preset identity metadata."
+timestamp: 2026-11-24T00:00:00Z
 tags: ["audio-plugin", "automation", "state", "presets", "metering", "waveforms"]
-resource: "https://github.com/LordZordack/disDorktion/issues/42"
+resource: "https://github.com/LordZordack/disDorktion/issues/50"
 ---
 
 # Plugin interface, presets and host state
@@ -43,20 +43,21 @@ remains unchanged.
 
 ## Layout and waveform display
 
-Each main section uses three columns: Receiver and Waveshaper have two rows,
-Refiner has four. GLOBAL is one row beneath Receiver. Refiner groups the HP/LP
-cutoffs with their response knobs on a common background. Bit depth and filter
-response are stepped knobs retaining existing host mappings and choice values.
+The v009 artwork defines a 1040 × 948 logical canvas. The 4× faceplate and
+knob atlas are embedded, and the placement map aligns the controls with the
+glass windows. Receiver and Waveshaper have two rows, and Refiner has four,
+with low-pass above high-pass. The bottom panel groups global gain and mix
+with preset access. Bit depth and filter response use stepped rotary travel.
 The exact control tables are in `docs/PLUGIN_INTERFACE.md`.
 
 Signed waveform envelopes above Receiver and Refiner show raw input and final
 output, including host-bypass replacement. Min/max aggregation across stereo
 channels avoids cancellation in the display. Fixed-capacity transport separates
 audio writes from UI history and painting; dropped frames break history and
-lifecycle epochs clear stale traces even when processing has stopped. These
-displays do not add audio latency or change samples. The separate input/output
-histories are not a latency-compensated overlay. Existing dBFS peak meters sit
-below Waveshaper; preset actions remain available in the center branding area.
+lifecycle epochs clear stale traces. A 600 ms message-thread timeout returns
+each trace to center when its input stops publishing. The input and output
+histories are independent. The dBFS peak meters keep their existing taps.
+Each overloaded readout clears its own latch when activated.
 
 ## Preset workflow and defaults
 
@@ -98,13 +99,14 @@ work is added to the audio callback.
 
 Raw input/final output meters retain peaks and overloads between UI polls.
 Controls publish independent scalar atomics, not a whole-state bank. Serialized
-host lifecycle ownership governs state restore/reset. The editor starts at
-1120x740 (100%). Corner dragging uniformly scales all content with a locked
-aspect ratio, from 60% (672x444) to 125% (1400x925), independently of host DPI
-scaling. The header keeps the plugin name and preset button with its modified
-asterisk; the subtitle and separate preset source/status text are omitted.
+host lifecycle ownership governs state restore/reset. The initial viewport
+fits the primary display when space is limited. Corner dragging scales the
+canvas uniformly from 60% to 125%, independently of host DPI scaling. The
+preset window shows up to 12 uppercase characters, retains its modified marker,
+and exposes the full name through accessibility.
 
-See [preset management validation](../notes/preset_management_validation.md),
+See [v009 faceplate validation](../notes/v009_faceplate_validation.md),
+[preset management validation](../notes/preset_management_validation.md),
 [Driver adjustment status](../notes/driver_adjustment_validation.md),
 [historical issue #38 evidence](../notes/issue38_validation.md) and the explicitly
 historical [interface validation record](../notes/plugin_interface_validation.md).
