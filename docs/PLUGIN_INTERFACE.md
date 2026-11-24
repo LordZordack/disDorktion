@@ -70,7 +70,9 @@ rate and HP/LP cutoffs. Host-normalized parameter mapping remains linear.
 Tanh/Fold minima, HP minimum and LP maximum display
 **Off**. Capture requests are retained while effective rate is host-capped;
 active filter cutoffs are capped at 45% of host rate. The editor starts at
-1120x740 and resizes from 1000x680 to 1400x1000.
+1120x740 (100%). Corner dragging locks the aspect ratio and uniformly scales
+the entire interface, including text and numeric fields, from 60% (672x444)
+through 125% (1400x925). Host display/DPI scaling remains independent.
 
 ### Editor layout
 
@@ -90,7 +92,9 @@ responses use stepped rotary knobs with readable choice values; their existing
 host parameter mappings and saved values are unchanged.
 
 Input and output waveform envelopes appear above Receiver and Refiner, with
-plugin branding and preset access between them. Each trace retains signed
+plugin name and preset button between them. The subtitle and separate preset
+source/status line are omitted; the button keeps the preset name and modified
+asterisk. Each trace retains signed
 min/max values across channels, so opposite-polarity stereo remains visible.
 The input tap precedes Input Gain and the output tap follows final gain and
 host-bypass replacement. The displays use a fixed amplitude scale and separate

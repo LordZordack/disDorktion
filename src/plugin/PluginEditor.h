@@ -30,7 +30,9 @@ private:
 
     PluginProcessor& processor;
     juce::LookAndFeel_V4 lookAndFeel;
-    juce::Label title, subtitle, presetStatus;
+    // Keep the logical canvas alive until all its child controls are destroyed.
+    juce::Component content;
+    juce::Label title;
     juce::TextButton presets, clearOverloads {"Clear overloads"};
     std::shared_ptr<PresetDialogs> presetDialogs;
     bool presetDialogPending = false;

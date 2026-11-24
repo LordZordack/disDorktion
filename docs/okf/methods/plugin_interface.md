@@ -99,7 +99,10 @@ work is added to the audio callback.
 Raw input/final output meters retain peaks and overloads between UI polls.
 Controls publish independent scalar atomics, not a whole-state bank. Serialized
 host lifecycle ownership governs state restore/reset. The editor starts at
-1120x740, with limits 1000x680 to 1400x1000.
+1120x740 (100%). Corner dragging uniformly scales all content with a locked
+aspect ratio, from 60% (672x444) to 125% (1400x925), independently of host DPI
+scaling. The header keeps the plugin name and preset button with its modified
+asterisk; the subtitle and separate preset source/status text are omitted.
 
 See [preset management validation](../notes/preset_management_validation.md),
 [Driver adjustment status](../notes/driver_adjustment_validation.md),
